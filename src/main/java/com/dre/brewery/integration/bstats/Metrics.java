@@ -1,3 +1,4 @@
+// No Copyright
 /*
  * This Metrics class was auto-generated and can be copied into your project if you are
  * not using a build tool like Gradle or Maven for dependency management.
@@ -12,6 +13,7 @@
  *
  * Violations will result in a ban of your plugin and account from bStats.
  */
+
 package com.dre.brewery.integration.bstats;
 
 import java.io.BufferedReader;
@@ -138,7 +140,12 @@ public class Metrics {
     }
 
     private void appendServiceData(JsonObjectBuilder builder) {
-        builder.appendField("pluginVersion", plugin.getDescription().getVersion());
+        String versionString = plugin.getDescription().getVersion();
+        if (versionString.contains(";")) {
+            // The version string contains a semicolon, which includes the branch.
+            versionString = versionString.split(";")[0];
+        }
+        builder.appendField("pluginVersion", versionString);
     }
 
     private int getPlayerAmount() {

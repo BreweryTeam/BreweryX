@@ -1,3 +1,23 @@
+/*
+ * BreweryX Bukkit-Plugin for an alternate brewing process
+ * Copyright (C) 2024 The Brewery Team
+ *
+ * This file is part of BreweryX.
+ *
+ * BreweryX is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * BreweryX is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with BreweryX. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
+ */
+
 package com.dre.brewery;
 
 import com.dre.brewery.api.events.barrel.BarrelAccessEvent;
@@ -7,12 +27,11 @@ import com.dre.brewery.api.events.barrel.BarrelRemoveEvent;
 import com.dre.brewery.configuration.ConfigManager;
 import com.dre.brewery.configuration.files.Config;
 import com.dre.brewery.configuration.files.Lang;
-import com.dre.brewery.integration.LogBlockHook;
+import com.dre.brewery.integration.Hook;
 import com.dre.brewery.integration.barrel.LogBlockBarrel;
 import com.dre.brewery.lore.BrewLore;
 import com.dre.brewery.utility.BUtil;
 import com.dre.brewery.utility.BoundingBox;
-import com.dre.brewery.utility.LegacyUtil;
 import com.dre.brewery.utility.Logging;
 import com.github.Anon8281.universalScheduler.UniversalRunnable;
 import lombok.Getter;
@@ -169,7 +188,7 @@ public class Barrel extends BarrelBody implements InventoryHolder {
 				if (inventory.getViewers().isEmpty()) {
 					// if inventory contains potions
 					if (inventory.contains(Material.POTION)) {
-						byte wood = getWood();
+						BarrelWoodType wood = this.getWood();
 						long loadTime = System.nanoTime();
 						for (ItemStack item : inventory.getContents()) {
 							if (item != null) {
@@ -189,7 +208,7 @@ public class Barrel extends BarrelBody implements InventoryHolder {
 		// reset barreltime, potions have new age
 		time = 0;
 
-		if (LogBlockHook.LOGBLOCK.isEnabled()) {
+		if (Hook.LOGBLOCK.isEnabled()) {
 			try {
 				LogBlockBarrel.openBarrel(player, inventory, spigot.getLocation());
 			} catch (Throwable e) {
@@ -256,7 +275,7 @@ public class Barrel extends BarrelBody implements InventoryHolder {
 			return null;
 		}
 		Material type = block.getType();
-		if (LegacyUtil.isFence(type) || LegacyUtil.isSign(type)) {
+		if (BarrelAsset.isBarrelAsset(BarrelAsset.FENCE, type) || BarrelAsset.isBarrelAsset(BarrelAsset.SIGN, type)) {
 			return getBySpigot(block);
 		} else {
 			return getByWood(block);
@@ -298,7 +317,7 @@ public class Barrel extends BarrelBody implements InventoryHolder {
 	 */
 	@Nullable
 	public static Barrel getByWood(Block wood) {
-		if (LegacyUtil.isWoodPlanks(wood.getType()) || LegacyUtil.isWoodStairs(wood.getType())) {
+		if (BarrelAsset.isBarrelAsset(BarrelAsset.PLANKS, wood.getType()) || BarrelAsset.isBarrelAsset(BarrelAsset.STAIRS, wood.getType())) {
 			int i = 0;
 			for (Barrel barrel : barrels) {
 				if (barrel.getSpigot().getWorld().equals(wood.getWorld()) && barrel.getBounds().contains(wood)) {
@@ -338,7 +357,7 @@ public class Barrel extends BarrelBody implements InventoryHolder {
 		if (barrel == null) {
 			barrel = new Barrel(spigot, signoffset);
 			if (barrel.getBrokenBlock(true) == null) {
-				if (LegacyUtil.isSign(spigot.getType())) {
+				if (BarrelAsset.isBarrelAsset(BarrelAsset.SIGN, spigot.getType())) {
 					if (!player.hasPermission("brewery.createbarrel.small")) {
 						lang.sendEntry(player, "Perms_NoBarrelCreate");
 						return false;
@@ -385,7 +404,7 @@ public class Barrel extends BarrelBody implements InventoryHolder {
 			}
 			ItemStack[] items = inventory.getContents();
 			inventory.clear();
-			if (LogBlockHook.LOGBLOCK.isEnabled() && breaker != null) {
+			if (Hook.LOGBLOCK.isEnabled() && breaker != null) {
 				try {
 					LogBlockBarrel.breakBarrel(breaker, items, spigot.getLocation());
 				} catch (Throwable e) {
@@ -399,7 +418,7 @@ public class Barrel extends BarrelBody implements InventoryHolder {
 					return;
 				}
 
-				byte wood = getWood();
+				BarrelWoodType wood = this.getWood();
 				for (ItemStack item : items) {
 					if (item != null) {
 						Brew brew = Brew.get(item);
@@ -451,13 +470,13 @@ public class Barrel extends BarrelBody implements InventoryHolder {
 	 */
 	public boolean isSmall() {
 		if (!BreweryPlugin.isFolia()) {
-			return LegacyUtil.isSign(spigot.getType());
+			return BarrelAsset.isBarrelAsset(BarrelAsset.SIGN, spigot.getType());
 		}
 
 
 		AtomicBoolean type = new AtomicBoolean(false);
 		BreweryPlugin.getScheduler().runTask(spigot.getLocation(),
-				() -> type.set(LegacyUtil.isSign(spigot.getType())));
+				() -> type.set(BarrelAsset.isBarrelAsset(BarrelAsset.SIGN, spigot.getType())));
 		return type.get();
 	}
 

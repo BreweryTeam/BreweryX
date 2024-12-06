@@ -1,3 +1,23 @@
+/*
+ * BreweryX Bukkit-Plugin for an alternate brewing process
+ * Copyright (C) 2024 The Brewery Team
+ *
+ * This file is part of BreweryX.
+ *
+ * BreweryX is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * BreweryX is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with BreweryX. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
+ */
+
 package com.dre.brewery.integration.bstats;
 
 import com.dre.brewery.BCauldron;
@@ -19,7 +39,12 @@ import org.bukkit.Bukkit;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Stats {
+/**
+ * General stats written by the original author of Brewery.
+ */
+public class BreweryStats {
+
+	private static final int BSTATS_ID = 3494;
 
 	private final Config config = ConfigManager.getConfig(Config.class);
 	public int brewsCreated;
@@ -51,9 +76,9 @@ public class Stats {
 
 	public void setupBStats() {
 		try {
-			Metrics metrics = new Metrics(BreweryPlugin.getInstance(), 3494);
-			metrics.addCustomChart(new Metrics.SingleLineChart("drunk_players", BPlayer::numDrunkPlayers));
-			metrics.addCustomChart(new Metrics.SingleLineChart("brews_in_existence", () -> brewsCreated));
+			Metrics metrics = new Metrics(BreweryPlugin.getInstance(), BSTATS_ID);
+			metrics.addCustomChart(new SingleLineChart("drunk_players", BPlayer::numDrunkPlayers));
+			metrics.addCustomChart(new SingleLineChart("brews_in_existence", () -> brewsCreated));
 			metrics.addCustomChart(new SingleLineChart("barrels_built", Barrel.barrels::size));
 			metrics.addCustomChart(new SingleLineChart("cauldrons_boiling", BCauldron.bcauldrons::size));
 			metrics.addCustomChart(new AdvancedPie("brew_quality", () -> {

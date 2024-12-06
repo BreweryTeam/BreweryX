@@ -1,21 +1,31 @@
+/*
+ * BreweryX Bukkit-Plugin for an alternate brewing process
+ * Copyright (C) 2024 The Brewery Team
+ *
+ * This file is part of BreweryX.
+ *
+ * BreweryX is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * BreweryX is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with BreweryX. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
+ */
+
 package com.dre.brewery.listeners;
 
-import com.dre.brewery.BCauldron;
-import com.dre.brewery.BPlayer;
-import com.dre.brewery.BSealer;
-import com.dre.brewery.Barrel;
-import com.dre.brewery.Brew;
-import com.dre.brewery.BreweryPlugin;
-import com.dre.brewery.DistortChat;
-import com.dre.brewery.Wakeup;
+import com.dre.brewery.*;
 import com.dre.brewery.configuration.ConfigManager;
 import com.dre.brewery.configuration.files.Config;
 import com.dre.brewery.configuration.files.Lang;
-import com.dre.brewery.utility.BUtil;
-import com.dre.brewery.utility.LegacyUtil;
-import com.dre.brewery.utility.MinecraftVersion;
-import com.dre.brewery.utility.PermissionUtil;
-import com.dre.brewery.utility.UpdateChecker;
+import com.dre.brewery.utility.*;
+import com.dre.brewery.utility.MaterialUtil;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -97,7 +107,7 @@ public class PlayerListener implements Listener {
 		if (player.isSneaking()) return;
 
 		// -- Interacting with a Cauldron --
-		if (LegacyUtil.isWaterCauldron(type)) {
+		if (MaterialUtil.isWaterCauldron(type)) {
 			// Handle the Cauldron Interact
 			// The Event might get cancelled in here
 			BCauldron.clickCauldron(event);
@@ -120,18 +130,18 @@ public class PlayerListener implements Listener {
 
 		// -- Access a Barrel --
 		Barrel barrel = null;
-		if (LegacyUtil.isWoodPlanks(type)) {
+		if (BarrelAsset.isBarrelAsset(BarrelAsset.PLANKS, type)) {
 			if (config.isOpenLargeBarrelEverywhere()) {
 				barrel = Barrel.getByWood(clickedBlock);
 			}
-		} else if (LegacyUtil.isWoodStairs(type)) {
+		} else if (BarrelAsset.isBarrelAsset(BarrelAsset.STAIRS, type)) {
 			barrel = Barrel.getByWood(clickedBlock);
 			if (barrel != null) {
 				if (!config.isOpenLargeBarrelEverywhere() && barrel.isLarge()) {
 					barrel = null;
 				}
 			}
-		} else if (LegacyUtil.isFence(type) || LegacyUtil.isSign(type)) {
+		} else if (BarrelAsset.isBarrelAsset(BarrelAsset.FENCE, type) || BarrelAsset.isBarrelAsset(BarrelAsset.SIGN, type)) {
 			barrel = Barrel.getBySpigot(clickedBlock);
 		}
 
@@ -154,7 +164,7 @@ public class PlayerListener implements Listener {
 				// This seems to make the client stop animating a consumption
 				// If there is a better way to do this please let me know
 				Material hand = event.getMaterial();
-				if ((hand == Material.POTION || hand.isEdible()) && !LegacyUtil.isSign(type)) {
+				if ((hand == Material.POTION || hand.isEdible()) && !BarrelAsset.isBarrelAsset(BarrelAsset.SIGN, type)) {
 					PlayerInventory inv = player.getInventory();
 					final int held = inv.getHeldItemSlot();
 					int useSlot = -1;

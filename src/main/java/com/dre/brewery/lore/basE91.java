@@ -1,5 +1,3 @@
-package com.dre.brewery.lore;
-
 /*
  * basE91 encoding/decoding routines
  *
@@ -30,6 +28,9 @@ package com.dre.brewery.lore;
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+package com.dre.brewery.lore;
+
+
 
 public class basE91
 {

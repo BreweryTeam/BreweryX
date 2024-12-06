@@ -1,3 +1,23 @@
+/*
+ * BreweryX Bukkit-Plugin for an alternate brewing process
+ * Copyright (C) 2024 The Brewery Team
+ *
+ * This file is part of BreweryX.
+ *
+ * BreweryX is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * BreweryX is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with BreweryX. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
+ */
+
 package com.dre.brewery;
 
 import com.dre.brewery.api.events.brew.BrewModifyEvent;
@@ -131,7 +151,7 @@ public class BIngredients {
 		if (cookRecipe != null) {
 			// Potion is best with cooking only
 			int quality = (int) Math.round((getIngredientQuality(cookRecipe) + getCookingQuality(cookRecipe, false)) / 2.0);
-			int alc = (int) Math.round(cookRecipe.getAlcohol() * ((float) quality / 10.0f));
+			int alc = Math.round(cookRecipe.getAlcohol() * ((float) quality / 10.0f));
 			Logging.debugLog("cooked potion has Quality: " + quality + ", Alc: " + alc);
 			brew = new Brew(quality, alc, cookRecipe, this);
 			BrewLore lore = new BrewLore(brew, potionMeta);
@@ -197,7 +217,7 @@ public class BIngredients {
 		}
 		brew.save(potionMeta);
 		potion.setItemMeta(potionMeta);
-		plugin.getStats().metricsForCreate(false);
+		plugin.getBreweryStats().metricsForCreate(false);
 
 		return potion;
 	}
@@ -224,7 +244,7 @@ public class BIngredients {
 	/**
 	 * best recipe for current state of potion, STILL not always returns the correct one...
 	 */
-	public BRecipe getBestRecipe(float wood, float time, boolean distilled) {
+	public BRecipe getBestRecipe(BarrelWoodType wood, float time, boolean distilled) {
 		float quality = 0;
 		int ingredientQuality;
 		int cookingQuality;
@@ -268,7 +288,7 @@ public class BIngredients {
 	 * returns recipe that is cooking only and matches the ingredients and cooking time
 	 */
 	public BRecipe getCookRecipe() {
-		BRecipe bestRecipe = getBestRecipe(0, 0, false);
+		BRecipe bestRecipe = getBestRecipe(BarrelWoodType.ANY, 0, false);
 
 		// Check if best recipe is cooking only
 		if (bestRecipe != null) {
@@ -303,7 +323,7 @@ public class BIngredients {
 	/**
 	 * returns the currently best matching recipe for distilling for the ingredients and cooking time
 	 */
-	public BRecipe getDistillRecipe(float wood, float time) {
+	public BRecipe getDistillRecipe(BarrelWoodType wood, float time) {
 		BRecipe bestRecipe = getBestRecipe(wood, time, true);
 
 		// Check if best recipe needs to be destilled
@@ -318,7 +338,7 @@ public class BIngredients {
 	/**
 	 * returns currently best matching recipe for ingredients, cooking- and ageingtime
 	 */
-	public BRecipe getAgeRecipe(float wood, float time, boolean distilled) {
+	public BRecipe getAgeRecipe(BarrelWoodType wood, float time, boolean distilled) {
 		BRecipe bestRecipe = getBestRecipe(wood, time, distilled);
 
 		if (bestRecipe != null) {
@@ -400,12 +420,12 @@ public class BIngredients {
 	/**
 	 * returns the quality regarding the barrel wood conditioning given Recipe
 	 */
-	public int getWoodQuality(BRecipe recipe, float wood) {
-		if (recipe.getWood() == 0) {
+	public int getWoodQuality(BRecipe recipe, BarrelWoodType wood) {
+		if (recipe.getWood().equals(BarrelWoodType.ANY)) {
 			// type of wood doesnt matter
 			return 10;
 		}
-		int quality = 10 - Math.round(recipe.getWoodDiff(wood) * recipe.getDifficulty());
+		int quality = 10 - Math.round(recipe.getWoodDiff(wood.getIndex()) * recipe.getDifficulty());
 
 		return Math.max(quality, 0);
 	}

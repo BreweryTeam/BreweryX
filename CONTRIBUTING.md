@@ -6,7 +6,7 @@
 
 Code should follow the overall project's code style.
 We follow [Oracle's Standard Programming Practices](https://www.oracle.com/java/technologies/javase/codeconventions-programmingpractices.html)
-with the exception of the `10.5.1 Parentheses` practice. As long as your operator expressions are
+with the exception of `10.5.1 Parentheses`. As long as your operator expressions are
 *clear enough*, you should be fine.
 
 ### License Headers
@@ -101,13 +101,13 @@ Learn how to use Codespaces: https://docs.github.com/en/codespaces
 ### Contributions Manually
 
 I don't recommend editing files without the proper tools like [Git](https://git-scm.com/downloads) or [Codespaces](https://docs.github.com/en/codespaces) 
-at your disposal. If you choose to contribute manually, feel free to but there won't be a tutorial for
+at your disposal. If you choose to contribute manually, feel free to, but there won't be a tutorial for
 this. 
 
 
 ### Opening a Pull Request
 
-GitHub should for the most part, prompt you to open a Pull Request as soon as you push changes
+GitHub should for the most part, prompts you to open a Pull Request as soon as you push changes
 to your forked repository. Just navigate to the home page for your repository and follow GitHub's
 prompts from there.
 

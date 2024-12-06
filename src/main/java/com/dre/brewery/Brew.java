@@ -1,3 +1,23 @@
+/*
+ * BreweryX Bukkit-Plugin for an alternate brewing process
+ * Copyright (C) 2024 The Brewery Team
+ *
+ * This file is part of BreweryX.
+ *
+ * BreweryX is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * BreweryX is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with BreweryX. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
+ */
+
 package com.dre.brewery;
 
 import com.dre.brewery.api.events.brew.BrewModifyEvent;
@@ -19,6 +39,8 @@ import com.dre.brewery.recipe.PotionColor;
 import com.dre.brewery.utility.BUtil;
 import com.dre.brewery.utility.Logging;
 import com.dre.brewery.utility.MinecraftVersion;
+import lombok.Getter;
+import lombok.Setter;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.enchantments.Enchantment;
@@ -48,6 +70,8 @@ import java.util.Objects;
 /**
  * Represents the liquid in the brewed Potions
  */
+@Getter
+@Setter
 public class Brew implements Cloneable {
 	private static final MinecraftVersion VERSION = BreweryPlugin.getMCVersion();
 	private static final Config config = ConfigManager.getConfig(Config.class);
@@ -64,7 +88,8 @@ public class Brew implements Cloneable {
 	private int alc;
 	private byte distillRuns;
 	private float ageTime;
-	private float wood;
+	private BarrelWoodType wood;
+	// TODO: This should extend BRecipe, not hold a reference.
 	private BRecipe currentRecipe; // Recipe this Brew is currently based off. May change between modifications and is often null when not modifying
 	private boolean unlabeled;
 	private boolean persistent; // Only for legacy
@@ -96,7 +121,7 @@ public class Brew implements Cloneable {
 	/**
 	 * Loading a Brew with all values set
 	 */
-	public Brew(BIngredients ingredients, int quality, int alc, byte distillRuns, float ageTime, float wood, String recipe, boolean unlabeled, boolean immutable, int lastUpdate) {
+	public Brew(BIngredients ingredients, int quality, int alc, byte distillRuns, float ageTime, BarrelWoodType wood, String recipe, boolean unlabeled, boolean immutable, int lastUpdate) {
 		this.ingredients = ingredients;
 		this.quality = quality;
 		this.alc = alc;
@@ -308,7 +333,7 @@ public class Brew implements Cloneable {
 				alc == brew.alc &&
 				distillRuns == brew.distillRuns &&
 				Float.compare(brew.ageTime, ageTime) == 0 &&
-				Float.compare(brew.wood, wood) == 0 &&
+				brew.wood == wood &&
 				unlabeled == brew.unlabeled &&
 				persistent == brew.persistent &&
 				immutable == brew.immutable &&
@@ -414,9 +439,6 @@ public class Brew implements Cloneable {
 		return Math.round(quality);
 	}
 
-	public int getQuality() {
-		return quality;
-	}
 
 	public boolean canDistill() {
 		if (immutable) return false;
@@ -510,7 +532,7 @@ public class Brew implements Cloneable {
 		stripped = true;
 		ingredients = new BIngredients();
 		ageTime = 0;
-		wood = -1;
+		wood = BarrelWoodType.NONE;
 		touch();
 
 		BrewModifyEvent modifyEvent = new BrewModifyEvent(this, meta, BrewModifyEvent.Type.SEAL);
@@ -541,64 +563,17 @@ public class Brew implements Cloneable {
 		return alc;
 	}
 
-	public void setAlc(int alc) {
-		this.alc = alc;
-	}
-
-	public byte getDistillRuns() {
-		return distillRuns;
-	}
-
-	public float getAgeTime() {
-		return ageTime;
-	}
-
-	public float getWood() {
-		return wood;
-	}
-
-	public BIngredients getIngredients() {
-		return ingredients;
-	}
-
 	public boolean hasRecipe() {
 		return currentRecipe != null;
 	}
 
-	public BRecipe getCurrentRecipe() {
-		return currentRecipe;
-	}
-
-	public boolean isStatic() {
-		return immutable;
-	}
-
-	public boolean isImmutable() {
-		return immutable;
-	}
-
-	public boolean isUnlabeled() {
-		return unlabeled;
-	}
-
-	public boolean isStripped() {
-		return stripped;
-	}
 
 	public boolean isSealed() {
 		return stripped && immutable;
 	}
 
-	public boolean needsSave() {
-		return needsSave;
-	}
-
-	public boolean hasGlint() {
-		return hasGlint;
-	}
-
-	public void setNeedsSave(boolean needsSave) {
-		this.needsSave = needsSave;
+	public boolean isStatic() {
+		return immutable;
 	}
 
 	/**
@@ -612,10 +587,6 @@ public class Brew implements Cloneable {
             currentRecipe.getColor().colorBrew(((PotionMeta) potion.getItemMeta()), potion, !immutable);
 		}
 		this.immutable = immutable;
-	}
-
-	public int getLastUpdate() {
-		return lastUpdate;
 	}
 
 	// Distilling section ---------------
@@ -707,7 +678,7 @@ public class Brew implements Cloneable {
 
 	// Ageing Section ------------------
 
-	public void age(ItemStack item, float time, byte woodType) {
+	public void age(ItemStack item, float time, BarrelWoodType woodType) {
 		if (immutable) return;
 		PotionMeta potionMeta = (PotionMeta) item.getItemMeta();
 
@@ -716,7 +687,7 @@ public class Brew implements Cloneable {
 
 		// if younger than half a day, it shouldnt get aged form
 		if (ageTime > 0.5) {
-			if (wood == 0) {
+			if (wood == BarrelWoodType.ANY) {
 				wood = woodType;
 			} else if (wood != woodType) {
 				woodShift(time, woodType);
@@ -780,8 +751,11 @@ public class Brew implements Cloneable {
 	/**
 	 * Slowly shift the wood of the Brew to the new Type
 	 */
-	public void woodShift(float time, byte to) {
+	public void woodShift(float time, BarrelWoodType to) {
 		if (immutable) return;
+		int fromIndex = wood.getIndex();
+		int toIndex = to.getIndex();
+
 		float factor = 1;
 		if (ageTime > 5) {
 			factor = 2;
@@ -789,14 +763,14 @@ public class Brew implements Cloneable {
 			factor = 2;
 			factor += ageTime / 10F;
 		}
-		if (wood > to) {
-			wood -= time / factor;
-			if (wood < to) {
+		if (fromIndex > toIndex) {
+			fromIndex -= (int) (time / factor);
+			if (fromIndex < toIndex) {
 				wood = to;
 			}
 		} else {
-			wood += time / factor;
-			if (wood > to) {
+			fromIndex += (int) (time / factor);
+			if (fromIndex > toIndex) {
 				wood = to;
 			}
 		}
@@ -847,7 +821,7 @@ public class Brew implements Cloneable {
 		//}
 		// This effect stores the UID in its Duration
 		//potionMeta.addCustomEffect((PotionEffectType.REGENERATION).createEffect((uid * 4), 0), true);
-		
+
 		BrewLore lore = new BrewLore(this, potionMeta);
 		lore.convertLore(false);
 		lore.addOrReplaceEffects(recipe.getEffects(), quality);
@@ -862,7 +836,7 @@ public class Brew implements Cloneable {
 		}
 		save(potionMeta);
 		potion.setItemMeta(potionMeta);
-		BreweryPlugin.getInstance().getStats().metricsForCreate(true);
+		BreweryPlugin.getInstance().getBreweryStats().metricsForCreate(true);
 		return potion;
 	}
 
@@ -975,7 +949,7 @@ public class Brew implements Cloneable {
 			ageTime = in.readFloat();
 		}
 		if ((bools & 4) != 0) {
-			wood = in.readFloat();
+			wood = BarrelWoodType.fromAny(in.readFloat());
 		}
 		String recipe = null;
 		if ((bools & 8) != 0) {
@@ -1043,7 +1017,7 @@ public class Brew implements Cloneable {
 		int bools = 0;
 		bools |= ((distillRuns != 0) 	? 1 : 0);
 		bools |= (ageTime > 0 	? 2 : 0);
-		bools |= (wood != -1 	? 4 : 0);
+		bools |= (wood != BarrelWoodType.NONE 	? 4 : 0);
 		bools |= (currentRecipe != null ? 8 : 0);
 		bools |= (unlabeled 	? 16 : 0);
 		bools |= (immutable 	? 32 : 0);
@@ -1059,8 +1033,8 @@ public class Brew implements Cloneable {
 		if (ageTime > 0) {
 			out.writeFloat(ageTime);
 		}
-		if (wood != -1) {
-			out.writeFloat(wood);
+		if (wood != BarrelWoodType.NONE) {
+			out.writeFloat(wood != null ? wood.getIndex() : 0);
 		}
 		if (currentRecipe != null) {
 			out.writeUTF(currentRecipe.getRecipeName());
@@ -1104,7 +1078,7 @@ public class Brew implements Cloneable {
 	/**
 	 * Load potion data from data file for backwards compatibility
 	 */
-	public static void loadLegacy(BIngredients ingredients, int uid, int quality, int alc, byte distillRuns, float ageTime, float wood, String recipe, boolean unlabeled, boolean persistent, boolean stat, int lastUpdate) {
+	public static void loadLegacy(BIngredients ingredients, int uid, int quality, int alc, byte distillRuns, float ageTime, BarrelWoodType wood, String recipe, boolean unlabeled, boolean persistent, boolean stat, int lastUpdate) {
 		Brew brew = new Brew(ingredients, quality, alc, distillRuns, ageTime, wood, recipe, unlabeled, stat, lastUpdate);
 		brew.persistent = persistent;
 		if (brew.lastUpdate <= 0) {
@@ -1185,7 +1159,7 @@ public class Brew implements Cloneable {
 			if (brew.ageTime != 0) {
 				idConfig.set("ageTime", brew.ageTime);
 			}
-			if (brew.wood != -1) {
+			if (brew.wood != BarrelWoodType.NONE) {
 				idConfig.set("wood", brew.wood);
 			}
 			if (brew.currentRecipe != null) {

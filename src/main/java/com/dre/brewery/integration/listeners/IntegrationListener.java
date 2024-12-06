@@ -1,6 +1,27 @@
+/*
+ * BreweryX Bukkit-Plugin for an alternate brewing process
+ * Copyright (C) 2024 The Brewery Team
+ *
+ * This file is part of BreweryX.
+ *
+ * BreweryX is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * BreweryX is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with BreweryX. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
+ */
+
 package com.dre.brewery.integration.listeners;
 
 import com.dre.brewery.Barrel;
+import com.dre.brewery.BarrelAsset;
 import com.dre.brewery.BreweryPlugin;
 import com.dre.brewery.api.events.barrel.BarrelAccessEvent;
 import com.dre.brewery.api.events.barrel.BarrelDestroyEvent;
@@ -9,7 +30,7 @@ import com.dre.brewery.configuration.ConfigManager;
 import com.dre.brewery.configuration.files.Config;
 import com.dre.brewery.configuration.files.Lang;
 import com.dre.brewery.integration.Hook;
-import com.dre.brewery.integration.LogBlockHook;
+import com.dre.brewery.integration.BlockLockerHook;
 import com.dre.brewery.integration.WorldGuarkHook;
 import com.dre.brewery.integration.barrel.BlockLockerBarrel;
 import com.dre.brewery.integration.barrel.GriefPreventionBarrel;
@@ -20,7 +41,7 @@ import com.dre.brewery.integration.item.MMOItemsPluginItem;
 import com.dre.brewery.listeners.PlayerListener;
 import com.dre.brewery.recipe.BCauldronRecipe;
 import com.dre.brewery.recipe.RecipeItem;
-import com.dre.brewery.utility.LegacyUtil;
+import com.dre.brewery.utility.MaterialUtil;
 import com.dre.brewery.utility.Logging;
 import com.dre.brewery.utility.MinecraftVersion;
 import io.lumine.mythic.lib.api.item.NBTItem;
@@ -101,27 +122,25 @@ public class IntegrationListener implements Listener {
 			}
 		}
 		if (Hook.GRIEFPREVENTION.isEnabled()) {
-			if (BreweryPlugin.getInstance().getServer().getPluginManager().isPluginEnabled("GriefPrevention")) {
-				try {
-					if (!GriefPreventionBarrel.checkAccess(event)) {
-						lang.sendEntry(event.getPlayer(), "Error_NoBarrelAccess");
-						event.setCancelled(true);
-						return;
-					}
-				} catch (Throwable e) {
+			try {
+				if (!GriefPreventionBarrel.checkAccess(event)) {
+					lang.sendEntry(event.getPlayer(), "Error_NoBarrelAccess");
 					event.setCancelled(true);
-					Logging.errorLog("Failed to Check GriefPrevention for Barrel Open Permissions!", e);
-					Logging.errorLog("Brewery was tested with GriefPrevention v14.5 - v16.9");
-					Logging.errorLog("Disable the GriefPrevention support in the config and do /brew reload");
-					Player player = event.getPlayer();
-					if (player.hasPermission("brewery.admin") || player.hasPermission("brewery.mod")) {
-						Logging.msg(player, "&cGriefPrevention check Error, Brewery was tested with up to v16.9 of GriefPrevention");
-						Logging.msg(player, "&cSet &7useGriefPrevention: false &cin the config and /brew reload");
-					} else {
-						Logging.msg(player, "&cError opening Barrel, please report to an Admin!");
-					}
 					return;
 				}
+			} catch (Throwable e) {
+				event.setCancelled(true);
+				Logging.errorLog("Failed to Check GriefPrevention for Barrel Open Permissions!", e);
+				Logging.errorLog("Brewery was tested with GriefPrevention v14.5 - v16.9");
+				Logging.errorLog("Disable the GriefPrevention support in the config and do /brew reload");
+				Player player = event.getPlayer();
+				if (player.hasPermission("brewery.admin") || player.hasPermission("brewery.mod")) {
+					Logging.msg(player, "&cGriefPrevention check Error, Brewery was tested with up to v16.9 of GriefPrevention");
+					Logging.msg(player, "&cSet &7useGriefPrevention: false &cin the config and /brew reload");
+				} else {
+					Logging.msg(player, "&cError opening Barrel, please report to an Admin!");
+				}
+				return;
 			}
 		}
 
@@ -130,7 +149,7 @@ public class IntegrationListener implements Listener {
 			if (plugin != null) {
 
 				// If the Clicked Block was the Sign, LWC already knows and we dont need to do anything here
-				if (!LegacyUtil.isSign(event.getClickedBlock().getType())) {
+				if (!BarrelAsset.isBarrelAsset(BarrelAsset.SIGN, event.getClickedBlock().getType())) {
 					Block sign = event.getBarrel().getSignOfSpigot();
 					// If the Barrel does not have a Sign, it cannot be locked
 					if (!sign.equals(event.getClickedBlock())) {
@@ -160,52 +179,48 @@ public class IntegrationListener implements Listener {
 		}
 
 		if (Hook.TOWNY.isEnabled()) {
-			if (BreweryPlugin.getInstance().getServer().getPluginManager().isPluginEnabled("Towny")) {
-				try {
-					if (!TownyBarrel.checkAccess(event)) {
-						lang.sendEntry(event.getPlayer(), "Error_NoBarrelAccess");
-						event.setCancelled(true);
-						return;
-					}
-				} catch (Throwable e) {
+			try {
+				if (!TownyBarrel.checkAccess(event)) {
+					lang.sendEntry(event.getPlayer(), "Error_NoBarrelAccess");
 					event.setCancelled(true);
-					Logging.errorLog("Failed to Check Towny for Barrel Open Permissions!", e);
-					Logging.errorLog("Brewery was tested with Towny v0.96.3.0");
-					Logging.errorLog("Disable the Towny support in the config and do /brew reload");
-					Player player = event.getPlayer();
-					if (player.hasPermission("brewery.admin") || player.hasPermission("brewery.mod")) {
-						Logging.msg(player, "&cTowny check Error, Brewery was tested with up to v0.96.3.0 of Towny");
-						Logging.msg(player, "&cSet &7useTowny: false &cin the config and /brew reload");
-					} else {
-						Logging.msg(player, "&cError opening Barrel, please report to an Admin!");
-					}
 					return;
 				}
+			} catch (Throwable e) {
+				event.setCancelled(true);
+				Logging.errorLog("Failed to Check Towny for Barrel Open Permissions!", e);
+				Logging.errorLog("Brewery was tested with Towny v0.96.3.0");
+				Logging.errorLog("Disable the Towny support in the config and do /brew reload");
+				Player player = event.getPlayer();
+				if (player.hasPermission("brewery.admin") || player.hasPermission("brewery.mod")) {
+					Logging.msg(player, "&cTowny check Error, Brewery was tested with up to v0.96.3.0 of Towny");
+					Logging.msg(player, "&cSet &7useTowny: false &cin the config and /brew reload");
+				} else {
+					Logging.msg(player, "&cError opening Barrel, please report to an Admin!");
+				}
+				return;
 			}
 		}
 
-		if (Hook.BLOCKLOCKER.isEnabled()) {
-			if (BreweryPlugin.getInstance().getServer().getPluginManager().isPluginEnabled("BlockLocker")) {
-				try {
-					if (!BlockLockerBarrel.checkAccess(event)) {
-						lang.sendEntry(event.getPlayer(), "Error_NoBarrelAccess");
-						event.setCancelled(true);
-						return;
-					}
-				} catch (Throwable e) {
+		if (BlockLockerHook.BLOCKLOCKER.isEnabled()) {
+			try {
+				if (!BlockLockerBarrel.checkAccess(event)) {
+					lang.sendEntry(event.getPlayer(), "Error_NoBarrelAccess");
 					event.setCancelled(true);
-					Logging.errorLog("Failed to Check BlockLocker for Barrel Open Permissions!", e);
-					Logging.errorLog("Brewery was tested with BlockLocker v1.9");
-					Logging.errorLog("Disable the BlockLocker support in the config and do /brew reload");
-					Player player = event.getPlayer();
-					if (player.hasPermission("brewery.admin") || player.hasPermission("brewery.mod")) {
-						Logging.msg(player, "&cBlockLocker check Error, Brewery was tested with v1.9 of BlockLocker");
-						Logging.msg(player, "&cSet &7useBlockLocker: false &cin the config and /brew reload");
-					} else {
-						Logging.msg(player, "&cError opening Barrel, please report to an Admin!");
-					}
 					return;
 				}
+			} catch (Throwable e) {
+				event.setCancelled(true);
+				Logging.errorLog("Failed to Check BlockLocker for Barrel Open Permissions!", e);
+				Logging.errorLog("Brewery was tested with BlockLocker v1.9");
+				Logging.errorLog("Disable the BlockLocker support in the config and do /brew reload");
+				Player player = event.getPlayer();
+				if (player.hasPermission("brewery.admin") || player.hasPermission("brewery.mod")) {
+					Logging.msg(player, "&cBlockLocker check Error, Brewery was tested with v1.9 of BlockLocker");
+					Logging.msg(player, "&cSet &7useBlockLocker: false &cin the config and /brew reload");
+				} else {
+					Logging.msg(player, "&cError opening Barrel, please report to an Admin!");
+				}
+				return;
 			}
 		}
 
@@ -305,7 +320,7 @@ public class IntegrationListener implements Listener {
 
 	@EventHandler
 	public void onInventoryClose(InventoryCloseEvent event) {
-		if (LogBlockHook.LOGBLOCK.isEnabled()) {
+		if (Hook.LOGBLOCK.isEnabled()) {
 			if (event.getInventory().getHolder() instanceof Barrel) {
 				try {
 					LogBlockBarrel.closeBarrel(event.getPlayer(), event.getInventory());
@@ -324,7 +339,7 @@ public class IntegrationListener implements Listener {
 		if (!Hook.MMOITEMS.isEnabled()) return;
 		try {
 			if (event.getAction() == Action.RIGHT_CLICK_BLOCK && event.hasItem() && event.getHand() == EquipmentSlot.HAND) {
-				if (event.getClickedBlock() != null && LegacyUtil.isWaterCauldron(event.getClickedBlock().getType())) {
+				if (event.getClickedBlock() != null && MaterialUtil.isWaterCauldron(event.getClickedBlock().getType())) {
 					NBTItem item = NBTItem.get(event.getItem());
 					if (item.hasType()) {
 						for (RecipeItem rItem : BCauldronRecipe.acceptedCustom) {
