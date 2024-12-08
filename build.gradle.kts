@@ -1,3 +1,23 @@
+/*
+ * BreweryX Bukkit-Plugin for an alternate brewing process
+ * Copyright (C) 2024 The Brewery Team
+ *
+ * This file is part of BreweryX.
+ *
+ * BreweryX is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * BreweryX is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with BreweryX. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
+ */
+
 import org.apache.commons.io.output.ByteArrayOutputStream
 import org.apache.tools.ant.filters.ReplaceTokens
 import java.nio.charset.Charset
@@ -8,11 +28,11 @@ plugins {
     id("com.gradleup.shadow") version "8.3.5"
 }
 
-val langVersion: Int = 17
+val langVersion = 17
 val encoding = "UTF-8"
 
 group = "com.dre.brewery"
-version = "3.4.1"
+version = "3.4.3-SNAPSHOT"
 
 repositories {
     mavenCentral()
@@ -79,8 +99,8 @@ dependencies {
     compileOnly("com.nisovin.shopkeepers:ShopkeepersAPI:2.18.0") // https://www.spigotmc.org/resources/shopkeepers.80756/history
     compileOnly("nl.rutgerkok:blocklocker:1.10.4") // https://www.spigotmc.org/resources/blocklocker.3268/history
     compileOnly("me.clip:placeholderapi:2.11.5") // https://www.spigotmc.org/resources/placeholderapi.6245/history
-    compileOnly("io.th0rgal:oraxen:1.163.0")
-    compileOnly("com.github.LoneDev6:API-ItemsAdder:3.6.1")
+    compileOnly("io.th0rgal:oraxen:1.163.0") // https://www.spigotmc.org/resources/%E2%98%84%EF%B8%8F-oraxen-custom-items-blocks-emotes-furniture-resourcepack-and-gui-1-18-1-21-3.72448/
+    compileOnly("com.github.LoneDev6:API-ItemsAdder:3.6.1") // https://www.spigotmc.org/resources/%E2%9C%A8itemsadder%E2%AD%90emotes-mobs-items-armors-hud-gui-emojis-blocks-wings-hats-liquids.73355/updates
 
 
 
@@ -163,11 +183,41 @@ java {
 
 
 publishing {
+    val user = System.getenv("repo_username")
+    val pass = System.getenv("repo_secret")
+
+    repositories {
+        if (user != null && pass != null) {
+            maven {
+                name = "jsinco-repo"
+                url = uri("https://repo.jsinco.dev/releases")
+                credentials(PasswordCredentials::class) {
+                    username = user
+                    password = pass
+                }
+                authentication {
+                    create<BasicAuthentication>("basic")
+                }
+            }
+        }
+    }
+
 	publications {
-		create<MavenPublication>("maven") {
+		create<MavenPublication>("maven") { // Jitpack
 			artifact(tasks.shadowJar.get().archiveFile) {
 				builtBy(tasks.shadowJar)
 			}
 		}
+
+        if (user != null && pass != null) {
+            create<MavenPublication>("jsinco") {
+                groupId = "com.dre.brewery"
+                artifactId = "BreweryX"
+                version = project.version.toString()
+                artifact(tasks.shadowJar.get().archiveFile) {
+                    builtBy(tasks.shadowJar)
+                }
+            }
+        }
 	}
 }

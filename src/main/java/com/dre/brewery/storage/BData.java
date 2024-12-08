@@ -1,9 +1,30 @@
+/*
+ * BreweryX Bukkit-Plugin for an alternate brewing process
+ * Copyright (C) 2024 The Brewery Team
+ *
+ * This file is part of BreweryX.
+ *
+ * BreweryX is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * BreweryX is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with BreweryX. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
+ */
+
 package com.dre.brewery.storage;
 
 import com.dre.brewery.BCauldron;
 import com.dre.brewery.BIngredients;
 import com.dre.brewery.BPlayer;
 import com.dre.brewery.Barrel;
+import com.dre.brewery.BarrelWoodType;
 import com.dre.brewery.Brew;
 import com.dre.brewery.BreweryPlugin;
 import com.dre.brewery.MCBarrel;
@@ -100,13 +121,13 @@ public class BData {
                 int hash = data.getInt("brewsCreatedH");
                 // Check the hash to prevent tampering with statistics
                 if (brewsCreated.hashCode() == hash) {
-                    plugin.getStats().brewsCreated = brewsCreated.get(0);
-                    plugin.getStats().brewsCreatedCmd = brewsCreated.get(1);
-                    plugin.getStats().exc = brewsCreated.get(2);
-                    plugin.getStats().good = brewsCreated.get(3);
-                    plugin.getStats().norm = brewsCreated.get(4);
-                    plugin.getStats().bad = brewsCreated.get(5);
-                    plugin.getStats().terr = brewsCreated.get(6);
+                    plugin.getBreweryStats().brewsCreated = brewsCreated.get(0);
+                    plugin.getBreweryStats().brewsCreatedCmd = brewsCreated.get(1);
+                    plugin.getBreweryStats().exc = brewsCreated.get(2);
+                    plugin.getBreweryStats().good = brewsCreated.get(3);
+                    plugin.getBreweryStats().norm = brewsCreated.get(4);
+                    plugin.getBreweryStats().bad = brewsCreated.get(5);
+                    plugin.getBreweryStats().terr = brewsCreated.get(6);
                 }
             }
         }
@@ -154,22 +175,22 @@ public class BData {
                     boolean stat = section.getBoolean(uid + ".stat", false);
                     int lastUpdate = section.getInt(uid + ".lastUpdate", 0);
 
-                    Brew.loadLegacy(ingredients, BUtil.parseInt(uid), quality, alc, distillRuns, ageTime, wood, recipe, unlabeled, persistent, stat, lastUpdate);
+                    Brew.loadLegacy(ingredients, BUtil.parseInt(uid), quality, alc, distillRuns, ageTime, BarrelWoodType.fromAny(wood), recipe, unlabeled, persistent, stat, lastUpdate);
                 }
             }
 
             // Store how many legacy brews were created
-            if (plugin.getStats().brewsCreated <= 0) {
-                plugin.getStats().brewsCreated = 0;
-                plugin.getStats().brewsCreatedCmd = 0;
-                plugin.getStats().exc = 0;
-                plugin.getStats().good = 0;
-                plugin.getStats().norm = 0;
-                plugin.getStats().bad = 0;
-                plugin.getStats().terr = 0;
+            if (plugin.getBreweryStats().brewsCreated <= 0) {
+                plugin.getBreweryStats().brewsCreated = 0;
+                plugin.getBreweryStats().brewsCreatedCmd = 0;
+                plugin.getBreweryStats().exc = 0;
+                plugin.getBreweryStats().good = 0;
+                plugin.getBreweryStats().norm = 0;
+                plugin.getBreweryStats().bad = 0;
+                plugin.getBreweryStats().terr = 0;
                 if (!Brew.noLegacy()) {
                     for (int i = Brew.legacyPotions.size(); i > 0; i--) {
-                        plugin.getStats().metricsForCreate(false);
+                        plugin.getBreweryStats().metricsForCreate(false);
                     }
                 }
             }

@@ -1,3 +1,23 @@
+/*
+ * BreweryX Bukkit-Plugin for an alternate brewing process
+ * Copyright (C) 2024 The Brewery Team
+ *
+ * This file is part of BreweryX.
+ *
+ * BreweryX is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * BreweryX is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with BreweryX. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
+ */
+
 package com.dre.brewery;
 
 import com.dre.brewery.api.events.IngedientAddEvent;
@@ -7,9 +27,11 @@ import com.dre.brewery.configuration.files.Lang;
 import com.dre.brewery.recipe.BCauldronRecipe;
 import com.dre.brewery.recipe.RecipeItem;
 import com.dre.brewery.utility.BUtil;
-import com.dre.brewery.utility.LegacyUtil;
+import com.dre.brewery.utility.MaterialUtil;
 import com.dre.brewery.utility.MinecraftVersion;
 import com.dre.brewery.utility.Tuple;
+import lombok.Getter;
+import lombok.Setter;
 import org.bukkit.Color;
 import org.bukkit.Effect;
 import org.bukkit.Location;
@@ -38,17 +60,17 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static com.dre.brewery.utility.MinecraftVersion.V1_9;
-
+@Getter
+@Setter
 public class BCauldron {
 
 	private static final MinecraftVersion VERSION = BreweryPlugin.getMCVersion();
 	private static final Config config = ConfigManager.getConfig(Config.class);
 	private static final Lang lang = ConfigManager.getConfig(Lang.class);
-	public static final byte EMPTY = 0, SOME = 1, FULL = 2;
 	public static final int PARTICLEPAUSE = 15;
 	public static Random particleRandom = new Random();
 	private static final Set<UUID> plInteracted = new HashSet<>(); // Interact Event helper
+	@Getter
 	public static Map<Block, BCauldron> bcauldrons = new ConcurrentHashMap<>(); // All active cauldrons. Mapped to their block for fast retrieve
 
 	private BIngredients ingredients = new BIngredients();
@@ -85,12 +107,12 @@ public class BCauldron {
 		if (!BUtil.isChunkLoaded(block)) {
 			increaseState();
 		} else {
-			if (!LegacyUtil.isWaterCauldron(block.getType())) {
+			if (!MaterialUtil.isWaterCauldron(block.getType())) {
 				// Catch any WorldEdit etc. removal
 				return false;
 			}
 			// Check if fire still alive
-			if (LegacyUtil.isCauldronHeatsource(block.getRelative(BlockFace.DOWN))) {
+			if (MaterialUtil.isCauldronHeatSource(block.getRelative(BlockFace.DOWN))) {
 				increaseState();
 			}
 		}
@@ -131,32 +153,6 @@ public class BCauldron {
 		}
 	}
 
-	/**
-	 * Get the Block that this BCauldron represents
-	 */
-	public Block getBlock() {
-		return block;
-	}
-
-	/**
-	 * Get the State (Time in Minutes) that this Cauldron currently has
-	 */
-	public int getState() {
-		return state;
-	}
-
-
-	public BIngredients getIngredients() {
-		return ingredients;
-	}
-
-	public static Map<Block, BCauldron> getBcauldrons() {
-		return bcauldrons;
-	}
-
-	public UUID getId() {
-		return id;
-	}
 
 	// get cauldron by Block
 	@Nullable
@@ -168,7 +164,7 @@ public class BCauldron {
 	// Calls the IngredientAddEvent and may be cancelled or changed
 	public static boolean ingredientAdd(Block block, ItemStack ingredient, Player player) {
 		// if not empty
-		if (LegacyUtil.getFillLevel(block) != EMPTY) {
+		if (MaterialUtil.getFillLevel(block) != MaterialUtil.EMPTY) {
 
 			if (!BCauldronRecipe.acceptedMaterials.contains(ingredient.getType()) && !ingredient.hasItemMeta()) {
 				// Extremely fast way to check for most items
@@ -221,7 +217,7 @@ public class BCauldron {
 			}
 
 			// If the Water_Cauldron type exists and the cauldron is on last level
-			if (LegacyUtil.WATER_CAULDRON != null && cauldron.getLevel() == 1) {
+			if (MaterialUtil.WATER_CAULDRON != null && cauldron.getLevel() == 1) {
 				// Empty Cauldron
 				block.setType(Material.CAULDRON);
 				bcauldrons.remove(block);
@@ -250,7 +246,7 @@ public class BCauldron {
 				return false;
 			}
 			data -= 1;
-			LegacyUtil.setData(block, data);
+			MaterialUtil.setData(block, data);
 
 			if (data == 0) {
 				bcauldrons.remove(block);
@@ -258,7 +254,7 @@ public class BCauldron {
 				changed = true;
 			}
 		}
-		if (VERSION.isOrLater(V1_9)) {
+		if (VERSION.isOrLater(MinecraftVersion.V1_9)) {
 			block.getWorld().playSound(block.getLocation(), Sound.ITEM_BOTTLE_FILL, 1f, 1f);
 		}
 		// Bukkit Bug, inventory not updating while in event so this
@@ -287,7 +283,7 @@ public class BCauldron {
 	}
 
 	public void cookEffect() {
-		if (BUtil.isChunkLoaded(block) && LegacyUtil.isCauldronHeatsource(block.getRelative(BlockFace.DOWN))) {
+		if (BUtil.isChunkLoaded(block) && MaterialUtil.isCauldronHeatSource(block.getRelative(BlockFace.DOWN))) {
 			Color color = getParticleColor();
 			// Colorable spirally spell, 0 count enables color instead of the offset variables
 			// Configurable RGB color. The last parameter seems to control the hue and motion, but I couldn't find
@@ -430,7 +426,7 @@ public class BCauldron {
 		if (materialInHand == Material.AIR || materialInHand == Material.BUCKET) {
 			return;
 
-		} else if (materialInHand == LegacyUtil.CLOCK) {
+		} else if (materialInHand == MaterialUtil.CLOCK) {
 			printTime(player, clickedBlock);
 			return;
 
@@ -458,10 +454,10 @@ public class BCauldron {
 
 			// Ignore Water Buckets
 		} else if (materialInHand == Material.WATER_BUCKET) {
-			if (VERSION.isOrEarlier(V1_9)) {
+			if (VERSION.isOrEarlier(MinecraftVersion.V1_9)) {
 				// reset < 1.9 cauldron when refilling to prevent unlimited source of potions
 				// We catch >=1.9 cases in the Cauldron Listener
-				if (LegacyUtil.getFillLevel(clickedBlock) == 1) {
+				if (MaterialUtil.getFillLevel(clickedBlock) == 1) {
 					// will only remove when existing
 					BCauldron.remove(clickedBlock);
 				}
@@ -471,7 +467,7 @@ public class BCauldron {
 
 		// Check if fire alive below cauldron when adding ingredients
 		Block down = clickedBlock.getRelative(BlockFace.DOWN);
-		if (LegacyUtil.isCauldronHeatsource(down)) {
+		if (MaterialUtil.isCauldronHeatSource(down)) {
 
 			event.setCancelled(true);
 			boolean handSwap = false;
@@ -480,7 +476,7 @@ public class BCauldron {
 			// Certain Items in Hand cause one of them to be cancelled or not called at all sometimes.
 			// We mark if a player had the event for the main hand
 			// If not, we handle the main hand in the event for the offhand
-			if (VERSION.isOrLater(V1_9)) {
+			if (VERSION.isOrLater(MinecraftVersion.V1_9)) {
 				if (event.getHand() == EquipmentSlot.HAND) {
 					final UUID id = player.getUniqueId();
 					plInteracted.add(id);
@@ -505,7 +501,7 @@ public class BCauldron {
 			}
 			if (ingredientAdd(clickedBlock, item, player)) {
 				boolean isBucket = item.getType().name().endsWith("_BUCKET");
-				boolean isBottle = LegacyUtil.isBottle(item.getType());
+				boolean isBottle = MaterialUtil.isBottle(item.getType());
 				if (item.getAmount() > 1) {
 					item.setAmount(item.getAmount() - 1);
 
@@ -535,7 +531,7 @@ public class BCauldron {
 			cauldron.particleRecipe = null;
 			cauldron.particleColor = null;
 			if (config.isEnableCauldronParticles()) {
-				if (BUtil.isChunkLoaded(cauldron.block) && LegacyUtil.isCauldronHeatsource(cauldron.block.getRelative(BlockFace.DOWN))) {
+				if (BUtil.isChunkLoaded(cauldron.block) && MaterialUtil.isCauldronHeatSource(cauldron.block.getRelative(BlockFace.DOWN))) {
 					cauldron.getParticleColor();
 				}
 			}

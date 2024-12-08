@@ -1,24 +1,23 @@
-/**
+/*
+ * BreweryX Bukkit-Plugin for an alternate brewing process
+ * Copyright (C) 2024 The Brewery Team
  *
- *     Brewery Minecraft-Plugin for an alternate Brewing Process
- *     Copyright (C) 2021 Milan Albrecht
+ * This file is part of BreweryX.
  *
- *     This file is part of Brewery.
+ * BreweryX is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- *     Brewery is free software: you can redistribute it and/or modify
- *     it under the terms of the GNU General Public License as published by
- *     the Free Software Foundation, either version 3 of the License, or
- *     (at your option) any later version.
+ * BreweryX is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
  *
- *     Brewery is distributed in the hope that it will be useful,
- *     but WITHOUT ANY WARRANTY; without even the implied warranty of
- *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *     GNU General Public License for more details.
- *
- *     You should have received a copy of the GNU General Public License
- *     along with Brewery.  If not, see <http://www.gnu.org/licenses/>.
- *
+ * You should have received a copy of the GNU General Public License
+ * along with BreweryX. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
+
 package com.dre.brewery;
 
 import com.dre.brewery.api.addons.AddonManager;
@@ -27,10 +26,12 @@ import com.dre.brewery.configuration.ConfigManager;
 import com.dre.brewery.configuration.configurer.TranslationManager;
 import com.dre.brewery.configuration.files.Config;
 import com.dre.brewery.configuration.files.Lang;
+import com.dre.brewery.integration.BlockLockerHook;
 import com.dre.brewery.integration.Hook;
 import com.dre.brewery.integration.PlaceholderAPIHook;
 import com.dre.brewery.integration.barrel.BlockLockerBarrel;
-import com.dre.brewery.integration.bstats.Stats;
+import com.dre.brewery.integration.bstats.BreweryXStats;
+import com.dre.brewery.integration.bstats.BreweryStats;
 import com.dre.brewery.integration.listeners.ChestShopListener;
 import com.dre.brewery.integration.listeners.IntegrationListener;
 import com.dre.brewery.integration.listeners.ShopKeepersListener;
@@ -47,9 +48,9 @@ import com.dre.brewery.recipe.PluginItem;
 import com.dre.brewery.recipe.SimpleItem;
 import com.dre.brewery.storage.DataManager;
 import com.dre.brewery.storage.StorageInitException;
-import com.dre.brewery.utility.LegacyUtil;
 import com.dre.brewery.utility.Logging;
 import com.dre.brewery.utility.MinecraftVersion;
+import com.dre.brewery.utility.NBTUtil;
 import com.dre.brewery.utility.UpdateChecker;
 import com.github.Anon8281.universalScheduler.UniversalScheduler;
 import com.github.Anon8281.universalScheduler.scheduling.schedulers.TaskScheduler;
@@ -75,8 +76,6 @@ import java.util.stream.Collectors;
 @Getter
 public class BreweryPlugin extends JavaPlugin {
 
-	// TODO: Change the addon API FileManager to use Okaeri
-
 	private static final int RESOURCE_ID = 114777;
 
 	private @Getter static AddonManager addonManager;
@@ -89,7 +88,7 @@ public class BreweryPlugin extends JavaPlugin {
 
 
 	private final Map<String, Function<ItemLoader, Ingredient>> ingredientLoaders = new HashMap<>(); // Registrations
-	private Stats stats; // Metrics
+	private BreweryStats breweryStats; // Metrics
 
 
 	@Override
@@ -108,13 +107,12 @@ public class BreweryPlugin extends JavaPlugin {
 		try {
 			Class.forName("io.papermc.paper.threadedregions.RegionizedServer");
 			isFolia = true;
-		} catch (ClassNotFoundException ignored) {
-		}
+		} catch (ClassNotFoundException ignored) {}
 
 
 		// MC 1.13 uses a different NBT API than the newer versions.
 		// We decide here which to use, the new or the old or none at all
-		if (LegacyUtil.initNbt()) {
+		if (NBTUtil.initNbt()) {
 			useNBT = true;
 		}
 
@@ -143,7 +141,7 @@ public class BreweryPlugin extends JavaPlugin {
 		ConfigManager.loadCauldronIngredients();
 		ConfigManager.loadRecipes();
 		ConfigManager.loadDistortWords();
-		this.stats = new Stats(); // Load metrics
+		this.breweryStats = new BreweryStats(); // Load metrics
 
         // Load Addons
 		addonManager = new AddonManager(this);
@@ -162,7 +160,7 @@ public class BreweryPlugin extends JavaPlugin {
             dataManager = DataManager.createDataManager(config.getStorage());
         } catch (StorageInitException e) {
 			Logging.errorLog("Failed to initialize DataManager!", e);
-			Bukkit.getPluginManager().disablePlugin(this);
+			Bukkit.getPluginManager().disablePlugin(this); // TODO: Maybe don't shut down and just revert to FLATFILE?
         }
 
 		DataManager.loadMiscData(dataManager.getBreweryMiscData());
@@ -173,7 +171,8 @@ public class BreweryPlugin extends JavaPlugin {
 
 
 		// Setup Metrics
-		this.stats.setupBStats();
+		this.breweryStats.setupBStats();
+		new BreweryXStats().setupBStats();
 
 		// Register command and aliases
 		PluginCommand defaultCommand = getCommand("breweryx");
@@ -234,10 +233,6 @@ public class BreweryPlugin extends JavaPlugin {
 
 		// Stop schedulers
 		BreweryPlugin.getScheduler().cancelTasks(this);
-
-		if (instance == null) {
-			return;
-		}
 
 		// save Data to Disk
 		if (dataManager != null) dataManager.exit(true, false);
@@ -315,7 +310,7 @@ public class BreweryPlugin extends JavaPlugin {
 		}
 	}
 
-	public class BreweryRunnable implements Runnable {
+	public static class BreweryRunnable implements Runnable {
 		@Override
 		public void run() {
 			long start = System.currentTimeMillis();
@@ -334,7 +329,7 @@ public class BreweryPlugin extends JavaPlugin {
 			Barrel.onUpdate();// runs every min to check and update ageing time
 
 			if (getMCVersion().isOrLater(MinecraftVersion.V1_14)) MCBarrel.onUpdate();
-			if (Hook.BLOCKLOCKER.isEnabled()) BlockLockerBarrel.clearBarrelSign();
+			if (BlockLockerHook.BLOCKLOCKER.isEnabled()) BlockLockerBarrel.clearBarrelSign();
 
 			BPlayer.onUpdate();// updates players drunkenness
 

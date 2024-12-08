@@ -1,3 +1,23 @@
+/*
+ * BreweryX Bukkit-Plugin for an alternate brewing process
+ * Copyright (C) 2024 The Brewery Team
+ *
+ * This file is part of BreweryX.
+ *
+ * BreweryX is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * BreweryX is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with BreweryX. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
+ */
+
 package com.dre.brewery.lore;
 
 import com.dre.brewery.BIngredients;
@@ -276,7 +296,7 @@ public class BrewLore {
 	public void updateAlc(boolean inDistiller) {
 		if (!brew.isUnlabeled() && (inDistiller || config.isAlwaysShowAlc()) && (!brew.hasRecipe() || brew.getCurrentRecipe().getAlcohol() != 0)) {
 			int alc = brew.getOrCalcAlc();
-			addOrReplaceLore(Type.ALC, "§8",lang.getEntry("Brew_Alc", alc + ""));
+			addOrReplaceLore(Type.ALC, "§8", lang.getEntry("Brew_Alc", alc + ""));
 		} else {
 			removeLore(Type.ALC);
 		}
@@ -284,7 +304,7 @@ public class BrewLore {
 
 	public void updateBrewer(String name) {
 		if (name != null && config.isShowBrewer()) {
-			addOrReplaceLore(Type.BREWER, "§8",lang.getEntry("Brew_Brewer", name));
+			addOrReplaceLore(Type.BREWER, "§8", lang.getEntry("Brew_Brewer", name));
 		} else {
 			removeLore(Type.BREWER);
 		}
@@ -389,7 +409,7 @@ public class BrewLore {
 				return i;
 			}
 		}
-		lore.add(type.id + prefix + line + suffix);
+		lore.add(type.id + prefix + BUtil.color(line) + suffix); // TODO: Color
 		return lore.size() - 1;
 	}
 

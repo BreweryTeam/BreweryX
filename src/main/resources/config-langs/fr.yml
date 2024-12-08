@@ -122,6 +122,10 @@ config:
 recipesFile:
   header: |
     -- Recettes pour les boissons --
+    
+    Proper guide for this section can be found in our wiki here - https://brewery.lumamc.net/guide/recipies/
+    
+    enabled: true if the recipe should be enabled, false if it should be disabled
 
     name : Différents noms pour la mauvaise/moyen/bonne qualité (Les codes de mise en forme sont pris en charge : comme par exemple &6 pour la couleur Or.)
     ingredients : Liste des 'matériaux/montant'

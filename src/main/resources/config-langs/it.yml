@@ -115,6 +115,10 @@ config:
 recipesFile:
   header: |
     -- Ricette per pozioni --
+    
+    Proper guide for this section can be found in our wiki here - https://brewery.lumamc.net/guide/recipies/
+    
+    enabled: true if the recipe should be enabled, false if it should be disabled
 
     name: Tre nomi diversi per diverse qualità (cattivo/normale/buono). I codici come &6 possono essere usati.
      ingredients: Lista degli ingredienti nel formato materiale/quantità

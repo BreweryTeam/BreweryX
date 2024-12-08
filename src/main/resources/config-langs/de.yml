@@ -101,6 +101,10 @@ recipesFile:
   header: |
     -- Rezepte für Getränke --
     
+    Proper guide for this section can be found in our wiki here - https://brewery.lumamc.net/guide/recipies/
+    
+    enabled: true if the recipe should be enabled, false if it should be disabled
+    
     name: Verschiedene Namen für schlecht/mittel/gut (Farbcodes möglich: z.b. &6)
     ingredients: Auflistung von 'Material/Anzahl'
       Halte ein Item in der Hand und benutze /brew ItemName um dessen Material herauszufinden und für ein Rezept zu benutzen

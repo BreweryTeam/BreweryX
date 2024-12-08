@@ -1,3 +1,23 @@
+/*
+ * BreweryX Bukkit-Plugin for an alternate brewing process
+ * Copyright (C) 2024 The Brewery Team
+ *
+ * This file is part of BreweryX.
+ *
+ * BreweryX is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * BreweryX is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with BreweryX. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
+ */
+
 package com.dre.brewery;
 
 import com.dre.brewery.api.events.PlayerChatDistortEvent;
@@ -80,9 +100,9 @@ public class DistortChat {
 		} else {
 			this.pre = null;
 		}
-		this.match = configDistortWord.isMatch();
-		this.alcohol = configDistortWord.getAlcohol();
-		this.percentage = configDistortWord.getPercentage();
+		this.match = configDistortWord.getMatch() != null ? configDistortWord.getMatch() : false;
+		this.alcohol = configDistortWord.getAlcohol() != null ? configDistortWord.getAlcohol() : 1;
+		this.percentage = configDistortWord.getPercentage() != null ? configDistortWord.getPercentage() : 100;
 
 		if (this.from != null && this.to != null) {
 			words.add(this);
@@ -95,7 +115,7 @@ public class DistortChat {
 		if (bPlayer == null) {
 			return;
 		}
-		if (commands != null && !commands.isEmpty() && !words.isEmpty()) {
+		if (!commands.isEmpty() && !words.isEmpty()) {
 			String name = event.getPlayer().getName();
 			if (!waitPlayers.containsKey(name) || waitPlayers.get(name) + 500 < System.currentTimeMillis()) {
 				String chat = event.getMessage();

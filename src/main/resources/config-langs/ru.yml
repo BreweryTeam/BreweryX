@@ -133,6 +133,8 @@ recipesFile:
     -- Рецепты напитков--
 
     Удобный и локализованный гайд на этот раздел можно найти по ссылке - https://brewery.lumamc.net/ru/guide/recipies/
+    
+    enabled: true if the recipe should be enabled, false if it should be disabled
 
     name: Имя, ИЛИ три различных имени для плохого/среднего/хорошего качества напитка (Поддерживает цвет: &6 или hex - &#123123)
       пример: name: 'Плохое пиво/Среднее пиво/&6&lПИЗДАТОЕ ПИВО'

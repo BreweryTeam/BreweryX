@@ -117,6 +117,8 @@ recipesFile:
     -- Recipes for Potions --
          
     Proper guide for this section can be found in our wiki here - https://brewery.lumamc.net/guide/recipies/
+    
+    enabled: true if the recipe should be enabled, false if it should be disabled
          
     name: Different names for bad/normal/good (Formatting codes possible: such as &6 or hex as &#123123)
       name: "Worst drink/Good Drink/Best drink i had in my entire life!"

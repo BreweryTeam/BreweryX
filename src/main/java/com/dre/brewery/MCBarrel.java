@@ -1,3 +1,23 @@
+/*
+ * BreweryX Bukkit-Plugin for an alternate brewing process
+ * Copyright (C) 2024 The Brewery Team
+ *
+ * This file is part of BreweryX.
+ *
+ * BreweryX is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * BreweryX is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with BreweryX. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
+ */
+
 package com.dre.brewery;
 
 import com.dre.brewery.configuration.ConfigManager;
@@ -20,7 +40,6 @@ import java.util.List;
 
 public class MCBarrel {
 
-	public static final byte OAK = 2;
 	public static final String TAG = "Btime";
 
 	public static long mcBarrelTime; // Globally stored Barrel time. Difference between this and the time stored on each mc-barrel will give the barrel age time
@@ -72,7 +91,7 @@ public class MCBarrel {
 							if (brew != null && !brew.isStatic()) {
 								if (brews < config.getMaxBrewsInMCBarrels() || config.getMaxBrewsInMCBarrels() < 0) {
 									// The time is in minutes, but brew.age() expects time in mc-days
-									brew.age(item, ((float) time) / 20f, OAK);
+									brew.age(item, ((float) time) / 20f, BarrelWoodType.OAK);
 								}
 								brews++;
 							}

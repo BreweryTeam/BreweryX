@@ -1,6 +1,27 @@
+/*
+ * BreweryX Bukkit-Plugin for an alternate brewing process
+ * Copyright (C) 2024 The Brewery Team
+ *
+ * This file is part of BreweryX.
+ *
+ * BreweryX is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * BreweryX is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with BreweryX. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
+ */
+
 package com.dre.brewery.recipe;
 
 import com.dre.brewery.BIngredients;
+import com.dre.brewery.BarrelWoodType;
 import com.dre.brewery.Brew;
 import com.dre.brewery.BreweryPlugin;
 import com.dre.brewery.configuration.ConfigManager;
@@ -9,7 +30,7 @@ import com.dre.brewery.configuration.files.CustomItemsFile;
 import com.dre.brewery.configuration.sector.capsule.ConfigRecipe;
 import com.dre.brewery.integration.PlaceholderAPIHook;
 import com.dre.brewery.utility.BUtil;
-import com.dre.brewery.utility.LegacyUtil;
+import com.dre.brewery.utility.MaterialUtil;
 import com.dre.brewery.utility.Logging;
 import com.dre.brewery.utility.MinecraftVersion;
 import com.dre.brewery.utility.StringParser;
@@ -55,7 +76,7 @@ public class BRecipe implements Cloneable {
 	private int cookingTime; // time to cook in cauldron
 	private byte distillruns; // runs through the brewer
 	private int distillTime; // time for one distill run in seconds
-	private byte wood; // type of wood the barrel has to consist of
+	private BarrelWoodType wood; // type of wood the barrel has to consist of
 	private int age; // time in minecraft days for the potions to age in barrels
 
 	// outcome
@@ -126,18 +147,18 @@ public class BRecipe implements Cloneable {
 			Logging.errorLog("No ingredients for: " + recipe.getRecipeName());
 			return null;
 		}
-		recipe.cookingTime = configRecipe.getCookingTime();
-		int dis = configRecipe.getDistillRuns();
+		recipe.cookingTime = configRecipe.getCookingTime() != null ? configRecipe.getCookingTime() : 0;
+		int dis = configRecipe.getDistillRuns() != null ? configRecipe.getDistillRuns() : 0;
 		if (dis > Byte.MAX_VALUE) {
 			recipe.distillruns = Byte.MAX_VALUE;
 		} else {
 			recipe.distillruns = (byte) dis;
 		}
-		recipe.distillTime = configRecipe.getDistillTime() * 20;
-		recipe.wood = (byte) configRecipe.getWood();
-		recipe.age = configRecipe.getAge();
-		recipe.difficulty = configRecipe.getDifficulty();
-		recipe.alcohol = configRecipe.getAlcohol();
+		recipe.distillTime = (configRecipe.getDistillTime() != null ? configRecipe.getDistillTime() : 0) * 20;
+		recipe.wood = BarrelWoodType.fromAny(configRecipe.getWood());
+		recipe.age = configRecipe.getAge() != null ? configRecipe.getAge() : 0;
+		recipe.difficulty = configRecipe.getDifficulty() != null ? configRecipe.getDifficulty() : 0;
+		recipe.alcohol = configRecipe.getAlcohol() != null ? configRecipe.getAlcohol() : 0;
 
 		String col = configRecipe.getColor() != null ? configRecipe.getColor() : "BLUE";
 		recipe.color = PotionColor.fromString(col);
@@ -153,7 +174,7 @@ public class BRecipe implements Cloneable {
 
 		recipe.drinkMsg = BUtil.color(configRecipe.getDrinkMessage());
 		recipe.drinkTitle = BUtil.color(configRecipe.getDrinkTitle());
-		recipe.glint = configRecipe.isGlint();
+		recipe.glint = configRecipe.getGlint() != null ? configRecipe.getGlint() : false;
 
 		if (configRecipe.getCustomModelData() != null) {
 			String[] cmdParts = configRecipe.getCustomModelData().split("/");
@@ -225,7 +246,11 @@ public class BRecipe implements Cloneable {
 			// Check if this is a Plugin Item
 			String[] pluginItem = matParts[0].split(":");
 			if (pluginItem.length > 1) {
-				RecipeItem custom = com.dre.brewery.recipe.PluginItem.fromConfig(pluginItem[0], pluginItem[1]);
+				StringBuilder itemId = new StringBuilder();
+				for (int i = 1; i < pluginItem.length; i++) { // Append all but the first part to include namespaces.
+					itemId.append(pluginItem[i]);
+				}
+				RecipeItem custom = PluginItem.fromConfig(pluginItem[0], itemId.toString());
 				if (custom != null) {
 					custom.setAmount(amount);
 					custom.makeImmutable();
@@ -257,7 +282,7 @@ public class BRecipe implements Cloneable {
 				}
 			}
 
-			Material mat = BUtil.getMaterialSafely(matParts[0]);
+			Material mat = MaterialUtil.getMaterialSafely(matParts[0]);
 			short durability = -1;
 			if (matParts.length == 2) {
 				durability = (short) BUtil.parseInt(matParts[1]);
@@ -343,10 +368,10 @@ public class BRecipe implements Cloneable {
 			Logging.errorLog("Invalid distilltime '" + distillTime + "' in Recipe: " + getRecipeName());
 			return false;
 		}
-		if (wood < 0 || wood > LegacyUtil.TOTAL_WOOD_TYPES) {
-			Logging.errorLog("Invalid wood type '" + wood + "' in Recipe: " + getRecipeName());
-			return false;
-		}
+//		if (wood < 0 || wood > LegacyUtil.TOTAL_WOOD_TYPES) {
+//			Logging.errorLog("Invalid wood type '" + wood + "' in Recipe: " + getRecipeName());
+//			return false;
+//		}
 		if (age < 0) {
 			Logging.errorLog("Invalid age time '" + age + "' in Recipe: " + getRecipeName());
 			return false;
@@ -392,7 +417,7 @@ public class BRecipe implements Cloneable {
 	 * difference between given and recipe-wanted woodtype
 	 */
 	public float getWoodDiff(float wood) {
-		return Math.abs(wood - this.wood);
+		return Math.abs(wood - this.wood.getIndex());
 	}
 
 	public boolean isCookingOnly() {
@@ -882,7 +907,7 @@ public class BRecipe implements Cloneable {
 			return this;
 		}
 
-		public Builder age(int age, byte wood) {
+		public Builder age(int age, BarrelWoodType wood) {
 			recipe.age = age;
 			recipe.wood = wood;
 			return this;

@@ -1,3 +1,23 @@
+/*
+ * BreweryX Bukkit-Plugin for an alternate brewing process
+ * Copyright (C) 2024 The Brewery Team
+ *
+ * This file is part of BreweryX.
+ *
+ * BreweryX is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * BreweryX is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with BreweryX. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
+ */
+
 package com.dre.brewery.storage;
 
 import com.dre.brewery.BCauldron;
@@ -10,7 +30,7 @@ import com.dre.brewery.Wakeup;
 import com.dre.brewery.configuration.ConfigManager;
 import com.dre.brewery.configuration.files.Config;
 import com.dre.brewery.configuration.sector.capsule.ConfiguredDataManager;
-import com.dre.brewery.integration.bstats.Stats;
+import com.dre.brewery.integration.bstats.BreweryStats;
 import com.dre.brewery.storage.impls.FlatFileStorage;
 import com.dre.brewery.storage.impls.MongoDBStorage;
 import com.dre.brewery.storage.impls.MySQLStorage;
@@ -18,6 +38,7 @@ import com.dre.brewery.storage.impls.SQLiteStorage;
 import com.dre.brewery.storage.records.BreweryMiscData;
 import com.dre.brewery.utility.BUtil;
 import com.dre.brewery.utility.Logging;
+import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -33,6 +54,13 @@ public abstract class DataManager {
 
     protected static BreweryPlugin plugin = BreweryPlugin.getInstance();
     protected static long lastAutoSave = System.currentTimeMillis();
+
+    @Getter
+    private final DataManagerType type;
+
+    protected DataManager(DataManagerType type) throws StorageInitException {
+        this.type = type;
+    }
 
     public abstract Barrel getBarrel(UUID id);
     public abstract Collection<Barrel> getAllBarrels();
@@ -84,14 +112,14 @@ public abstract class DataManager {
         if (save) {
             saveAll(async, () -> {
                 this.closeConnection();
-                Logging.log("Closed connection from&7:&a " + this.getClass().getSimpleName());
+                Logging.log("Closed connection from&7:&a " + this.getType().getFormattedName());
                 if (callback != null) {
                     callback.run();
                 }
             });
         } else {
             this.closeConnection(); // let databases close their connections
-            Logging.log("Closed connection from&7:&a " + this.getClass().getSimpleName());
+            Logging.log("Closed connection from&7:&a " + this.getType().getFormattedName());
             if (callback != null) {
                 callback.run();
             }
@@ -173,23 +201,23 @@ public abstract class DataManager {
         Brew.loadPrevSeeds(miscData.prevSaveSeeds());
 
 
-        Stats stats = plugin.getStats();
+        BreweryStats breweryStats = plugin.getBreweryStats();
         // Check the hash to prevent tampering with statistics - Note by original author
         if (miscData.brewsCreated().size() == 7 && miscData.brewsCreatedHash() == miscData.brewsCreated().hashCode()) {
-            stats.brewsCreated = miscData.brewsCreated().get(0);
-            stats.brewsCreatedCmd = miscData.brewsCreated().get(1);
-            stats.exc = miscData.brewsCreated().get(2);
-            stats.good = miscData.brewsCreated().get(3);
-            stats.norm = miscData.brewsCreated().get(4);
-            stats.bad = miscData.brewsCreated().get(5);
-            stats.terr = miscData.brewsCreated().get(6);
+            breweryStats.brewsCreated = miscData.brewsCreated().get(0);
+            breweryStats.brewsCreatedCmd = miscData.brewsCreated().get(1);
+            breweryStats.exc = miscData.brewsCreated().get(2);
+            breweryStats.good = miscData.brewsCreated().get(3);
+            breweryStats.norm = miscData.brewsCreated().get(4);
+            breweryStats.bad = miscData.brewsCreated().get(5);
+            breweryStats.terr = miscData.brewsCreated().get(6);
         }
     }
 
     public static BreweryMiscData getLoadedMiscData() {
         List<Integer> brewsCreated = new ArrayList<>(7);
-        Stats stats = plugin.getStats();
-        brewsCreated.addAll(List.of(stats.brewsCreated, stats.brewsCreatedCmd, stats.exc, stats.good, stats.norm, stats.bad, stats.terr));
+        BreweryStats breweryStats = plugin.getBreweryStats();
+        brewsCreated.addAll(List.of(breweryStats.brewsCreated, breweryStats.brewsCreatedCmd, breweryStats.exc, breweryStats.good, breweryStats.norm, breweryStats.bad, breweryStats.terr));
 
 
         return new BreweryMiscData(

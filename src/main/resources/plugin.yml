@@ -5,7 +5,7 @@ api-version: 1.13
 load: POSTWORLD
 folia-supported: true
 website: 'https://brewery.lumamc.net/'
-authors: [Jsinco, Mitality, Nadwey, Szarkans, Sn0wStorm, TTTheKing, Grafe]
+authors: [Jsinco, Mitality, Nadwey, Szarkans, Vutka1]
 libraries: ['org.jetbrains.kotlin:kotlin-stdlib:2.0.21']
 softdepend:
   - LWC
@@ -21,6 +21,7 @@ softdepend:
   - PlaceholderAPI
   - Oraxen
   - ItemsAdder
+  - Nexo
 commands:
   breweryx:
     description: Mostly admin commands to create/modify Brews and drunkenness

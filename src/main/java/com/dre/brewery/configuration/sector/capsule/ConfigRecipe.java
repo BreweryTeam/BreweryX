@@ -1,3 +1,23 @@
+/*
+ * BreweryX Bukkit-Plugin for an alternate brewing process
+ * Copyright (C) 2024 The Brewery Team
+ *
+ * This file is part of BreweryX.
+ *
+ * BreweryX is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * BreweryX is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with BreweryX. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
+ */
+
 package com.dre.brewery.configuration.sector.capsule;
 
 import eu.okaeri.configs.OkaeriConfig;
@@ -17,20 +37,23 @@ import java.util.List;
 @AllArgsConstructor
 public class ConfigRecipe extends OkaeriConfig {
 
+    // Added because our configs don't support external comments yet
+    private Boolean enabled;
+
     private String name;
     private List<String> ingredients;
 
     @CustomKey("cookingtime")
-    private int cookingTime;
+    private Integer cookingTime;
     @CustomKey("distillruns")
-    private int distillRuns;
+    private Integer distillRuns;
     @CustomKey("distilltime")
-    private int distillTime;
-    private int wood;
-    private int age;
+    private Integer distillTime;
+    private Object wood; // int or String(Enum<BarrelWoodType>)
+    private Integer age;
     private String color;
-    private int difficulty;
-    private int alcohol;
+    private Integer difficulty;
+    private Integer alcohol;
     private Object lore; // List<String> or String
     @CustomKey("servercommands")
     private List<String> serverCommands;
@@ -40,7 +63,7 @@ public class ConfigRecipe extends OkaeriConfig {
     private String drinkMessage;
     @CustomKey("drinktitle")
     private String drinkTitle;
-    private boolean glint;
+    private Boolean glint;
     private String customModelData;
     private List<String> effects;
 }
