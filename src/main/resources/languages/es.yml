@@ -1,118 +1,118 @@
 # Traducción al español for BreweryX
-# Author: MrNizzy
+# Author: KoCitrusMaker
 # Brew
-Brew_-times: -veces
-Brew_BadPotion: Poción arruinada
-Brew_BarrelRiped: en el barril envejecido
+Brew_-times:  veces
+Brew_BadPotion: Bebida arruinada
+Brew_BarrelRiped: Añejado en tonel
 Brew_DistillUndefined: Destilado turbio
 Brew_Distilled: Destilado
 Brew_LessDistilled: Menos destilado
 Brew_HundredsOfYears: Cientos de años
 Brew_Ingredients: Ingredientes
 Brew_MinutePluralPostfix: s
-Brew_OneYear: Un Año
-Brew_ThickBrew: Brebaje fangoso
-Brew_Undefined: Cerveza de Caldero
-Brew_Woodtype: Tipo madera
+Brew_OneYear: Un año
+Brew_ThickBrew: Bebida espesa
+Brew_Undefined: Bebida de caldero
+Brew_Woodtype: Tipo de madera
 Brew_Years: Años
 Brew_fermented: fermentado
 Brew_minute: minuto
-Brew_Alc: Alc &v1ml
-Brew_Brewer: 'Brewer: &v1'
+Brew_Alc: Alcohol &v1ml
+Brew_Brewer: 'Creador de la bebida: &v1'
 
-# CMD
-CMD_Copy_Error: '&6&v1 &cLas pociones no cabían en tu inventario'
-CMD_Info_Drunk: '&v1 está &6&v2% &fborracho(a), con una cualidad de &6&v3'
+# Comandos
+CMD_Copy_Error: '&6&v1 &cLas bebidas no caben en tu inventario'
+CMD_Info_Drunk: '&v1 esta &6&v2% &fborracho(a), con una calidad de &6&v3'
 CMD_Info_NotDrunk: '&v1 no está borracho(a)'
-CMD_NonStatic: '&eLa poción ya no es estática y normalmente envejecerá en barriles.'
-CMD_Player: '&a&v1 está ahora &6&v2% &aborracho, con una cualidad de &6&v3'
-CMD_Player_Error: '&c¡La calidad tiene que estar entre 1 y 10!'
-CMD_Reload: '&aLa configuración se volvió a cargar correctamente'
-CMD_Created: '&aBrebaje Creado'
-CMD_Configname: '&aEl nombre de la configuración es: &f&v1'
-CMD_Configname_Error: '&cNo se pudo encontrar el artículo en tu mano'
-CMD_Static: '&aLa poción ahora es estática y no cambiará en barriles o puestos de elaboración.'
-CMD_UnLabel: '&aEtiqueta eliminada!'
-CMD_Drink: '&aYou drank one &v1'
-CMD_DrinkOther: '&a&v1 drinks one &v2'
-CMD_Set: '&aSe ha establecido con éxito la borrachera de &v1 a &v2 con una calidad de &v3.'
+CMD_NonStatic: '&eLa bebida ahora no es estática y se añejará en toneles.'
+CMD_Player: '&a&v1 ahora está &6&v2% &aborracho(a), con una calidad de &6&v3'
+CMD_Player_Error: '&c¡La calidad debe ser entre 1 y 10!'
+CMD_Reload: '&aLa configuración se recargó con éxito'
+CMD_Created: '&aBebida creada'
+CMD_Configname: '&aNombre de la configuración: &f&v1'
+CMD_Configname_Error: '&cNo se pudo encontrar el objeto en tu mano'
+CMD_Static: '&aLa bebida ahora es estática y no cambiará en toneles o soportes de pociones.'
+CMD_UnLabel: '&a¡Se quitó la etiqueta!'
+CMD_Drink: '&aBebiste un(a) &v1'
+CMD_DrinkOther: '&a&v1 bebió un(a) &v2'
+CMD_Set: '&aLa borrachera de &v1 se definió a &v2 con una calidad de &v3 con éxito.'
 
-# Error
-Error_ConfigUpdate: 'Versión de configuración de Brewery desconocida: v&v1, ¡la configuración no se actualizó!'
-Error_ItemNotPotion: '&c¡El objeto en tu mano no se pudo identificar como una poción!'
-Error_SealingTableDisabled: '&cLa tabla de sellado está desactivada'
-Error_SealedAlwaysStatic: '¡Las cervezas selladas son siempre estáticas!'
-Error_AlreadyUnlabeled: '&c¡La cerveza en tu mano ya no está etiquetada!'
-Error_NoBarrelAccess: '&c¡No tienes permisos para acceder a este barril!'
-Error_NoBrewName: '&cNinguna receta con nombre: ''&v1&c'' encontrada!'
-Error_NoPermissions: '&c¡No tienes permisos para hacer esto!'
+# Errores
+Error_ConfigUpdate: '¡Version de la configuración de Brewery desconocida: v&v1, la configuración no fue actualizada!'
+Error_ItemNotPotion: '&c¡El objeto en tu mano no se pudo identificar como una bebida!'
+Error_SealingTableDisabled: '&cLa mesa de sellado esta desactivada'
+Error_SealedAlwaysStatic: '¡Bebidas selladas siempre son estáticas!'
+Error_AlreadyUnlabeled: '&c¡La bebida en tu mano no tiene etiqueta!'
+Error_NoBarrelAccess: '&c¡No tienes los permisos para acceder este tonel!'
+Error_NoBrewName: '&c¡La receta de nombre: ''&v1&c'' no fue encontrada!'
+Error_NoPermissions: '&c¡No tienes los permisos para hacer esto!'
 Error_PlayerCommand: '&c¡Este comando solo se puede ejecutar como jugador!'
-Error_Recipeload: '&cNo se pudieron restaurar todas las recetas: ¡Más información en el registro del servidor!'
+Error_Recipeload: '&cNo se pudieron restaurar todas la recetas: ¡Más información en los registros del servidor!'
 Error_ShowHelp: Usa &6/brew help &fpara mostrar la ayuda
 Error_UnknownCommand: Comando desconocido
-Error_YmlRead: 'No se pudo leer el archivo config.yml, asegúrese de que el archivo esté en formato yml válido (espacios correctos, etc.)'
-Error_NoPlayer: 'Player not found: &v1'
+Error_YmlRead: 'No se pudo leer el archivo config.yml, por favor asegurate de que el archivo esta en un formato yml válido (espacios correctos, usando '' '' etc.)'
+Error_NoPlayer: 'Jugador no encontrado(a): &v1'
 
 # Etc
-Etc_Barrel: Barril
+Etc_Barrel: Tonel
 Etc_Page: Página
-Etc_Usage: 'Usa:'
-Etc_SealingTable: Mesa de sellado
-Etc_UpdateAvailable: 'Update available: &a&v1 &f-> &a&v2 &bhttps://www.spigotmc.org/resources/breweryx.114777/'
+Etc_Usage: 'Uso:'
+Etc_SealingTable: Mesa de sellado de bebidas
+Etc_UpdateAvailable: 'Actualización disponible: &a&v1 &f-> &a&v2 &bhttps://www.spigotmc.org/resources/breweryx.114777/'
 
-# Help
-Help_Copy: '&6/brew copy [Cantidad]&9 Copia la poción en tu mano'
-Help_Create: '&6/brew create <Receta> [Cantidad] [Jugador] &9Crea una cerveza con calidad opcional (1-10)'
-Help_Give: '&6/brew give <Recipe> [Quality] [Player] &9Alias for /brew create'
-Help_Delete: '&6/brew delete &9Elimina la poción en tu mano'
-Help_Help: '&6/brew help [Página] &9Muestra una página de ayuda específica.'
-Help_Info: '&6/brew info&9 Muestra tu embriaguez y calidad actuales'
-Help_InfoOther: '&6/brew info [Jugador]&9Muestra la embriaguez actual y la calidad del [Jugador]'
-Help_Reload: '&6/brew reload &9Recarga la configuración'
-Help_Configname: '&6/brew ItemName &9Muestra el nombre del elemento disponible para la configuración'
-Help_Static: '&6/brew static &9Hace la preparación estática -> No más envejecimiento o destilación'
-Help_Set: '&6/brew set <Jugador> <%De embriaguez> [Cantidad] &9Establece la embriaguez (y la calidad) de un jugador'
-Help_UnLabel: '&6/brew unlabel &9Elimina la etiqueta detallada de una poción.'
-Help_Seal: '&6/brew seal &9Sellos de cerveza para vender en tiendas'
-Help_Wakeup: '&6/brew wakeup list <Página>&9 Enumera todos los puntos de activación.'
-Help_WakeupAdd: '&6/brew wakeup add &9Agrega un punto de activación en su posición actual'
-Help_WakeupCheck: '&6/brew wakeup check &9Teletransporta a todos los puntos de atención'
-Help_WakeupCheckSpecific: '&6/brew wakeup check <id> &9Teletransporta al punto de activación con <id>'
-Help_WakeupList: '&6/brew wakeup list <Página> [Mundo]&9 Enumera todos los puntos de activación del <Mundo>'
-Help_WakeupRemove: '&6/brew wakeup remove <id> &9Elimina el punto de activación con <id>'
-Help_Puke: '&6/brew puke [Player] [Amount] &9Makes you or [Player] puke'
-Help_Drink: '&6/brew drink <Recipe> [Quality] [Player] &9Simulates [Player] drinking a Brew'
+# Ayuda
+Help_Copy: '&6/brew copy [Cantidad]&9 Copia la bebida en tu mano'
+Help_Create: '&6/brew create <Receta> [Calidad] [Jugador] &9Crea una bebida con calidad opcional (1-10)'
+Help_Give: '&6/brew give <Receta> [Calidad] [Jugador] &9Alias de /brew create'
+Help_Delete: '&6/brew delete &9Elimina la bebida en tu mano'
+Help_Help: '&6/brew help [Página] &9Muestra una página de ayuda específica'
+Help_Info: '&6/brew info&9 Muestra tu borrachera actual y su calidad'
+Help_InfoOther: '&6/brew info [Jugador]&9 Muestra la actual borrachera y calidad de [Jugador]'
+Help_Reload: '&6/brew reload &9Recargar la configuración'
+Help_Configname: '&6/brew ItemName &9Muestra el nombre del objeto en tu mano para la configuración'
+Help_Static: '&6/brew static &9Convierte la bebida a estática -> No se añejará ni destilará'
+Help_Set: '&6/brew set <jugador> <borrachera> [calidad] &9Establece la borrachera (y su calidad) de un jugador'
+Help_UnLabel: '&6/brew unlabel &9Elimina la etiqueta detallada de una bebida'
+Help_Seal: '&6/brew seal &9Sella bebidas para su venta en tiendas'
+Help_Wakeup: '&6/brew wakeup list <Página>&9 Muestra la lista de todos los puntos de despertar'
+Help_WakeupAdd: '&6/brew wakeup add &9Establece tu posición actual como un punto de despertar'
+Help_WakeupCheck: '&6/brew wakeup check &9Teleportación para comprobar todos los puntos de despertar'
+Help_WakeupCheckSpecific: '&6/brew wakeup check <id> &9Teleportación al punto de despertar con el <id> especificado'
+Help_WakeupList: '&6/brew wakeup list <Página> [Mundo]&9 Muestra la lista de todos los puntos de despertar del <mundo>'
+Help_WakeupRemove: '&6/brew wakeup remove <id> &9Elimina el punto de despertar con el <id> especificado'
+Help_Puke: '&6/brew puke [Jugador] [Cantidad] &9Hace que tu o [jugador] vomiten'
+Help_Drink: '&6/brew drink <Receta> [Calidad] [Jugador] &9Simula que [Jugador] bebe una bebida'
 
-# Perms
-Perms_NoBarrelCreate: '&c¡No tienes permisos para crear barriles!'
-Perms_NoBigBarrelCreate: '&c¡No tienes permisos para crear barriles grandes!'
-Perms_NoCauldronFill: '&c¡No tienes permisos para llenar botellas de este caldero!'
-Perms_NoCauldronInsert: '&c¡No tienes permisos para poner ingredientes en calderos!'
-Perms_NoSmallBarrelCreate: '&c¡No tienes permisos para crear barriles pequeños!'
+# Permisos
+Perms_NoBarrelCreate: '&c¡No tienes los permisos para crear toneles!'
+Perms_NoBigBarrelCreate: '&c¡No tienes los permisos para crear toneles grandes!'
+Perms_NoCauldronFill: '&c¡No tienes los permisos para llenar botellas con este caldero!'
+Perms_NoCauldronInsert: '&c¡No tienes los permisos para insertar ingredientes en calderos!'
+Perms_NoSmallBarrelCreate: '&c¡No tienes los permisos para crear toneles pequeños!'
 
-# Player
-Player_BarrelCreated: Barril creado
-Player_BarrelFull: '&cEste barril no puede contener más bebidas'
+# Jugador
+Player_BarrelCreated: Tonel creado
+Player_BarrelFull: '&cEste tonel no puede contener más bebidas'
 Player_CantDrink: No puedes beber más.
-Player_CauldronInfo1: Este caldero ha estado hirviendo durante &v1 minutos.
-Player_CauldronInfo2: Este caldero acaba de comenzar a hervir.
-Player_DrunkPassOut: Bebiste demasiado y te desmayaste.
-Player_LoginDeny: Tu personaje intenta iniciar sesión, pero está demasiado borracho para encontrar el servidor. ¡Inténtalo de nuevo!
-Player_LoginDenyLong: Tu personaje está realmente borracho y se ha desmayado. ¡Inténtalo de nuevo en 10 minutos!
-Player_TriedToSay: '&v1 trató de decir: &0&v2'
-Player_Wake: ¡Oh no! No recuerdo cómo llegué aquí ...
-Player_WakeAlreadyDeleted: '&c¡El punto de activación con la identificación: &6&v1 &cya se ha eliminado!'
-Player_WakeCancel: '&6Se canceló la verificación del punto de activación'
-Player_WakeCreated: '&a¡Punto de activación con id: &6&v1 &afue creado con éxito!'
-Player_WakeDeleted: '&aEl punto de activación con la id: &6&v1 &a¡ha sido eliminado con éxito!'
-Player_WakeFilled: '&cEl punto de activación con la id: &6&v1&c en la posición &6&v2 &v3, &v4, &v5&c ¡está lleno de bloques!'
-Player_WakeHint1: 'Al siguiente punto de activación: golpea el puño en el aire'
+Player_CauldronInfo1: Este caldero ha estado hirviendo por &v1 minutos.
+Player_CauldronInfo2: Este caldero apenas empezó a hervir.
+Player_DrunkPassOut: Tomaste demasiado y te desmayaste.
+Player_LoginDeny: Tu personaje intenta entrar, pero está demasiado borracho(a) para encontrar el servidor. ¡Intenta otra vez!
+Player_LoginDenyLong: Tu personaje está muy borracho(a) y se desmayó. ¡Intentalo otra vez en 10 minutos!
+Player_TriedToSay: '&v1 intentó decir: &0&v2'
+Player_Wake: ¡Oh no! No recuerdo cómo llegué aquí...
+Player_WakeAlreadyDeleted: '&c¡El punto de despertar con id: &6&v1 &cha sido eliminado previamente!'
+Player_WakeCancel: '&6La comprobación de los puntos de despertar fue cancelada'
+Player_WakeCreated: '&a¡El punto de despertar con id: &6&v1 &aha sido creado con éxito!'
+Player_WakeDeleted: '&a¡El punto de despertar con id: &6&v1 &aha sido eliminado con éxito!'
+Player_WakeFilled: '&c¡El punto de despertar con id: &6&v1&c en las coordenadas &6&v2 &v3, &v4, &v5&c está lleno de bloques!'
+Player_WakeHint1: 'Para ir al siguiente punto de despertar: Golpea en el aire con tu mano vacía'
 Player_WakeHint2: 'Para cancelar: &9/brew wakeup cancel'
-Player_WakeLast: '&aEste fue el último punto de activación'
-Player_WakeNoCheck: '&cNinguna verificación de punto de activación está activa actualmente'
-Player_WakeNoPoints: '&c¡No hay puntos de activación!'
-Player_WakeNotExist: '&cEl Punto de Despertar con el id: &6&v1 &c¡No existe!'
-Player_WakeTeleport: 'Teletransporte al punto de activación con la identificación: &6&v1&f En la posición: &6&v2 &v3, &v4, &v5'
-Player_ShopSealBrew: '&eLas cervezas deben sellarse antes de venderlas.'
-Player_Drunkeness: 'Ebriedad'
-Player_Hangover: 'Tu resaca'
+Player_WakeLast: '&aEste fue el último punto de despertar'
+Player_WakeNoCheck: '&cNingún chequeo de los puntos de despertar está activo'
+Player_WakeNoPoints: '&c¡No hay puntos de despertar!'
+Player_WakeNotExist: '&c¡El punto de despertar con id: &6&v1 &cno existe!'
+Player_WakeTeleport: 'Teleportación hacia el punto de despertar con id: &6&v1&f en las coordenadas: &6&v2 &v3, &v4, &v5'
+Player_ShopSealBrew: '&eSe recomienda intercambiar/vender &ebebidas &6selladas'
+Player_Drunkeness: 'Borrachera'
+Player_Hangover: 'Resaca'
