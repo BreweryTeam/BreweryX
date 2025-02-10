@@ -26,6 +26,7 @@ import com.dre.brewery.configuration.configurer.BreweryXConfigurer;
 import com.dre.brewery.configuration.configurer.TranslationManager;
 import com.dre.brewery.utility.Logging;
 import eu.okaeri.configs.configurer.Configurer;
+import eu.okaeri.configs.exception.OkaeriException;
 import eu.okaeri.configs.serdes.BidirectionalTransformer;
 import eu.okaeri.configs.serdes.OkaeriSerdesPack;
 import eu.okaeri.configs.serdes.standard.StandardSerdes;
@@ -33,10 +34,12 @@ import eu.okaeri.configs.yaml.snakeyaml.YamlSnakeYamlConfigurer;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.yaml.snakeyaml.error.YAMLException;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.annotation.Annotation;
+import java.nio.charset.MalformedInputException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -177,7 +180,18 @@ public class ConfigHead {
             it.withRemoveOrphans(removeOrphans);
             it.withBindFile(file);
             it.saveDefaults();
-            it.load(update);
+
+            try {
+                it.load(update);
+            } catch (OkaeriException okaeriException) {
+                if (okaeriException.getCause() instanceof YAMLException yamlException) {
+                    if (yamlException.getCause() instanceof MalformedInputException) {
+                        Logging.errorLog("File " + file.getFileName() + " contains invalid characters.");
+                        Logging.warningLog("Try fixing it, or delete it to regenerate.");
+                    }
+                }
+                throw new RuntimeException("Invalid characters in " + file.getFileName());
+            }
         });
 
         instance.setUpdate(update);
