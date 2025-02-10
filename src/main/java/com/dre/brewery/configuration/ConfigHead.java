@@ -189,9 +189,11 @@ public class ConfigHead {
                 if (hasInvalidCharacterCause(okaeriException)) {
                     Logging.errorLog("File " + fileName + " contains invalid characters.");
                     Logging.warningLog("Try fixing it, or delete it to regenerate.");
+
+                    throw new RuntimeException("Invalid characters in " + fileName, okaeriException);
                 }
 
-                throw new RuntimeException("Invalid characters in " + fileName, okaeriException);
+                throw new RuntimeException("Failed to load file " + fileName, okaeriException);
             }
         });
 
