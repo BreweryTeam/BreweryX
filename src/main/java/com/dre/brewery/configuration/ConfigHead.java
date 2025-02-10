@@ -184,13 +184,14 @@ public class ConfigHead {
             try {
                 it.load(update);
             } catch (OkaeriException okaeriException) {
-                if (okaeriException.getCause() instanceof YAMLException yamlException) {
-                    if (yamlException.getCause() instanceof MalformedInputException) {
-                        Logging.errorLog("File " + file.getFileName() + " contains invalid characters.");
-                        Logging.warningLog("Try fixing it, or delete it to regenerate.");
-                    }
+                String fileName = file.getFileName().toString();
+
+                if (hasInvalidCharacterCause(okaeriException)) {
+                    Logging.errorLog("File " + fileName + " contains invalid characters.");
+                    Logging.warningLog("Try fixing it, or delete it to regenerate.");
                 }
-                throw new RuntimeException("Invalid characters in " + file.getFileName());
+
+                throw new RuntimeException("Invalid characters in " + fileName, okaeriException);
             }
         });
 
@@ -336,5 +337,14 @@ public class ConfigHead {
             };
         }
         return options;
+    }
+
+    /**
+     * Checks if the given OkaeriException was caused by invalid characters in the file.
+     */
+    private static boolean hasInvalidCharacterCause(OkaeriException exception) {
+        Throwable cause = exception.getCause();
+
+        return cause instanceof YAMLException yamlEx && yamlEx.getCause() instanceof MalformedInputException;
     }
 }
