@@ -498,6 +498,10 @@ public class Brew implements Cloneable {
             if (ageTime >= 1) {
                 lore.updateAgeLore(false);
             }
+            lore.updateIngredientLore(false);
+            lore.updateCookLore(false);
+            lore.updateDistillLore(false);
+            lore.updateAgeLore(false);
             lore.updateQualityStars(false);
             lore.updateAlc(false);
             lore.write();

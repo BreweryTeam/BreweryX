@@ -207,7 +207,9 @@ public class BrewLore {
                 prefix = prefix + lang.getEntry("Brew_HundredsOfYears") + " ";
             }
         }
-        addOrReplaceLore(Type.AGE, prefix, lang.getEntry("Brew_BarrelRiped"), suffix);
+        if (age > 0) {
+            addOrReplaceLore(Type.AGE, prefix, lang.getEntry("Brew_BarrelRiped"), suffix);
+        }
     }
 
     /**
