@@ -8,7 +8,7 @@
 config:
   language: |
     Fichier de langage à utiliser [en]
-    Valeurs disponibles: en (Anglais), de (Allemande), es (Espagnol), fr (Français), it (Italien), ru (Russe), zh (Chinois)
+    Valeurs disponibles: en (Anglais), de (Allemande), es (Espagnol), fr (Français), it (Italien), ru (Russe), zh (Chinois), uk (Ukrainian)
   updateCheck: |
     Activer la cherche de mises à jour.  Si oui, veuillez préciser quel service à y utiliser pour vérifier les mises à jour ; si non, préciser « None ».
     Services disponibles : GitHub, Snapshots, Spigot, None [GitHub]

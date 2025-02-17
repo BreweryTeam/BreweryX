@@ -41,7 +41,8 @@ public enum Translation {
     FR("fr.yml"),
     IT("it.yml"),
     RU("ru.yml"),
-    ZH("zh.yml");
+    ZH("zh.yml"),
+    UK("uk.yml");
 
     private final String filename;
 }

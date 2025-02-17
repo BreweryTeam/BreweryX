@@ -4,7 +4,7 @@
 config:
   language: |
     La traducción a utilizar
-    Tipos disponibles: en (Inglés), de (Alemán), es (Español), fr (Francés), it (Italiano), ru (Ruso), zh (Chino)
+    Tipos disponibles: en (Inglés), de (Alemán), es (Español), fr (Francés), it (Italiano), ru (Ruso), zh (Chino), uk (Ukrainian)
   updateCheck: |
     Should BreweryX check for updates? Specify which service you'd like to use for update checking or disable it.
     Options available: GitHub, Snapshots, Spigot, None [GitHub]

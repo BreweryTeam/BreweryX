@@ -1,0 +1,56 @@
+# !!! IMPORTANT: BreweryX configuration files do NOT support external comments! If you add any comments, they will be overwritten !!!
+# Translations for BreweryX
+
+# Brew
+Brew_-times: -раз
+Brew_BadPotion: Зіпсоване зілля
+Brew_BarrelRiped: Витримане в бочці
+Brew_DistillUndefined: Каламутнодистильований
+Brew_Distilled: Дистильований
+Brew_LessDistilled: Малодистильований
+Brew_HundredsOfYears: столітній
+Brew_Ingredients: Інгредієнти
+Brew_MinutePluralPostfix: и
+Brew_OneYear: Один рік
+Brew_ThickBrew: Каламутний напій
+Brew_Undefined: Казанний напій
+Brew_Woodtype: тип дерева
+Brew_Years: роки
+Brew_fermented: ферментовано
+Brew_minute: хвилин
+Brew_Alc: Алк &v1мл
+Brew_Alcoholic: Алкогольне
+Brew_Brewer: 'Зварив: &v1'
+
+# CMD
+CMD_Copy_Error: '&6&v1 &cЗілля не вмістилося в інвентар'
+CMD_Info_Drunk: '&v1 на &6&v2% &fп’яний, якість сп’яніння: &6&v3'
+CMD_Info_NotDrunk: '&v1 не п’яний'
+CMD_NonStatic: '&eНапій більше не настоюється і тепер почне бродити в бочці.'
+CMD_Player: '&a&v1 тепер п’яний на &6&v2% &a, якість сп’яніння: &6&v3'
+CMD_Player_Error: '&cЯкість повинна бути від 1 до 10!'
+CMD_Reload: '&aКонфіг успішно перезавантажено!'
+CMD_Created: '&aНапій створено'
+CMD_Configname: '&aНазва предмета для конфіга: &f&v1'
+CMD_Configname_Error: '&cНемає предмета в руці.'
+CMD_Static: '&aНапій закупорений і не буде бродити в бочках.'
+CMD_UnLabel: '&aДеякі деталі опису були приховані!'
+CMD_Drink: '&aТи випив одну &v1'
+CMD_DrinkOther: '&a&v1 випив одну &v2'
+CMD_Set: '&aРівень сп’яніння &v1 успішно встановлено на &v2 з якістю &v3.'
+
+# Error
+Error_ConfigUpdate: 'Невідома версія конфігура Brewery: v&v1, конфіг не оновлено!'
+Error_ItemNotPotion: '&cПредмет у твоїй руці не є зіллям!'
+Error_SealingTableDisabled: '&cСтіл закупорки вимкнено.'
+Error_SealedAlwaysStatic: Закупорені напої завжди статичні!
+Error_AlreadyUnlabeled: '&cДеталі опису напою у твоїй руці вже приховані!'
+Error_NoBarrelAccess: '&cУ тебе немає прав на доступ до цієї бочки!'
+Error_NoBrewName: '&cРецепт з назвою: ''&v1&c'' не знайдено!'
+Error_NoPermissions: '&cУ тебе немає прав на це!'
+Error_PlayerCommand: '&cЦю команду можна використовувати лише як гравець!'
+Error_Recipeload: '&cНе всі рецепти були завантажені: перевір консоль!'
+Error_ShowHelp: Використовуйте &6/brew help &fдля відображення довідки
+Error_UnknownCommand: Невідома команда
+Error_YmlRead: Не можу прочитати config.yml, будь ласка, перевір, що там усе правильно
+Error_NoPlayer: 'Гравець не знайдений: &v1'

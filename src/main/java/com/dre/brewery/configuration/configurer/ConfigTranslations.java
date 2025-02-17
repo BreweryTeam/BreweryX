@@ -37,11 +37,14 @@ public class ConfigTranslations {
     }
 
     public ConfigTranslations(Translation activeTranslation, Yaml yamlInstance) {
-        try (InputStream inputStream = this.getClass()
-            .getClassLoader()
-            .getResourceAsStream("config-langs/" + activeTranslation.getFilename())) {
-
-            translations = yamlInstance.load(inputStream);
+        try(InputStream inputStream = this.getClass().getResourceAsStream("/config-langs/" + activeTranslation.getFilename())) {
+            if (inputStream != null) {
+                translations = yamlInstance.load(inputStream);
+                return;
+            }
+            try(InputStream defaultInputStream = this.getClass().getResourceAsStream("/config-langs/" + Translation.EN.getFilename())) {
+                translations = yamlInstance.load(defaultInputStream);
+            }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
