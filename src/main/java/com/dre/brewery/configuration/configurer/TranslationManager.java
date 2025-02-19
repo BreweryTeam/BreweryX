@@ -66,13 +66,7 @@ public class TranslationManager {
         try (InputStream inputStream = Files.newInputStream(ConfigManager.getFilePath(Config.class))) {
             Map<String, String> data = yaml.loadAs(inputStream, Map.class);
             if (data != null) {
-                Translation trans = BUtil.getEnumByName(Translation.class, data.get("language"));
-
-                if (trans != null) {
-                    this.activeTranslation = trans;
-                } else {
-                    Logging.warningLog("Invalid language in config.yml: &6" + data.get("language"));
-                }
+                this.activeTranslation = Translation.getTranslation(data.get("language"));
             }
         } catch (IOException e) {
             Logging.debugLog("Error reading YAML file: " + e.getMessage());
@@ -82,7 +76,7 @@ public class TranslationManager {
         this.fallbackTranslations = new ConfigTranslations(fallbackTranslation, yaml);
 
         // Create lang files from /resources/languages
-        for (Translation translation : Translation.values()) {
+        for (Translation translation : Translation.getDefaultTranslations()) {
             createLanguageFile(translation);
         }
     }
@@ -107,7 +101,7 @@ public class TranslationManager {
     }
 
     public void createLanguageFile(Translation translation) {
-        ConfigManager.createFileFromResources("languages/" + translation.getFilename(), dataFolder.toPath().resolve("languages").resolve(translation.getFilename()));
+        ConfigManager.createFileFromResources("languages/" + translation.fileName(), dataFolder.toPath().resolve("languages").resolve(translation.fileName()));
     }
 
     // Okaeri would do this normally, but since default values in Lang changes based on language,
@@ -121,8 +115,8 @@ public class TranslationManager {
         ConfigHead tempHead = new ConfigHead(); // Prevent polluting ConfigManager global state
 
         Lang fallback = loadFromResources(tempHead, Translation.EN);
-        for (Translation trans : Translation.values()) {
-            String langFilePathStr = "languages/" + trans.getFilename();
+        for (Translation trans : Translation.getDefaultTranslations()) {
+            String langFilePathStr = "languages/" + trans.fileName();
             Path langFilePath = dataFolder.toPath().resolve(langFilePathStr);
 
             Lang langFromFile = tempHead.createConfig(Lang.class, langFilePath);
@@ -140,7 +134,7 @@ public class TranslationManager {
     // A bit of a hack, but avoids having to modify Okaeri
     @Nullable
     private Lang loadFromResources(ConfigHead tempHead, Translation translation) {
-        String langFilePathStr = "languages/" + translation.getFilename();
+        String langFilePathStr = "languages/" + translation.fileName();
         Path langFilePath = dataFolder.toPath().resolve(langFilePathStr);
 
         Lang langFromResources = tempHead.createConfig(Lang.class, langFilePath);

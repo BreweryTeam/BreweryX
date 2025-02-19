@@ -154,7 +154,7 @@ public class ConfigHead {
         if (!options.useLangFileName()) {
             return DATA_FOLDER.resolve(options.value());
         } else {
-            return DATA_FOLDER.resolve("languages/" + TranslationManager.getInstance().getActiveTranslation().getFilename());
+            return DATA_FOLDER.resolve("languages/" + TranslationManager.getInstance().getActiveTranslation().fileName());
         }
     }
 

@@ -20,28 +20,60 @@
 
 package com.dre.brewery.configuration.configurer;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Collections;
+import java.util.List;
+import java.util.Locale;
+import java.util.stream.Stream;
 
-/**
- * List of the available translation<br />
- * Should we even use an enum here?<br />
- * <br />
- * The comments can be found under {@code langs/LANGUAGE.yml}
- */
-@Getter
-@AllArgsConstructor
-public enum Translation {
+public record Translation(String fileName) {
 
-    // Languages added should have a config and a lang translation (resources/config-langs/, resources/languages/)
+    // Languages added should have a language translation, and may have a config translation
 
-    EN("en.yml"),
-    DE("de.yml"),
-    ES("es.yml"),
-    FR("fr.yml"),
-    IT("it.yml"),
-    RU("ru.yml"),
-    ZH("zh.yml");
+    public static final Translation EN = new Translation("en.yml");
+    private static final List<Translation> DEFAULT_TRANSLATIONS = compileTranslations();
 
-    private final String filename;
+    public static Translation getTranslation(String language) {
+        return new Translation(language.toLowerCase(Locale.ROOT) + ".yml");
+    }
+
+    public static List<Translation> getDefaultTranslations() {
+        return DEFAULT_TRANSLATIONS;
+    }
+
+    private static List<Translation> compileTranslations() {
+        try {
+            URI uri = Translation.class.getResource("/languages").toURI();
+            Path myPath;
+            if (uri.getScheme().equals("jar")) {
+                try (FileSystem fileSystem = FileSystems.newFileSystem(uri, Collections.emptyMap())) {
+                    myPath = fileSystem.getPath("/languages");
+                    return fromPaths(Files.walk(myPath, 1));
+                }
+            } else {
+                myPath = Paths.get(uri);
+                return fromPaths(Files.walk(myPath, 1));
+
+            }
+        } catch (URISyntaxException | IOException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
+    public static List<Translation> fromPaths(Stream<Path> pathStream) {
+        return pathStream
+            .map(Path::getFileName)
+            .map(Path::toString)
+            .filter(filename -> filename.endsWith(".yml"))
+            .map(Translation::new)
+            .toList();
+    }
 }
