@@ -89,6 +89,10 @@ config:
   hangoverDays: "Tempo in giorni che la sbronza resta in memoria dopo che il giocatore va offline, cioè il tempo per cui i postumi della sbornia durano. [7]"
   colorInBarrels-Brewer: "Colora la descrizione dell'item in base alla qualità mentre è in un barile o in un alambicco [true, true]"
   openLargeBarrelEverywhere: "Se un barile grande può essere aperto  cliccandoci sopra, non solo sul cartello e sulla staccionata. Questo è sempre true per i barili piccoli. [true]"
+  barrelInvSizes: |
+    Quante righe deve avere l'inventario di ogni tipo di barile [3,1]
+    Deve essere un numero intero tra 1 e 6 (una limitazione di Minecraft / GUI)
+    (È necessario riavviare il server affinché le modifiche abbiano effetto)
   brewHopperDump: "Allow emptying brews into hoppers to discard brews while keeping the glass bottle [true]"
   enableChatDistortion: |
     If written Chat is distorted when the Player is Drunk, so that it looks like drunk writing

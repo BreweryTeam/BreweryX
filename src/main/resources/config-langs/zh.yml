@@ -99,6 +99,10 @@ config:
   openLargeBarrelEverywhere: |
     大型木桶是否可通过点击其任一方块来开启，不仅仅限于龙头或标志
     对于小型木桶，这一功能始终有效 [true]
+  barrelInvSizes: |
+    每种类型的桶的库存应有多少行 [3,1]
+    必须是 1 到 6 之间的整数（Minecraft / GUI 限制）
+    (需要重启服务器才能使更改生效)
   brewHopperDump: "允许通过将饮品倒入漏斗来丢弃，同时保留玻璃瓶 [true]"
   enableChatDistortion: |
     -- 聊天口胡设置 --

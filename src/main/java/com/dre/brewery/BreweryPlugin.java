@@ -28,6 +28,7 @@ import com.dre.brewery.configuration.files.Config;
 import com.dre.brewery.configuration.files.Lang;
 import com.dre.brewery.integration.BlockLockerHook;
 import com.dre.brewery.integration.Hook;
+import com.dre.brewery.integration.LandsHook;
 import com.dre.brewery.integration.PlaceholderAPIHook;
 import com.dre.brewery.integration.barrel.BlockLockerBarrel;
 import com.dre.brewery.integration.bstats.BreweryStats;
@@ -103,6 +104,7 @@ public final class BreweryPlugin extends JavaPlugin {
             // Campfires are weird. Initialize once now, so it doesn't lag later when we check for campfires under Cauldrons
             getServer().createBlockData(Material.CAMPFIRE);
         }
+        if (getServer().getPluginManager().getPlugin("Lands") != null) LandsHook.load();
     }
 
     @Override
@@ -210,7 +212,6 @@ public final class BreweryPlugin extends JavaPlugin {
             getServer().getPluginManager().registerEvents(new ShopKeepersListener(), this);
         if (Hook.SLIMEFUN.isEnabled() && getMCVersion().isOrLater(MinecraftVersion.V1_14))
             getServer().getPluginManager().registerEvents(new SlimefunListener(), this);
-
 
         // Heartbeat
         BreweryPlugin.getScheduler().runTaskTimer(new BreweryRunnable(), 650, 1200);

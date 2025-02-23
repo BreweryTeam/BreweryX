@@ -35,6 +35,7 @@ import com.dre.brewery.storage.records.SerializableCauldron;
 import com.dre.brewery.storage.records.SerializableWakeup;
 import com.dre.brewery.storage.serialization.SQLDataSerializer;
 import com.dre.brewery.utility.Logging;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
@@ -48,7 +49,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
-@SuppressWarnings("Duplicates") // Dupe code from MySQLStorage
+// Dupe code from MySQLStorage
+@SuppressWarnings({ "SqlSourceToSinkFlow", "Duplicates" })
 public class SQLiteStorage extends DataManager {
 
     private static final String URL = "jdbc:sqlite:";
@@ -159,29 +161,61 @@ public class SQLiteStorage extends DataManager {
         return objects;
     }
 
-    @Override
-    public <T extends SerializableThing> void saveAllGeneric(List<T> serializableThings, String table, boolean overwrite, Class<T> type) {
-        String sql;
-        if (overwrite) {
-            sql = "INSERT INTO " + tablePrefix + table + " (id, data) VALUES (?, ?) ON CONFLICT(id) DO UPDATE SET data = excluded.data";
-        } else {
-            sql = "INSERT INTO " + tablePrefix + table + " (id, data) VALUES (?, ?) ON CONFLICT(id) DO NOTHING";
-        }
-
-        try (PreparedStatement insertStatement = connection.prepareStatement(sql)) {
-            for (SerializableThing serializableThing : serializableThings) {
-                insertStatement.setString(1, serializableThing.getId());
-                insertStatement.setString(2, serializer.serialize(serializableThing));
-                insertStatement.addBatch();
-            }
-            insertStatement.executeBatch();
-        } catch (SQLException e) {
-            Logging.errorLog("Failed to save objects to SQLite!", e);
-        }
+    public <T extends SerializableThing> void saveAllGeneric(List<T> serializableThings, String table) {
+        saveAllGeneric(serializableThings, table, null);
     }
 
-    private <T extends SerializableThing> void saveAllGeneric(List<T> serializableThings, String table, boolean overwrite) {
-        saveAllGeneric(serializableThings, table, overwrite, null);
+    @Override
+    public <T extends SerializableThing> void saveAllGeneric(List<T> serializableThings, String table, @Nullable Class<T> type) {
+
+        String createTempTableSql = "CREATE TEMPORARY TABLE temp_" + table + " (id TEXT PRIMARY KEY, data TEXT)";
+        String insertTempTableSql = "INSERT INTO temp_" + table + " (id, data) VALUES (?, ?) ON CONFLICT(id) DO UPDATE SET data = excluded.data";
+        String deleteOldRecordsSql = "DELETE FROM " + tablePrefix + table + " WHERE id NOT IN (SELECT id FROM temp_" + table + ")";
+
+        try {
+            connection.setAutoCommit(false);
+
+            // create the table before inserting data
+            try (PreparedStatement createTempTableStmt = connection.prepareStatement(createTempTableSql)) {
+                createTempTableStmt.execute();
+            } catch (SQLException e) {
+                Logging.errorLog("Failed to create temporary table for saving objects to: " + table + " due to SQLite exception!", e);
+            }
+
+            try (PreparedStatement insertTempTableStmt = connection.prepareStatement(insertTempTableSql)) {
+
+                for (SerializableThing serializableThing : serializableThings) {
+                    insertTempTableStmt.setString(1, serializableThing.getId());
+                    insertTempTableStmt.setString(2, serializer.serialize(serializableThing));
+                    insertTempTableStmt.addBatch();
+                }
+                insertTempTableStmt.executeBatch();
+
+                try (PreparedStatement deleteStmt = connection.prepareStatement(deleteOldRecordsSql)) {
+                    deleteStmt.executeUpdate();
+                }
+
+                try (PreparedStatement replaceTableStmt = connection.prepareStatement("INSERT OR REPLACE INTO " + tablePrefix + table + " (id, data) SELECT id, data FROM temp_" + table)) {
+                    replaceTableStmt.executeUpdate();
+                }
+
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+                Logging.errorLog("Failed to save objects to: " + table + " due to SQLite exception!", e);
+            } finally {
+                // Drop the temporary table to ensure it is removed
+                try (PreparedStatement dropTempTableStmt = connection.prepareStatement("DROP TABLE IF EXISTS temp_" + table)) {
+                    dropTempTableStmt.execute();
+                } catch (SQLException e) {
+                    Logging.errorLog("Failed to drop temporary table for saving objects to: " + table + " due to SQLite exception!", e);
+                } finally {
+                    connection.setAutoCommit(true);
+                }
+            }
+        } catch (SQLException e) {
+            Logging.errorLog("Failed to manage transaction for saving objects to: " + table + " due to SQLite exception!", e);
+        }
     }
 
 
@@ -225,12 +259,12 @@ public class SQLiteStorage extends DataManager {
     }
 
     @Override
-    public void saveAllBarrels(Collection<Barrel> barrels, boolean overwrite) {
+    public void saveAllBarrels(Collection<Barrel> barrels) {
         List<SerializableBarrel> serializableBarrels = barrels.stream()
             .filter(it -> it.getBounds() != null)
             .map(SerializableBarrel::new)
             .toList();
-        saveAllGeneric(serializableBarrels, "barrels", overwrite);
+        saveAllGeneric(serializableBarrels, "barrels");
     }
 
     @Override
@@ -260,11 +294,11 @@ public class SQLiteStorage extends DataManager {
     }
 
     @Override
-    public void saveAllCauldrons(Collection<BCauldron> cauldrons, boolean overwrite) {
+    public void saveAllCauldrons(Collection<BCauldron> cauldrons) {
         List<SerializableCauldron> serializableCauldrons = cauldrons.stream()
             .map(SerializableCauldron::new)
             .toList();
-        saveAllGeneric(serializableCauldrons, "cauldrons", overwrite);
+        saveAllGeneric(serializableCauldrons, "cauldrons");
     }
 
     @Override
@@ -294,11 +328,11 @@ public class SQLiteStorage extends DataManager {
     }
 
     @Override
-    public void saveAllPlayers(Collection<BPlayer> players, boolean overwrite) {
+    public void saveAllPlayers(Collection<BPlayer> players) {
         List<SerializableBPlayer> serializableBPlayers = players.stream()
             .map(SerializableBPlayer::new)
             .toList();
-        saveAllGeneric(serializableBPlayers, "players", overwrite);
+        saveAllGeneric(serializableBPlayers, "players");
     }
 
     @Override
@@ -328,11 +362,11 @@ public class SQLiteStorage extends DataManager {
     }
 
     @Override
-    public void saveAllWakeups(Collection<Wakeup> wakeups, boolean overwrite) {
+    public void saveAllWakeups(Collection<Wakeup> wakeups) {
         List<SerializableWakeup> serializableWakeups = wakeups.stream()
             .map(SerializableWakeup::new)
             .toList();
-        saveAllGeneric(serializableWakeups, "wakeups", overwrite);
+        saveAllGeneric(serializableWakeups, "wakeups");
     }
 
     @Override

@@ -80,6 +80,10 @@ config:
   hangoverDays: "Zeit (in Tagen) die Trunkenheitsdaten nach offlinegehen eines Spielers im Speicher verbleiben, um z.B. Kater-Effekte anzuwenden. [7]"
   colorInBarrels: "Färben der Iteminformationen je nach Qualität während sie sich 1. im Fass und/oder 2. im Braustand befinden [true, true]"
   openLargeBarrelEverywhere: "Ob große Fässer an jedem Block geöffnet werden können, nicht nur an Zapfhahn und Schild. Bei kleinen Fässern geht dies immer. [true]"
+  barrelInvSizes: |
+    Wie viele Reihen das Inventar jedes Fass-Typs haben soll [3,1]
+    Muss eine ganze Zahl zwischen 1 und 6 sein (eine Minecraft- / GUI-Beschränkung)
+    (Ein Server-Neustart ist erforderlich, damit die Änderungen hier wirksam werden)
   brewHopperDump: "Ob das Entleeren von Brewery Tränken mit Hilfe von Trichtern möglich ist, um die Glasflasche zurück zu bekommen [true]"
   enableChatDistortion: |
     Ob geschriebener Chat bei großer Trunkenheit abgefälscht werden soll,

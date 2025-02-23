@@ -89,6 +89,10 @@ config:
   hangoverDays: "Tiempo (en días) por el que se guarda los datos de borrachera en la memoria después de que un jugador se desconecte, para aplicar resaca. [7]"
   colorInBarrels-Brewer: "Colorea la información (lore) de un objeto dependiendo de su calidad mientras está A) en un tonel y/o B) en un estante de pociones [true, true]"
   openLargeBarrelEverywhere: "Si un tonel grande puede abrirse desde cualquiera de sus bloques, no solo el grifo o el cartel. Esto está siempre activado para los toneles pequeños. [true]"
+  barrelInvSizes: |
+    Cuántas filas debe tener el inventario de cada tipo de barril [3,1]
+    Debe ser un número entero entre 1 y 6 (una limitación de Minecraft / GUI)
+    (Se requiere reiniciar el servidor para que los cambios aquí surtan efecto)
   brewHopperDump: "Permitir vaciar bebidas en tolvas para descartarlas, manteniendo la botella de cristal [true]"
   enableChatDistortion: |
     Si el chat escrito se distorsiona cuando el jugador está borracho, para aparentarlo tambien al escribir

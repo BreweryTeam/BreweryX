@@ -31,10 +31,12 @@ import com.dre.brewery.configuration.files.Config;
 import com.dre.brewery.configuration.files.Lang;
 import com.dre.brewery.integration.BlockLockerHook;
 import com.dre.brewery.integration.Hook;
+import com.dre.brewery.integration.LandsHook;
 import com.dre.brewery.integration.WorldGuarkHook;
 import com.dre.brewery.integration.barrel.BlockLockerBarrel;
 import com.dre.brewery.integration.barrel.GriefPreventionBarrel;
 import com.dre.brewery.integration.barrel.LWCBarrel;
+import com.dre.brewery.integration.barrel.LandsBarrel;
 import com.dre.brewery.integration.barrel.LogBlockBarrel;
 import com.dre.brewery.integration.barrel.TownyBarrel;
 import com.dre.brewery.integration.item.MMOItemsPluginItem;
@@ -198,6 +200,14 @@ public class IntegrationListener implements Listener {
                 } else {
                     Logging.msg(player, "&cError opening Barrel, please report to an Admin!");
                 }
+                return;
+            }
+        }
+
+        if (Hook.LANDS.isEnabled()) {
+            if (!LandsBarrel.checkAccess(event)) {
+                lang.sendEntry(event.getPlayer(), "Error_NoBarrelAccess");
+                event.setCancelled(true);
                 return;
             }
         }

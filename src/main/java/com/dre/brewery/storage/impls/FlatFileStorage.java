@@ -144,11 +144,11 @@ public class FlatFileStorage extends DataManager {
     }
 
     @Override
-    public <T extends SerializableThing> void saveAllGeneric(List<T> serializableThings, String table, boolean overwrite, @Nullable Class<T> type) {
+    public <T extends SerializableThing> void saveAllGeneric(List<T> serializableThings, String table, @Nullable Class<T> type) {
         ConfigurationSection section = dataFile.getConfigurationSection(table);
-        if (overwrite && section != null) {
+        if (section != null) {
             section.getKeys(false).forEach(key -> dataFile.set(table + "." + key, null));
-        } else if (section == null) {
+        } else {
             dataFile.createSection(table);
         }
 
@@ -221,10 +221,8 @@ public class FlatFileStorage extends DataManager {
     }
 
     @Override
-    public void saveAllBarrels(Collection<Barrel> barrels, boolean overwrite) {
-        if (overwrite) {
-            dataFile.set("barrels", null);
-        }
+    public void saveAllBarrels(Collection<Barrel> barrels) {
+        dataFile.set("barrels", null);
         for (Barrel barrel : barrels) {
             saveBarrel(barrel);
         }
@@ -285,10 +283,8 @@ public class FlatFileStorage extends DataManager {
     }
 
     @Override
-    public void saveAllCauldrons(Collection<BCauldron> cauldrons, boolean overwrite) {
-        if (overwrite) {
-            dataFile.set("cauldrons", null);
-        }
+    public void saveAllCauldrons(Collection<BCauldron> cauldrons) {
+        dataFile.set("cauldrons", null);
         for (BCauldron cauldron : cauldrons) {
             saveCauldron(cauldron);
         }
@@ -342,10 +338,8 @@ public class FlatFileStorage extends DataManager {
     }
 
     @Override
-    public void saveAllPlayers(Collection<BPlayer> players, boolean overwrite) {
-        if (overwrite) {
-            dataFile.set("players", null);
-        }
+    public void saveAllPlayers(Collection<BPlayer> players) {
+        dataFile.set("players", null);
         for (BPlayer player : players) {
             savePlayer(player);
         }
@@ -397,10 +391,8 @@ public class FlatFileStorage extends DataManager {
     }
 
     @Override
-    public void saveAllWakeups(Collection<Wakeup> wakeups, boolean overwrite) {
-        if (overwrite) {
-            dataFile.set("wakeups", null);
-        }
+    public void saveAllWakeups(Collection<Wakeup> wakeups) {
+        dataFile.set("wakeups", null);
         for (Wakeup wakeup : wakeups) {
             saveWakeup(wakeup);
         }

@@ -48,7 +48,7 @@ import java.util.List;
 import java.util.UUID;
 
 // I don't write the greatest SQL, but I did my best ¯\_(ツ)_/¯ - Jsinco
-@SuppressWarnings("Duplicates") // Dupe code from SQLiteStorage
+@SuppressWarnings({ "SqlSourceToSinkFlow", "Duplicates" }) // Dupe code from SQLiteStorage
 public class MySQLStorage extends DataManager {
 
     private static final String URL = "jdbc:mysql://";
@@ -157,28 +157,17 @@ public class MySQLStorage extends DataManager {
         return objects;
     }
 
-
+    public <T extends SerializableThing> void saveAllGeneric(List<T> serializableThings, String table) {
+        saveAllGeneric(serializableThings, table, null);
+    }
+    // Batch saving/deleting
     @Override
-    public <T extends SerializableThing> void saveAllGeneric(List<T> serializableThings, String table, boolean overwrite, @Nullable Class<T> type) {
-        if (!overwrite) {
-            String insertSql = "INSERT INTO " + tablePrefix + table + " (id, data) VALUES (?, ?) ON DUPLICATE KEY UPDATE data = VALUES(data)";
-            try (PreparedStatement insertStatement = connection.prepareStatement(insertSql)) {
-                for (SerializableThing serializableThing : serializableThings) {
-                    insertStatement.setString(1, serializableThing.getId());
-                    insertStatement.setString(2, serializer.serialize(serializableThing));
-                    insertStatement.addBatch();
-                }
-                insertStatement.executeBatch();
-            } catch (SQLException e) {
-                Logging.errorLog("Failed to save to MySQL!", e);
-            }
-            return;
-        }
-
+    public <T extends SerializableThing> void saveAllGeneric(List<T> serializableThings, String table, @Nullable Class<T> type) {
         String createTempTableSql = "CREATE TEMPORARY TABLE temp_" + table + " (id VARCHAR(36), data LONGTEXT, PRIMARY KEY (id))";
         String insertTempTableSql = "INSERT INTO temp_" + table + " (id, data) VALUES (?, ?) ON DUPLICATE KEY UPDATE data = VALUES(data)";
         String replaceTableSql = "REPLACE INTO " + tablePrefix + table + " SELECT * FROM temp_" + table;
         String dropTempTableSql = "DROP TEMPORARY TABLE temp_" + table;
+        String deleteOldRecordsSql = "DELETE FROM " + tablePrefix + table + " WHERE id NOT IN (SELECT id FROM temp_" + table + ")";
 
         try {
             connection.setAutoCommit(false);
@@ -194,6 +183,10 @@ public class MySQLStorage extends DataManager {
                     insertTempTableStmt.addBatch();
                 }
                 insertTempTableStmt.executeBatch();
+
+                try (PreparedStatement deleteStmt = connection.prepareStatement(deleteOldRecordsSql)) {
+                    deleteStmt.executeUpdate();
+                }
 
                 try (PreparedStatement replaceTableStmt = connection.prepareStatement(replaceTableSql);
                      PreparedStatement dropTempTableStmt = connection.prepareStatement(dropTempTableSql)) {
@@ -212,10 +205,6 @@ public class MySQLStorage extends DataManager {
         } catch (SQLException e) {
             Logging.errorLog("Failed to manage transaction for saving objects to: " + table + " due to MySQL exception!", e);
         }
-    }
-
-    private <T extends SerializableThing> void saveAllGeneric(List<T> serializableThings, String table, boolean overwrite) {
-        saveAllGeneric(serializableThings, table, overwrite, null);
     }
 
     @Override
@@ -258,12 +247,12 @@ public class MySQLStorage extends DataManager {
     }
 
     @Override
-    public void saveAllBarrels(Collection<Barrel> barrels, boolean overwrite) {
+    public void saveAllBarrels(Collection<Barrel> barrels) {
         List<SerializableBarrel> serializableBarrels = barrels.stream()
             .filter(it -> it.getBounds() != null)
             .map(SerializableBarrel::new)
             .toList();
-        saveAllGeneric(serializableBarrels, "barrels", overwrite);
+        saveAllGeneric(serializableBarrels, "barrels");
     }
 
     @Override
@@ -293,11 +282,11 @@ public class MySQLStorage extends DataManager {
     }
 
     @Override
-    public void saveAllCauldrons(Collection<BCauldron> cauldrons, boolean overwrite) {
+    public void saveAllCauldrons(Collection<BCauldron> cauldrons) {
         List<SerializableCauldron> serializableCauldrons = cauldrons.stream()
             .map(SerializableCauldron::new)
             .toList();
-        saveAllGeneric(serializableCauldrons, "cauldrons", overwrite);
+        saveAllGeneric(serializableCauldrons, "cauldrons");
     }
 
     @Override
@@ -327,11 +316,11 @@ public class MySQLStorage extends DataManager {
     }
 
     @Override
-    public void saveAllPlayers(Collection<BPlayer> players, boolean overwrite) {
+    public void saveAllPlayers(Collection<BPlayer> players) {
         List<SerializableBPlayer> serializableBPlayers = players.stream()
             .map(SerializableBPlayer::new)
             .toList();
-        saveAllGeneric(serializableBPlayers, "players", overwrite);
+        saveAllGeneric(serializableBPlayers, "players");
     }
 
     @Override
@@ -361,11 +350,11 @@ public class MySQLStorage extends DataManager {
     }
 
     @Override
-    public void saveAllWakeups(Collection<Wakeup> wakeups, boolean overwrite) {
+    public void saveAllWakeups(Collection<Wakeup> wakeups) {
         List<SerializableWakeup> serializableWakeups = wakeups.stream()
             .map(SerializableWakeup::new)
             .toList();
-        saveAllGeneric(serializableWakeups, "wakeups", overwrite);
+        saveAllGeneric(serializableWakeups, "wakeups");
     }
 
     @Override

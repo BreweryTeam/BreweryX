@@ -41,12 +41,11 @@ public class BreweryPluginItem extends PluginItem {
         if (brew == null) {
             return false;
         }
-        return isBrew(brew, item) || isCauldronIngredient(item);
+        return isMatchingBrew(brew) || isCauldronIngredient(item);
     }
 
-    private boolean isBrew(Brew brew, ItemStack item) {
-
-
+    // Checks if an ItemStack is a Brewery Brew with the correct recipe by comparing the ids/names
+    private boolean isMatchingBrew(Brew brew) {
         BRecipe recipe = brew.getCurrentRecipe();
         if (recipe != null) {
             // We *could* add support for names instead of just using the ids

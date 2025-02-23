@@ -42,6 +42,7 @@ import com.mongodb.client.model.ReplaceOptions;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.Logger;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -134,15 +135,13 @@ public class MongoDBStorage extends DataManager {
     }
 
     @Override
-    public <T extends SerializableThing> void saveAllGeneric(List<T> things, String collection, boolean overwrite, Class<T> type) {
-        assert type != null : "'type' cannot be null!";
+    public <T extends SerializableThing> void saveAllGeneric(List<T> things, String collection, @Nullable Class<T> type) {
+        assert type != null : "'type' cannot be null when using mongo storage!";
         MongoCollection<T> mongoCollection = mongoDatabase.getCollection(collectionPrefix + collection, type);
 
-        if (overwrite) {
-            Set<String> thingsIds = things.stream().map(T::getId).collect(Collectors.toSet());
-            // Delete objects from the collection that are no longer in the list
-            mongoCollection.deleteMany(Filters.not(Filters.in(MONGO_ID, thingsIds)));
-        }
+        Set<String> thingsIds = things.stream().map(T::getId).collect(Collectors.toSet());
+        // Delete objects from the collection that are no longer in the list
+        mongoCollection.deleteMany(Filters.not(Filters.in(MONGO_ID, thingsIds)));
 
         for (T thing : things) {
             mongoCollection.replaceOne(Filters.eq(MONGO_ID, thing.getId()), thing, new ReplaceOptions().upsert(true)); // Upsert to handle both insert and update
@@ -173,12 +172,12 @@ public class MongoDBStorage extends DataManager {
     }
 
     @Override
-    public void saveAllBarrels(Collection<Barrel> barrels, boolean overwrite) {
+    public void saveAllBarrels(Collection<Barrel> barrels) {
         List<SerializableBarrel> serializableBarrels = barrels.stream()
             .filter(it -> it.getBounds() != null)
             .map(SerializableBarrel::new)
             .toList();
-        saveAllGeneric(serializableBarrels, "barrels", overwrite, SerializableBarrel.class);
+        saveAllGeneric(serializableBarrels, "barrels", SerializableBarrel.class);
     }
 
     @Override
@@ -208,11 +207,11 @@ public class MongoDBStorage extends DataManager {
     }
 
     @Override
-    public void saveAllCauldrons(Collection<BCauldron> cauldrons, boolean overwrite) {
+    public void saveAllCauldrons(Collection<BCauldron> cauldrons) {
         List<SerializableCauldron> serializableCauldrons = cauldrons.stream()
             .map(SerializableCauldron::new)
             .toList();
-        saveAllGeneric(serializableCauldrons, "cauldrons", overwrite, SerializableCauldron.class);
+        saveAllGeneric(serializableCauldrons, "cauldrons", SerializableCauldron.class);
     }
 
     @Override
@@ -242,11 +241,11 @@ public class MongoDBStorage extends DataManager {
     }
 
     @Override
-    public void saveAllPlayers(Collection<BPlayer> players, boolean overwrite) {
+    public void saveAllPlayers(Collection<BPlayer> players) {
         List<SerializableBPlayer> serializableBPlayers = players.stream()
             .map(SerializableBPlayer::new)
             .toList();
-        saveAllGeneric(serializableBPlayers, "players", overwrite, SerializableBPlayer.class);
+        saveAllGeneric(serializableBPlayers, "players", SerializableBPlayer.class);
     }
 
     @Override
@@ -276,11 +275,11 @@ public class MongoDBStorage extends DataManager {
     }
 
     @Override
-    public void saveAllWakeups(Collection<Wakeup> wakeups, boolean overwrite) {
+    public void saveAllWakeups(Collection<Wakeup> wakeups) {
         List<SerializableWakeup> serializableWakeups = wakeups.stream()
             .map(SerializableWakeup::new)
             .toList();
-        saveAllGeneric(serializableWakeups, "wakeups", overwrite, SerializableWakeup.class);
+        saveAllGeneric(serializableWakeups, "wakeups", SerializableWakeup.class);
     }
 
     @Override

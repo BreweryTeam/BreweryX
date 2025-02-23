@@ -38,6 +38,7 @@ public class Hook {
     public static final Hook LWC = new Hook("LWC", config.isUseLWC());
     public static final Hook GRIEFPREVENTION = new Hook("GriefPrevention", config.isUseGriefPrevention());
     public static final Hook TOWNY = new Hook("Towny", config.isUseTowny());
+    public static final Hook LANDS = new Hook("Lands", config.isUseLands());
     public static final Hook LOGBLOCK = new Hook("LogBlock", config.isUseLogBlock());
     public static final Hook GAMEMODEINVENTORIES = new Hook("GameModeInventories", config.isUseGMInventories());
     public static final Hook MMOITEMS = new Hook("MMOItems");

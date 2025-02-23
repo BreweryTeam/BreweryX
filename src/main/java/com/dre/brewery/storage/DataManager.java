@@ -75,7 +75,7 @@ public abstract class DataManager {
 
     public abstract <T extends SerializableThing> List<T> getAllGeneric(String table, Class<T> type);
 
-    public abstract <T extends SerializableThing> void saveAllGeneric(List<T> serializableThings, String table, boolean overwrite, @Nullable Class<T> type);
+    public abstract <T extends SerializableThing> void saveAllGeneric(List<T> serializableThings, String table, @Nullable Class<T> type);
 
     public abstract <T extends SerializableThing> void saveGeneric(T serializableThing, String table);
 
@@ -85,7 +85,7 @@ public abstract class DataManager {
 
     public abstract Collection<Barrel> getAllBarrels();
 
-    public abstract void saveAllBarrels(Collection<Barrel> barrels, boolean overwrite);
+    public abstract void saveAllBarrels(Collection<Barrel> barrels);
 
     public abstract void saveBarrel(Barrel barrel);
 
@@ -96,7 +96,7 @@ public abstract class DataManager {
 
     public abstract Collection<BCauldron> getAllCauldrons();
 
-    public abstract void saveAllCauldrons(Collection<BCauldron> cauldrons, boolean overwrite);
+    public abstract void saveAllCauldrons(Collection<BCauldron> cauldrons);
 
     public abstract void saveCauldron(BCauldron cauldron);
 
@@ -107,7 +107,7 @@ public abstract class DataManager {
 
     public abstract Collection<BPlayer> getAllPlayers();
 
-    public abstract void saveAllPlayers(Collection<BPlayer> players, boolean overwrite);
+    public abstract void saveAllPlayers(Collection<BPlayer> players);
 
     public abstract void savePlayer(BPlayer player);
 
@@ -118,7 +118,7 @@ public abstract class DataManager {
 
     public abstract Collection<Wakeup> getAllWakeups();
 
-    public abstract void saveAllWakeups(Collection<Wakeup> wakeups, boolean overwrite);
+    public abstract void saveAllWakeups(Collection<Wakeup> wakeups);
 
     public abstract void saveWakeup(Wakeup wakeup);
 
@@ -192,11 +192,11 @@ public abstract class DataManager {
     }
 
     private void doSave(Collection<Barrel> barrels, Collection<BCauldron> cauldrons, Collection<BPlayer> players, Collection<Wakeup> wakeups) {
-        saveBreweryMiscData(getLoadedMiscData());
-        saveAllBarrels(barrels, true);
-        saveAllCauldrons(cauldrons, true);
-        saveAllPlayers(players, true);
-        saveAllWakeups(wakeups, true);
+        this.saveBreweryMiscData(getLoadedMiscData());
+        this.saveAllBarrels(barrels);
+        this.saveAllCauldrons(cauldrons);
+        this.saveAllPlayers(players);
+        this.saveAllWakeups(wakeups);
 
         for (ExternallyAutoSavable autoSaveAble : autoSavabales) {
             try {

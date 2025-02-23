@@ -82,7 +82,7 @@ public class Barrel extends BarrelBody implements InventoryHolder {
      */
     public Barrel(Block spigot, byte signoffset) {
         super(spigot, signoffset);
-        this.inventory = Bukkit.createInventory(this, isLarge() ? 27 : 9, lang.getEntry("Etc_Barrel"));
+        this.inventory = Bukkit.createInventory(this, isLarge() ? config.getBarrelInvSizeLarge() * 9 : config.getBarrelInvSizeSmall() * 9, lang.getEntry("Etc_Barrel"));
         this.id = UUID.randomUUID();
     }
 
@@ -93,7 +93,7 @@ public class Barrel extends BarrelBody implements InventoryHolder {
      */
     public Barrel(Block spigot, byte sign, BoundingBox bounds, @Nullable Map<String, Object> items, float time, UUID id) {
         super(spigot, sign, bounds);
-        this.inventory = Bukkit.createInventory(this, isLarge() ? 27 : 9, lang.getEntry("Etc_Barrel"));
+        this.inventory = Bukkit.createInventory(this, isLarge() ? config.getBarrelInvSizeLarge() * 9 : config.getBarrelInvSizeSmall() * 9, lang.getEntry("Etc_Barrel"));
         if (items != null) {
             for (String slot : items.keySet()) {
                 if (items.get(slot) instanceof ItemStack) {
@@ -107,7 +107,7 @@ public class Barrel extends BarrelBody implements InventoryHolder {
 
     public Barrel(Block spigot, byte sign, BoundingBox bounds, ItemStack[] items, float time, UUID id) {
         super(spigot, sign, bounds);
-        this.inventory = Bukkit.createInventory(this, isLarge() ? 27 : 9, lang.getEntry("Etc_Barrel"));
+        this.inventory = Bukkit.createInventory(this, isLarge() ? config.getBarrelInvSizeLarge() * 9 : config.getBarrelInvSizeSmall() * 9, lang.getEntry("Etc_Barrel"));
         if (items != null) {
             for (int slot = 0; slot < items.length; slot++) {
                 if (items[slot] != null) {
@@ -180,7 +180,7 @@ public class Barrel extends BarrelBody implements InventoryHolder {
      */
     public void open(Player player) {
         if (inventory == null) {
-            this.inventory = Bukkit.createInventory(this, isLarge() ? 27 : 9, lang.getEntry("Etc_Barrel"));
+            this.inventory = Bukkit.createInventory(this, isLarge() ? config.getBarrelInvSizeLarge() * 9 : config.getBarrelInvSizeSmall() * 9, lang.getEntry("Etc_Barrel"));
         } else {
             if (time > 0) {
                 // if nobody has the inventory opened
