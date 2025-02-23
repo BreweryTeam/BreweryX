@@ -53,6 +53,12 @@ config:
   sealingTableBlock: |
     Par défaut, Brewery utilise le bloc « SMOKER » comme table de scellage des boissons ; ce paramètre vous permet de le changer.
     IMPORTANT : Il est nécessaire que le bloc choisi est un conteneur — signifiant un bloc qui peur stocker des objets (e.g., SMOKER, CHEST, BLAST_FURNACE).
+  enableSplashableBrews: |
+    Enables or disables the ability to convert brews into splash potions.
+    Splash potions can be created by using gunpowder instead of glowstone in distillers. [true]
+  splashableBrewPotencyReduction: |
+    Brewery will reduce the alcohol content of a thrown brew by the percentage specified here.
+    0.75 means the brew will have 75% of its original alcohol content when thrown (1.0 = 100%). [1.0]
   alwaysShowQuality: "Toujours montrer les 1-5 étoiles sur les objets en fonction de leur qualité. S’ils sont faux, ils n’apparaîtront que lors de l’infusion. [true]"
   alwaysShowAlc: "Toujours indiquer la teneur en alcool sur les objets. S’il est false, il n’apparaîtra que dans le stand de brassage. [false]"
   showBrewer: "Si le brasseur de la boisson devrait être montré. [false]"

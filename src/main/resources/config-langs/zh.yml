@@ -54,6 +54,12 @@ config:
   sealingTableBlock: |
     By default, Brewery uses Smoker as a Sealing Table, this option allows you to change it
     IMPORTANT: It needs to be a container - meaning a block that can store items (e.g., SMOKER, CHEST, BLAST_FURNACE).
+  enableSplashableBrews: |
+    Enables or disables the ability to convert brews into splash potions.
+    Splash potions can be created by using gunpowder instead of glowstone in distillers. [true]
+  splashableBrewPotencyReduction: |
+    Brewery will reduce the alcohol content of a thrown brew by the percentage specified here.
+    0.75 means the brew will have 75% of its original alcohol content when thrown (1.0 = 100%). [1.0]
   alwaysShowQuality: "是否始终根据物品质量显示1-5颗星，如果设置为否，则仅在酿造过程中显示星星 [true]"
   alwaysShowAlc: "是否始终在物品上显示酒精含量，如果设置为否，则只在酿造台上显示 [false]"
   showBrewer: "如果我们应该显示谁制作了这杯饮料 [false]"

@@ -21,6 +21,7 @@
 package com.dre.brewery.listeners;
 
 import com.dre.brewery.BDistiller;
+import com.dre.brewery.BDistillerOperation;
 import com.dre.brewery.BSealer;
 import com.dre.brewery.Barrel;
 import com.dre.brewery.Brew;
@@ -67,7 +68,7 @@ public class InventoryListener implements Listener {
     private final Config config = ConfigManager.getConfig(Config.class);
 
     /* === Recreating manually the prior BrewEvent behavior. === */
-    private HashSet<UUID> trackedBrewmen = new HashSet<>();
+    private final HashSet<UUID> trackedBrewmen = new HashSet<>();
 
     /**
      * Start tracking distillation for a person when they open the brewer window.
@@ -77,7 +78,7 @@ public class InventoryListener implements Listener {
         if (VERSION.isOrEarlier(MinecraftVersion.V1_9)) return;
         HumanEntity player = event.getPlayer();
         Inventory inv = event.getInventory();
-        if (player == null || !(inv instanceof BrewerInventory)) return;
+        if (!(inv instanceof BrewerInventory)) return;
 
         Logging.debugLog("Starting brew inventory tracking");
         trackedBrewmen.add(player.getUniqueId());
@@ -91,7 +92,7 @@ public class InventoryListener implements Listener {
         if (VERSION.isOrEarlier(MinecraftVersion.V1_9)) return;
         HumanEntity player = event.getPlayer();
         Inventory inv = event.getInventory();
-        if (player == null || !(inv instanceof BrewerInventory)) return;
+        if (!(inv instanceof BrewerInventory)) return;
 
         Logging.debugLog("Stopping brew inventory tracking");
         trackedBrewmen.remove(player.getUniqueId());
@@ -131,7 +132,7 @@ public class InventoryListener implements Listener {
     @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
     public void onBrew(BrewEvent event) {
         if (VERSION.isOrLater(MinecraftVersion.V1_9)) {
-            if (BDistiller.hasBrew(event.getContents(), BDistiller.getDistillContents(event.getContents())) != 0) {
+            if (BDistillerOperation.isDistillable(event.getContents(), BDistiller.getDistillContents(event.getContents())) != BDistillerOperation.NOT_DISTILLABLE) {
                 event.setCancelled(true);
             }
             return;

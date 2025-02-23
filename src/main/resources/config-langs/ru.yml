@@ -59,6 +59,12 @@ config:
   sealingTableBlock: |
     Обычно в качестве стола для запечатывания используется модифицированный блок Коптильной печи, но вы можете это изменить
     ВАЖНО: Блок должен быть контейнером, то есть блоком, способным держать в себе предметы (например, SMOKER, CHEST, BLAST_FURNACE).
+  enableSplashableBrews: |
+    Enables or disables the ability to convert brews into splash potions.
+    Splash potions can be created by using gunpowder instead of glowstone in distillers. [true]
+  splashableBrewPotencyReduction: |
+    Brewery will reduce the alcohol content of a thrown brew by the percentage specified here.
+    0.75 means the brew will have 75% of its original alcohol content when thrown (1.0 = 100%). [1.0]
   alwaysShowQuality: |
     Всегда ли отображать 1-5 звезд, в зависимости от качества, в описании напитка.
     Если false, то звезды будут видны только при настаивании или дистилляции [true]

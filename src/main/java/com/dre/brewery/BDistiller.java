@@ -101,9 +101,19 @@ public class BDistiller {
         Brew[] contents = new Brew[3];
         for (int slot = 0; slot < 3; slot++) {
             item = inv.getItem(slot);
-            if (item != null) {
-                contents[slot] = Brew.get(item);
+            if (item == null) {
+                continue;
             }
+            Brew brew = Brew.get(item);
+
+            if (brew == null) {
+                continue;
+            }
+
+            if (item.getType() == Material.SPLASH_POTION) {
+                brew.setSplashPotion(true);
+            }
+            contents[slot] = brew;
         }
         return contents;
     }
@@ -118,25 +128,6 @@ public class BDistiller {
                 }
             }
         }
-    }
-
-    public static byte hasBrew(BrewerInventory brewer, Brew[] contents) {
-        ItemStack item = brewer.getItem(3); // ingredient
-        boolean glowstone = (item != null && Material.GLOWSTONE_DUST == item.getType()); // need dust in the top slot.
-        byte customFound = 0;
-        for (Brew brew : contents) {
-            if (brew != null) {
-                if (!glowstone) {
-                    return 1;
-                }
-                if (brew.canDistill()) {
-                    return 2;
-                } else {
-                    customFound = 1;
-                }
-            }
-        }
-        return customFound;
     }
 
     public static boolean runDistill(BrewerInventory inv, Brew[] contents) {
@@ -205,7 +196,16 @@ public class BDistiller {
                 }
 
                 BrewingStand stand = (BrewingStand) PaperLib.getBlockState(standBlock, true).getState();
-                if (brewTime == -1 && !prepareForDistillables(stand)) { // check at the beginning for distillables
+                BrewerInventory inventory = stand.getInventory();
+                if (contents == null) {
+                    contents = getDistillContents(inventory);
+                } else {
+                    checkContents(inventory, contents);
+                }
+                BDistillerOperation operation = BDistillerOperation.isDistillable(inventory, contents);
+                System.out.println("Operation: " + operation);
+
+                if (brewTime == -1 && !prepareForDistillables(stand, inventory, operation)) { // check at the beginning for distillables
                     return;
                 }
 
@@ -220,6 +220,22 @@ public class BDistiller {
                 contents = getDistillContents(stand.getInventory()); // Get the contents again at the end just in case
                 stand.setBrewingTime(0);
                 stand.update();
+
+                if (operation == BDistillerOperation.SPLASHABLE) {
+                    // This is the only case where we don't want to distill the potions
+                    // TODO: clean this up
+                    this.cancel();
+                    trackedDistillers.remove(standBlock);
+                    for (int slot = 0; slot < 3; slot++) {
+                        if (contents[slot] != null) {
+                            ItemStack item = inventory.getItem(slot);
+                            item.setType(Material.SPLASH_POTION);
+                        }
+                    }
+                    Logging.debugLog("Created a splash potion");
+                    return;
+                }
+
                 if (!runDistill(stand.getInventory(), contents)) {
                     this.cancel();
                     trackedDistillers.remove(standBlock);
@@ -231,15 +247,19 @@ public class BDistiller {
             });
         }
 
-        private boolean prepareForDistillables(BrewingStand stand) {
-            BrewerInventory inventory = stand.getInventory();
-            if (contents == null) {
-                contents = getDistillContents(inventory);
-            } else {
-                checkContents(inventory, contents);
-            }
-            switch (hasBrew(inventory, contents)) {
-                case 1:
+
+        private boolean prepareForDistillables(BrewingStand stand, BrewerInventory inventory, BDistillerOperation operation) {
+            switch (operation) {
+                case NOT_DISTILLABLE -> {
+                    // No custom potion, cancel and ignore
+                    this.cancel();
+                    trackedDistillers.remove(standBlock);
+                    showAlc(inventory, contents);
+                    Logging.debugLog("nothing to distill");
+                    return false;
+                }
+
+                case DISTILLABLE_NO_OPERTION -> {
                     // Custom potion but not for distilling. Stop any brewing and cancel this task
                     if (stand.getBrewingTime() > 0) {
                         if (VERSION.isOrLater(MinecraftVersion.V1_11)) {
@@ -256,20 +276,17 @@ public class BDistiller {
                         stand.setFuelLevel(fuel);
                         stand.update();
                     }
-                case 0:
-                    // No custom potion, cancel and ignore
-                    this.cancel();
-                    trackedDistillers.remove(standBlock);
-                    showAlc(inventory, contents);
-                    Logging.debugLog("nothing to distill");
-                    return false;
-                default:
+                }
+                case DISTILLABLE, SPLASHABLE -> {
                     runTime = getLongestDistillTime(contents);
                     brewTime = runTime;
                     Logging.debugLog("using brewtime: " + runTime);
+                }
 
             }
             return true;
         }
     }
+
+
 }

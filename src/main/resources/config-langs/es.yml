@@ -49,6 +49,12 @@ config:
   sealingTableBlock: |
     Por defecto, BreweryX utiliza un ahumador como mesa de sellado. Esta opción te permite cambiarlo
     IMPORTANTE: Debe de ser un contenedor - un bloque que pueda contener objetos (por ejemplo, SMOKER, CHEST, BLAST_FURNACE).
+  enableSplashableBrews: |
+    Enables or disables the ability to convert brews into splash potions.
+    Splash potions can be created by using gunpowder instead of glowstone in distillers. [true]
+  splashableBrewPotencyReduction: |
+    Brewery will reduce the alcohol content of a thrown brew by the percentage specified here.
+    0.75 means the brew will have 75% of its original alcohol content when thrown (1.0 = 100%). [1.0]
   alwaysShowQuality: "Muestra siempre las estrellas en el objeto dependiendo de su calidad. Si se desactiva, solo aparecera durante su cocinado [true]"
   alwaysShowAlc: "Muestra siempre el nivel de alcohol del objeto. Si se desactiva, solo se mostrará en el estante de pociones [false]"
   showBrewer: "Si se debería mostrar quien hizo la bebida [false]"
