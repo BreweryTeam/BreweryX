@@ -27,6 +27,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
+import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -49,10 +50,10 @@ public class BrewDrinkEvent extends BrewEvent implements Cancellable {
     private int quality;
     private boolean cancelled;
 
-    @Nullable // Null if drinking from command
-    private PlayerItemConsumeEvent predecessorEvent;
+    @Nullable // Null if drinking from command. Can be either PlayerConsumeItemEvent or PotionSplashEvent
+    private Event predecessorEvent;
 
-    public BrewDrinkEvent(Brew brew, ItemMeta meta, Player player, BPlayer bPlayer, @Nullable PlayerItemConsumeEvent predecessor) {
+    public BrewDrinkEvent(Brew brew, ItemMeta meta, Player player, BPlayer bPlayer, @Nullable Event predecessor) {
         super(brew, meta);
         this.player = player;
         this.bPlayer = bPlayer;

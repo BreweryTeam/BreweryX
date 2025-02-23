@@ -90,7 +90,7 @@ public class Brew implements Cloneable {
     private byte distillRuns;
     private float ageTime;
     private BarrelWoodType wood;
-    // TODO: This should extend BRecipe, not hold a reference.
+    // TODO: Maybe this should extend BRecipe, not hold a reference?
     private BRecipe currentRecipe; // Recipe this Brew is currently based off. May change between modifications and is often null when not modifying
     private boolean unlabeled;
     private boolean persistent; // Only for legacy
@@ -99,6 +99,7 @@ public class Brew implements Cloneable {
     private int lastUpdate; // last update in hours after install time
     private boolean needsSave; // There was a change that has not yet been saved
     private boolean hasGlint; // The Brew has a glint effect
+    private transient boolean splashPotion = false;
 
     /**
      * A new Brew with only ingredients
@@ -166,7 +167,7 @@ public class Brew implements Cloneable {
      */
     @Nullable
     public static Brew get(ItemStack item) {
-        if (item.getType() != Material.POTION) return null;
+        if (item.getType() != Material.POTION && item.getType() != Material.SPLASH_POTION) return null;
         if (!item.hasItemMeta()) return null;
 
         ItemMeta meta = item.getItemMeta();

@@ -48,6 +48,7 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.ItemStack;
@@ -190,13 +191,13 @@ public class BPlayer {
     }
 
     // Drink a brew and apply effects, etc.
-    public static boolean drink(Brew brew, Player player, @Nullable ItemMeta meta, @Nullable PlayerItemConsumeEvent event) {
+    public static boolean drink(Brew brew, Player player, @Nullable ItemMeta meta, @Nullable Event parentEvent) {
         BPlayer bPlayer = get(player);
         if (bPlayer == null) {
             bPlayer = addPlayer(player);
         }
         // In this event the added alcohol amount is calculated, based on the sensitivity permission
-        BrewDrinkEvent drinkEvent = new BrewDrinkEvent(brew, meta, player, bPlayer, event);
+        BrewDrinkEvent drinkEvent = new BrewDrinkEvent(brew, meta, player, bPlayer, parentEvent);
         if (meta != null) {
             BreweryPlugin.getInstance().getServer().getPluginManager().callEvent(drinkEvent);
             if (brew != drinkEvent.getBrew()) brew = drinkEvent.getBrew();

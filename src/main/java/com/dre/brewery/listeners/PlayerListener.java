@@ -47,6 +47,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.entity.PotionSplashEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -61,12 +62,15 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 
+import java.util.List;
+
 
 public class PlayerListener implements Listener {
 
     private static final MinecraftVersion VERSION = BreweryPlugin.getMCVersion();
     private static final Config config = ConfigManager.getConfig(Config.class);
     private static final Lang lang = ConfigManager.getConfig(Lang.class);
+    private static final ItemStack BLANK_POTION = new ItemStack(Material.POTION);
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onPlayerInteract(PlayerInteractEvent event) {
@@ -232,15 +236,12 @@ public class PlayerListener implements Listener {
                     event.setCancelled(true);
                     return;
                 }
-                /*if (player.getGameMode() != org.bukkit.GameMode.CREATIVE) {
-                    brew.remove(item);
-                }*/
                 if (VERSION.isOrLater(MinecraftVersion.V1_9)) {
                     if (player.getGameMode() != GameMode.CREATIVE) {
-// replace the potion with an empty potion to avoid effects
-                        event.setItem(new ItemStack(Material.POTION));
+                        // replace the potion with an empty potion to avoid effects
+                        event.setItem(BLANK_POTION);
                     } else {
-// Don't replace the item when keeping the potion, just cancel the event
+                        // Don't replace the item when keeping the potion, just cancel the event
                         event.setCancelled(true);
                     }
                 }
@@ -252,6 +253,27 @@ public class PlayerListener implements Listener {
                 if (config.isShowStatusOnDrink()) {
                     bplayer.showDrunkeness(player);
                 }
+            }
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onPlayerSplashPotion(PotionSplashEvent event) {
+        ItemStack item = event.getPotion().getItem();
+        Brew brew = Brew.get(item);
+        if (brew == null) {
+            return;
+        }
+
+        brew.setAlc((int) (brew.getAlc() * config.getSplashableBrewPotencyReduction()));
+
+        List<Player> players = event.getAffectedEntities().stream()
+            .filter(entity -> entity instanceof Player)
+            .map(entity -> (Player) entity).toList();
+        for (Player player : players) {
+            if (!BPlayer.drink(brew, player, item.getItemMeta(), event)) {
+                event.setCancelled(true);
+                return;
             }
         }
     }

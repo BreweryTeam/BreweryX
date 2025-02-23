@@ -143,6 +143,11 @@ public class Config extends AbstractOkaeriConfigFile {
     @LocalizedComment("config.sealingTableBlock")
     private Material sealingTableBlock = Material.SMOKER;
 
+    @LocalizedComment("config.enableSplashableBrews")
+    private boolean enableSplashableBrews = true;
+    @LocalizedComment("config.splashableBrewPotencyReduction")
+    private double splashableBrewPotencyReduction = 1.0;
+
     @LocalizedComment("config.alwaysShowQuality")
     private boolean alwaysShowQuality = true;
 
