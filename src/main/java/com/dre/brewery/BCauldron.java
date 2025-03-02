@@ -435,21 +435,20 @@ public class BCauldron {
             assert item != null;
             if (player.getInventory().firstEmpty() != -1 || item.getAmount() == 1) {
                 BCauldron bcauldron = get(clickedBlock);
-                if (bcauldron != null) {
-                    if (bcauldron.fill(player, clickedBlock)) {
-                        event.setCancelled(true);
-                        if (player.hasPermission("brewery.cauldron.fill")) {
-                            if (item.getAmount() > 1) {
-                                item.setAmount(item.getAmount() - 1);
-                            } else {
-                                BUtil.setItemInHand(event, Material.AIR, false);
-                            }
-                        }
+                if (bcauldron == null) {
+                    return;
+                }
+
+                if (bcauldron.fill(player, clickedBlock) && player.hasPermission("brewery.cauldron.fill")) {
+                    if (item.getAmount() > 1) {
+                        item.setAmount(item.getAmount() - 1);
+                    } else {
+                        BUtil.setItemInHand(event, Material.AIR, false);
                     }
                 }
-            } else {
-                event.setCancelled(true);
+
             }
+            event.setCancelled(true);
             return;
 
             // Ignore Water Buckets

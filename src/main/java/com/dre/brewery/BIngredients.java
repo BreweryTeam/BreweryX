@@ -36,6 +36,7 @@ import com.dre.brewery.utility.BUtil;
 import com.dre.brewery.utility.Logging;
 import com.dre.brewery.utility.MinecraftVersion;
 import lombok.Getter;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.enchantments.Enchantment;
@@ -137,6 +138,7 @@ public class BIngredients {
     /**
      * returns an Potion item with cooked ingredients
      */
+    @Nullable
     public ItemStack cook(int state, Player brewer) {
 
         ItemStack potion = new ItemStack(Material.POTION);
@@ -214,7 +216,7 @@ public class BIngredients {
 
         brew.touch();
         BrewModifyEvent modifyEvent = new BrewModifyEvent(brew, potionMeta, BrewModifyEvent.Type.FILL, brewer);
-        plugin.getServer().getPluginManager().callEvent(modifyEvent);
+        Bukkit.getPluginManager().callEvent(modifyEvent);
         if (modifyEvent.isCancelled()) {
             return null;
         }
