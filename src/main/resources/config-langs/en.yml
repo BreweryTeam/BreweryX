@@ -165,9 +165,9 @@ recipesFile:
 
     servercommands: List of Commands executed by the -Server- when drinking the brew (Can use %player_name%  %quality%)
       Specific Commands for quality possible, using + bad, ++ normal, +++ good, added to the front of the line.
-      - +++ op %player%
-      - ++ money give %player% 10
-      - + kill %player%
+      - +++ op %player_name%
+      - ++ money give %player_name% 10
+      - + kill %player_name%
       Command execution can be delayed by adding "/ <amount>s" to the end, like this:
       - op Jsinco / 3s
 

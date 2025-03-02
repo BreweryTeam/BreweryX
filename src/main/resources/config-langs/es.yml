@@ -158,9 +158,9 @@ recipesFile:
 
     servercommands: Lista de comandos ejecutados por el -Servidor- al beber (se puede usar %player_name% %quality%)
       Se pueden especificar comandos por calidad, usando + mal, ++ normal, +++ bien, añadido al principio de la línea.
-      - +++ op %player%
-      - ++ money give %player% 10
-      - + kill %player%
+      - +++ op %player_name%
+      - ++ money give %player_name% 10
+      - + kill %player_name%
       El comando puede retrasarse antes de ejecutar añadiendo "/ <cantidad>s" al final, donde "s" significa segundos, como en este ejemplo:
       - op Jsinco / 3s
 
