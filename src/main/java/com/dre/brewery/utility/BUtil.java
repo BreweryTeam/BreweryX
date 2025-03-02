@@ -335,7 +335,7 @@ public final class BUtil {
             if (barrel2 != null) {
                 if (!barrel2.isLarge()) {
                     if (barrel2.hasPermsDestroy(player, block, reason)) {
-                        barrel2.remove(null, player, true);
+                        barrel2.remove(block, player, true);
                         return true;
                     } else {
                         return false;
