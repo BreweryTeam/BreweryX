@@ -94,7 +94,7 @@ public abstract class BarrelBody {
     /**
      * direction of the barrel from the spigot
      */
-    public static BarrelFacing getDirection(Block spigot) {
+    public static @Nullable BarrelFacing getDirection(Block spigot) {
         BarrelFacing direction = null;// 1=x+ 2=x- 3=z+ 4=z-
         Material type = spigot.getRelative(0, 0, 1).getType();
         if (BarrelAsset.isBarrelAsset(BarrelAsset.PLANKS, type) || BarrelAsset.isBarrelAsset(BarrelAsset.STAIRS, type)) {
