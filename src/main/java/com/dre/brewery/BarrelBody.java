@@ -22,15 +22,19 @@ package com.dre.brewery;
 
 import com.dre.brewery.utility.BUtil;
 import com.dre.brewery.utility.BoundingBox;
-import com.dre.brewery.utility.MaterialUtil;
 import com.dre.brewery.utility.MinecraftVersion;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Player;
+import org.bukkit.util.BlockVector;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * The Blocks that make up a Barrel in the World
@@ -90,34 +94,34 @@ public abstract class BarrelBody {
     /**
      * direction of the barrel from the spigot
      */
-    public static int getDirection(Block spigot) {
-        int direction = 0;// 1=x+ 2=x- 3=z+ 4=z-
+    public static BarrelFacing getDirection(Block spigot) {
+        BarrelFacing direction = null;// 1=x+ 2=x- 3=z+ 4=z-
         Material type = spigot.getRelative(0, 0, 1).getType();
         if (BarrelAsset.isBarrelAsset(BarrelAsset.PLANKS, type) || BarrelAsset.isBarrelAsset(BarrelAsset.STAIRS, type)) {
-            direction = 3;
+            direction = BarrelFacing.SOUTH;
         }
         type = spigot.getRelative(0, 0, -1).getType();
         if (BarrelAsset.isBarrelAsset(BarrelAsset.PLANKS, type) || BarrelAsset.isBarrelAsset(BarrelAsset.STAIRS, type)) {
-            if (direction == 0) {
-                direction = 4;
+            if (direction == null) {
+                direction = BarrelFacing.NORTH;
             } else {
-                return 0;
+                return null;
             }
         }
         type = spigot.getRelative(1, 0, 0).getType();
         if (BarrelAsset.isBarrelAsset(BarrelAsset.PLANKS, type) || BarrelAsset.isBarrelAsset(BarrelAsset.STAIRS, type)) {
-            if (direction == 0) {
-                direction = 1;
+            if (direction == null) {
+                direction = BarrelFacing.EAST;
             } else {
-                return 0;
+                return null;
             }
         }
         type = spigot.getRelative(-1, 0, 0).getType();
         if (BarrelAsset.isBarrelAsset(BarrelAsset.PLANKS, type) || BarrelAsset.isBarrelAsset(BarrelAsset.STAIRS, type)) {
-            if (direction == 0) {
-                direction = 2;
+            if (direction == null) {
+                direction = BarrelFacing.WEST;
             } else {
-                return 0;
+                return null;
             }
         }
         return direction;
@@ -127,17 +131,17 @@ public abstract class BarrelBody {
      * woodtype of the block the spigot is attached to
      */
     public BarrelWoodType getWood() {
-        Block wood;
-        switch (getDirection(spigot)) { // 1=x+ 2=x- 3=z+ 4=z-
-            case 0 -> {
-                return BarrelWoodType.ANY;
-            }
-
-            case 1 -> wood = spigot.getRelative(1, 0, 0);
-            case 2 -> wood = spigot.getRelative(-1, 0, 0);
-            case 3 -> wood = spigot.getRelative(0, 0, 1);
-            default -> wood = spigot.getRelative(0, 0, -1);
+        BarrelFacing direction = getDirection(spigot);
+        if (direction == null) {
+            return BarrelWoodType.ANY;
         }
+        // TODO: replace this with Block#getRelative(BlockFace)
+        Block wood = switch (direction) {
+            case WEST -> spigot.getRelative(1, 0, 0);
+            case EAST -> spigot.getRelative(-1, 0, 0);
+            case SOUTH -> spigot.getRelative(0, 0, 1);
+            case NORTH -> spigot.getRelative(0, 0, -1);
+        };
         return BarrelWoodType.fromMaterial(wood.getType());
     }
 
@@ -231,144 +235,105 @@ public abstract class BarrelBody {
     }
 
     public Block checkSBarrel() {
-        int direction = getDirection(spigot);// 1=x+ 2=x- 3=z+ 4=z-
-        if (direction == 0) {
+        BarrelFacing direction = getDirection(spigot);// 1=x+ 2=x- 3=z+ 4=z-
+        if (direction == null) {
             return spigot;
         }
-        int startX;
-        int startZ;
-        int endX;
-        int endZ;
-
-        if (direction == 1) {
-            startX = 1;
-            startZ = -1;
-        } else if (direction == 2) {
-            startX = -2;
-            startZ = 0;
-        } else if (direction == 3) {
-            startX = 0;
-            startZ = 1;
-        } else {
-            startX = -1;
-            startZ = -2;
-        }
-        endX = startX + 1;
-        endZ = startZ + 1;
-
-        Material type;
-        int x = startX;
-        int y = 0;
-        int z = startZ;
-        while (y <= 1) {
-            while (x <= endX) {
-                while (z <= endZ) {
-                    Block block = spigot.getRelative(x, y, z);
-                    type = block.getType();
-
-                    if (BarrelAsset.isBarrelAsset(BarrelAsset.STAIRS, type)) {
-                        if (y == 0) {
-                            // stairs have to be upside down
-                            if (!MaterialUtil.areStairsInverted(block)) {
-                                return block;
-                            }
-                        }
-                        z++;
-                    } else {
-                        return spigot.getRelative(x, y, z);
-                    }
-                }
-                z = startZ;
-                x++;
-            }
-            z = startZ;
-            x = startX;
-            y++;
-        }
-        bounds.resize(
-            spigot.getX() + startX,
-            spigot.getY(),
-            spigot.getZ() + startZ,
-            spigot.getX() + endX,
-            spigot.getY() + 1,
-            spigot.getZ() + endZ
+        BarrelFacing orthogonal = direction.rotate90degrees();
+        int dx1 = direction.getDx();
+        int dx2 = orthogonal.getDx();
+        int dz1 = direction.getDz();
+        int dz2 = orthogonal.getDz();
+        Map<BlockVector, BarrelPart> untransformedBarrelPartMap = Map.of(
+            new BlockVector(1, 0, 0), BarrelPart.BOTTOM_RIGHT,
+            new BlockVector(1, 0, 1), BarrelPart.BOTTOM_LEFT,
+            new BlockVector(1, 1, 0), BarrelPart.TOP_RIGHT,
+            new BlockVector(1, 1, 1), BarrelPart.TOP_LEFT,
+            new BlockVector(2, 0, 0), BarrelPart.BOTTOM_RIGHT,
+            new BlockVector(2, 0, 1), BarrelPart.BOTTOM_LEFT,
+            new BlockVector(2, 1, 0), BarrelPart.TOP_RIGHT,
+            new BlockVector(2, 1, 1), BarrelPart.TOP_LEFT
         );
+        Block brokenBlock = validateStructure(direction, dx1, dx2, dz1, dz2, untransformedBarrelPartMap);
+        if (brokenBlock != null) {
+            return brokenBlock;
+        }
+
+        BlockVector spigotPos = spigot.getLocation().toVector().toBlockVector();
+        BlockVector minBarrel = (BlockVector) new BlockVector(dx1, 0, dz1).add(spigotPos);
+        BlockVector maxBarrel = (BlockVector) new BlockVector(2 * dx1 + dx2, 1, 2 * dz1 + dz2).add(spigotPos);this.bounds.resize(minBarrel.getBlockX(), minBarrel.getBlockY(), minBarrel.getBlockZ(), maxBarrel.getBlockX(), maxBarrel.getBlockY(), maxBarrel.getBlockZ());
         return null;
     }
 
     public Block checkLBarrel() {
-        int direction = getDirection(spigot);// 1=x+ 2=x- 3=z+ 4=z-
-        if (direction == 0) {
+        BarrelFacing direction = getDirection(spigot);
+        if (direction == null) {
             return spigot;
         }
-        int startX;
-        int startZ;
-        int endX;
-        int endZ;
-
-        if (direction == 1) {
-            startX = 1;
-            startZ = -1;
-        } else if (direction == 2) {
-            startX = -4;
-            startZ = -1;
-        } else if (direction == 3) {
-            startX = -1;
-            startZ = 1;
-        } else {
-            startX = -1;
-            startZ = -4;
+        BarrelFacing orthogonal = direction.rotate90degrees();
+        int dx1 = direction.getDx();
+        int dx2 = orthogonal.getDx();
+        int dz1 = direction.getDz();
+        int dz2 = orthogonal.getDz();
+        Map<BlockVector, BarrelPart> untransformedBarrelPartMap = new HashMap<>();
+        untransformedBarrelPartMap.put(new BlockVector(1, 0, -1), BarrelPart.BOTTOM_RIGHT);
+        untransformedBarrelPartMap.put(new BlockVector(1, 0, 1), BarrelPart.BOTTOM_LEFT);
+        untransformedBarrelPartMap.put(new BlockVector(1, 0, 0), BarrelPart.BLOCK);
+        untransformedBarrelPartMap.put(new BlockVector(1, 1, 1), BarrelPart.BLOCK);
+        untransformedBarrelPartMap.put(new BlockVector(1, 1, -1), BarrelPart.BLOCK);
+        untransformedBarrelPartMap.put(new BlockVector(1, 2, -1), BarrelPart.TOP_RIGHT);
+        untransformedBarrelPartMap.put(new BlockVector(1, 2, 1), BarrelPart.TOP_LEFT);
+        untransformedBarrelPartMap.put(new BlockVector(1, 2, 0), BarrelPart.BLOCK);
+        untransformedBarrelPartMap.put(new BlockVector(1, 1, 0), BarrelPart.BLOCK);
+        untransformedBarrelPartMap.put(new BlockVector(2, 0, -1), BarrelPart.BOTTOM_RIGHT);
+        untransformedBarrelPartMap.put(new BlockVector(2, 0, 1), BarrelPart.BOTTOM_LEFT);
+        untransformedBarrelPartMap.put(new BlockVector(2, 0, 0), BarrelPart.BLOCK);
+        untransformedBarrelPartMap.put(new BlockVector(2, 1, 1), BarrelPart.BLOCK);
+        untransformedBarrelPartMap.put(new BlockVector(2, 1, -1), BarrelPart.BLOCK);
+        untransformedBarrelPartMap.put(new BlockVector(2, 2, -1), BarrelPart.TOP_RIGHT);
+        untransformedBarrelPartMap.put(new BlockVector(2, 2, 1), BarrelPart.TOP_LEFT);
+        untransformedBarrelPartMap.put(new BlockVector(2, 2, 0), BarrelPart.BLOCK);
+        untransformedBarrelPartMap.put(new BlockVector(3, 0, -1), BarrelPart.BOTTOM_RIGHT);
+        untransformedBarrelPartMap.put(new BlockVector(3, 0, 1), BarrelPart.BOTTOM_LEFT);
+        untransformedBarrelPartMap.put(new BlockVector(3, 0, 0), BarrelPart.BLOCK);
+        untransformedBarrelPartMap.put(new BlockVector(3, 1, 1), BarrelPart.BLOCK);
+        untransformedBarrelPartMap.put(new BlockVector(3, 1, -1), BarrelPart.BLOCK);
+        untransformedBarrelPartMap.put(new BlockVector(3, 2, -1), BarrelPart.TOP_RIGHT);
+        untransformedBarrelPartMap.put(new BlockVector(3, 2, 1), BarrelPart.TOP_LEFT);
+        untransformedBarrelPartMap.put(new BlockVector(3, 2, 0), BarrelPart.BLOCK);
+        untransformedBarrelPartMap.put(new BlockVector(4, 0, -1), BarrelPart.BOTTOM_RIGHT);
+        untransformedBarrelPartMap.put(new BlockVector(4, 0, 1), BarrelPart.BOTTOM_LEFT);
+        untransformedBarrelPartMap.put(new BlockVector(4, 0, 0), BarrelPart.BLOCK);
+        untransformedBarrelPartMap.put(new BlockVector(4, 1, 1), BarrelPart.BLOCK);
+        untransformedBarrelPartMap.put(new BlockVector(4, 1, -1), BarrelPart.BLOCK);
+        untransformedBarrelPartMap.put(new BlockVector(4, 2, -1), BarrelPart.TOP_RIGHT);
+        untransformedBarrelPartMap.put(new BlockVector(4, 2, 1), BarrelPart.TOP_LEFT);
+        untransformedBarrelPartMap.put(new BlockVector(4, 2, 0), BarrelPart.BLOCK);
+        untransformedBarrelPartMap.put(new BlockVector(4, 1, 0), BarrelPart.BLOCK);
+        Block brokenBlock = validateStructure(direction, dx1, dx2, dz1, dz2, untransformedBarrelPartMap);
+        if (brokenBlock != null) {
+            return brokenBlock;
         }
-        if (direction == 1 || direction == 2) {
-            endX = startX + 3;
-            endZ = startZ + 2;
-        } else {
-            endX = startX + 2;
-            endZ = startZ + 3;
-        }
+        BlockVector spigotPos = spigot.getLocation().toVector().toBlockVector();
+        BlockVector minBarrel = (BlockVector) new BlockVector(dx1 - dx2, 0, dz1 - dz2).add(spigotPos);
+        BlockVector maxBarrel = (BlockVector) new BlockVector(4 * dx1 + dx2, 2, 4 * dz1 + dz2).add(spigotPos);
+        this.bounds.resize(minBarrel.getBlockX(), minBarrel.getBlockY(), minBarrel.getBlockZ(), maxBarrel.getBlockX(), maxBarrel.getBlockY(), maxBarrel.getBlockZ());
+        return null;
+    }
 
-        Material type;
-        int x = startX;
-        int y = 0;
-        int z = startZ;
-        while (y <= 2) {
-            while (x <= endX) {
-                while (z <= endZ) {
-                    Block block = spigot.getRelative(x, y, z);
-                    type = block.getType();
-                    if (direction == 1 || direction == 2) {
-                        if (y == 1 && z == 0) {
-                            z++;
-                            continue;
-                        }
-                    } else {
-                        if (y == 1 && x == 0) {
-                            z++;
-                            continue;
-                        }
-                    }
-                    if (BarrelAsset.isBarrelAsset(BarrelAsset.PLANKS, type) || BarrelAsset.isBarrelAsset(BarrelAsset.STAIRS, type)) {
-                        z++;
-                    } else {
-                        return block;
-                    }
-                }
-                z = startZ;
-                x++;
+    @Nullable
+    private Block validateStructure(BarrelFacing direction, int dx1, int dx2, int dz1, int dz2, Map<BlockVector, BarrelPart> untransformedBarrelPartMap) {
+        BarrelWoodType woodType = getWood();
+        for (Map.Entry<BlockVector, BarrelPart> entry : untransformedBarrelPartMap.entrySet()) {
+            int relativeX = dx1 * entry.getKey().getBlockX() + dx2 * entry.getKey().getBlockZ();
+            int relativeZ = dz1 * entry.getKey().getBlockX() + dz2 * entry.getKey().getBlockZ();
+            int relativeY = entry.getKey().getBlockY();
+            Block block = spigot.getRelative(relativeX, relativeY, relativeZ);
+            BlockData blockData = block.getBlockData();
+            if (!entry.getValue().matches(woodType, blockData, direction)) {
+                return block;
             }
-            z = startZ;
-            x = startX;
-            y++;
         }
-
-        bounds.resize(
-            spigot.getX() + startX,
-            spigot.getY(),
-            spigot.getZ() + startZ,
-            spigot.getX() + endX,
-            spigot.getY() + 2,
-            spigot.getZ() + endZ
-        );
         return null;
     }
 }
