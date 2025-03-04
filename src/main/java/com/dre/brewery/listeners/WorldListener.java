@@ -26,6 +26,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.world.WorldLoadEvent;
+import org.bukkit.event.world.WorldUnloadEvent;
 
 import java.util.Collection;
 
@@ -43,7 +44,7 @@ public class WorldListener implements Listener {
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
-    public void onWorldUnLoad(WorldLoadEvent event) {
+    public void onWorldUnLoad(WorldUnloadEvent event) {
         Collection<Barrel> barrels = Barrel.getBarrels(event.getWorld());
         barrels.forEach(dataManager::saveBarrel);
     }
