@@ -63,9 +63,9 @@ public enum BarrelPart {
         }
         return switch (facing) {
             case SOUTH -> untransformedFacing.getFace().equals(directional.getFacing());
-            case EAST -> untransformedFacing.rotate90degrees().getFace().equals(directional.getFacing());
+            case EAST -> untransformedFacing.rotate270degrees().getFace().equals(directional.getFacing());
             case NORTH -> untransformedFacing.rotate180degrees().getFace().equals(directional.getFacing());
-            case WEST -> untransformedFacing.rotate270degrees().getFace().equals(directional.getFacing());
+            case WEST -> untransformedFacing.rotate90degrees().getFace().equals(directional.getFacing());
         };
     }
 }
