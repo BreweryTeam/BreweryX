@@ -42,6 +42,7 @@ import com.mongodb.client.model.ReplaceOptions;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.Logger;
+import org.bukkit.World;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -165,9 +166,10 @@ public class MongoDBStorage extends DataManager {
     }
 
     @Override
-    public Collection<Barrel> getAllBarrels() {
+    public Collection<Barrel> getAllBarrels(World world) {
         return getAllGeneric("barrels", SerializableBarrel.class).stream()
             .map(SerializableBarrel::toBarrel)
+            .filter(barrel -> barrel.getSpigot().getWorld().equals(world))
             .toList();
     }
 

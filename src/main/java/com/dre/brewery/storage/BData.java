@@ -386,7 +386,6 @@ public class BData {
                         ConfigurationSection invSection = section.getConfigurationSection(barrel + ".inv");
                         Block block = world.getBlockAt(Integer.parseInt(splitted[0]), Integer.parseInt(splitted[1]), Integer.parseInt(splitted[2]));
                         float time = (float) section.getDouble(barrel + ".time", 0.0);
-                        byte sign = (byte) section.getInt(barrel + ".sign", 0);
 
                         BoundingBox box = null;
                         if (section.contains(barrel + ".bounds")) {
@@ -421,10 +420,10 @@ public class BData {
 
                         Barrel b;
                         if (invSection != null) {
-                            b = new Barrel(block, sign, bbox, invSection.getValues(true), time, UUID.randomUUID());
+                            b = new Barrel(block, bbox, invSection.getValues(true), time, UUID.randomUUID());
                         } else {
                             // Barrel has no inventory
-                            b = new Barrel(block, sign, bbox, Collections.emptyMap(), time, UUID.randomUUID());
+                            b = new Barrel(block, bbox, Collections.emptyMap(), time, UUID.randomUUID());
                         }
 
                         initBarrels.add(b);
@@ -474,7 +473,7 @@ public class BData {
             BCauldron.bcauldrons.putAll(initCauldrons);
         }
         if (!initBarrels.isEmpty()) {
-            Barrel.barrels.addAll(initBarrels);
+            Barrel.addBarrels(initBarrels);
         }
 
         if (!initWakeups.isEmpty()) {

@@ -59,6 +59,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.command.CommandMap;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.event.HandlerList;
@@ -154,10 +155,12 @@ public final class BreweryPlugin extends JavaPlugin {
 
         // Load objects
         DataManager.loadMiscData(dataManager.getBreweryMiscData());
-        Barrel.getBarrels().addAll(dataManager.getAllBarrels()
-            .stream()
-            .filter(Objects::nonNull)
-            .toList());
+        for(World world : Bukkit.getWorlds()) {
+            Barrel.addBarrels(dataManager.getAllBarrels(world)
+                .stream()
+                .filter(Objects::nonNull)
+                .toList());
+        }
         BCauldron.getBcauldrons().putAll(dataManager.getAllCauldrons().stream()
             .filter(Objects::nonNull)
             .collect(Collectors.toMap(
