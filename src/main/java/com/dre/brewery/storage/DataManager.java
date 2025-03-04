@@ -83,7 +83,7 @@ public abstract class DataManager {
 
     public abstract Barrel getBarrel(UUID id);
 
-    public abstract Collection<Barrel> getAllBarrels();
+    public abstract Collection<Barrel> getAllBarrels(World world);
 
     public abstract void saveAllBarrels(Collection<Barrel> barrels);
 

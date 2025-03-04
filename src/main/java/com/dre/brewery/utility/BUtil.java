@@ -31,7 +31,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Color;
 import org.bukkit.Material;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.command.CommandSender;
@@ -332,16 +331,12 @@ public final class BUtil {
         } else if (BarrelAsset.isBarrelAsset(BarrelAsset.SIGN, type)) {
             // remove small Barrels
             Barrel barrel2 = Barrel.getBySpigot(block);
-            if (barrel2 != null) {
-                if (!barrel2.isLarge()) {
-                    if (barrel2.hasPermsDestroy(player, block, reason)) {
-                        barrel2.remove(null, player, true);
-                        return true;
-                    } else {
-                        return false;
-                    }
+            if (barrel2 != null && barrel2.isSmall()) {
+                if (barrel2.hasPermsDestroy(player, block, reason)) {
+                    barrel2.remove(null, player, true);
+                    return true;
                 } else {
-                    barrel2.destroySign();
+                    return false;
                 }
             }
             return true;

@@ -33,7 +33,6 @@ import com.dre.brewery.lore.BrewLore;
 import com.dre.brewery.utility.BoundingBox;
 import com.dre.brewery.utility.Logging;
 import com.dre.brewery.utility.MinecraftVersion;
-import com.github.Anon8281.universalScheduler.UniversalRunnable;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Bukkit;
@@ -50,12 +49,16 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.PotionMeta;
+import org.bukkit.util.BlockVector;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -66,11 +69,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @Setter
 public class Barrel extends BarrelBody implements InventoryHolder {
 
-    @Getter
-    public static final List<Barrel> barrels = new ArrayList<>();
+    private static final Map<UUID, Map<BlockVector, Barrel>> barrels = new HashMap<>();
+    private static final Map<UUID, Map<BlockVector, Barrel>> barrelSpigots = new HashMap<>();
     private static final Config config = ConfigManager.getConfig(Config.class);
     private static final Lang lang = ConfigManager.getConfig(Lang.class);
-    private static int check = 0; // Which Barrel was last checked
 
     private boolean checked; // Checked by the random BarrelCheck routine
     private Inventory inventory;
@@ -80,8 +82,8 @@ public class Barrel extends BarrelBody implements InventoryHolder {
     /**
      * Create a new Barrel
      */
-    public Barrel(Block spigot, byte signoffset) {
-        super(spigot, signoffset);
+    public Barrel(Block spigot) {
+        super(spigot);
         this.inventory = Bukkit.createInventory(this, isLarge() ? config.getBarrelInvSizeLarge() * 9 : config.getBarrelInvSizeSmall() * 9, lang.getEntry("Etc_Barrel"));
         this.id = UUID.randomUUID();
     }
@@ -91,8 +93,8 @@ public class Barrel extends BarrelBody implements InventoryHolder {
      * <p>If async: true, The Barrel Bounds will not be recreated when missing/corrupt, getBody().getBounds() will be null if it needs recreating
      * Note from Jsinco, async is now checked using Bukkit.isPrimaryThread().^
      */
-    public Barrel(Block spigot, byte sign, BoundingBox bounds, @Nullable Map<String, Object> items, float time, UUID id) {
-        super(spigot, sign, bounds);
+    public Barrel(Block spigot, BoundingBox bounds, @Nullable Map<String, Object> items, float time, UUID id) {
+        super(spigot, bounds);
         this.inventory = Bukkit.createInventory(this, isLarge() ? config.getBarrelInvSizeLarge() * 9 : config.getBarrelInvSizeSmall() * 9, lang.getEntry("Etc_Barrel"));
         if (items != null) {
             for (String slot : items.keySet()) {
@@ -105,8 +107,8 @@ public class Barrel extends BarrelBody implements InventoryHolder {
         this.id = id;
     }
 
-    public Barrel(Block spigot, byte sign, BoundingBox bounds, ItemStack[] items, float time, UUID id) {
-        super(spigot, sign, bounds);
+    public Barrel(Block spigot, BoundingBox bounds, ItemStack[] items, float time, UUID id) {
+        super(spigot, bounds);
         this.inventory = Bukkit.createInventory(this, isLarge() ? config.getBarrelInvSizeLarge() * 9 : config.getBarrelInvSizeSmall() * 9, lang.getEntry("Etc_Barrel"));
         if (items != null) {
             for (int slot = 0; slot < items.length; slot++) {
@@ -120,29 +122,40 @@ public class Barrel extends BarrelBody implements InventoryHolder {
     }
 
     public static void onUpdate() {
-        for (Barrel barrel : barrels) {
+        for (Map<BlockVector, Barrel> barrelMap : barrelSpigots.values()) {
             // A Minecraft day is 20 min, so add 1/20 to the time every minute
-            if (barrel != null) {
-                barrel.time += (float) (1.0 / config.getAgingYearDuration());
-            }
-        }
-        int numBarrels = barrels.size();
-        if (check == 0 && numBarrels > 0) {
-            Barrel random = barrels.get((int) Math.floor(Math.random() * numBarrels));
-            if (random != null) {
-                // You have been selected for a random search
-                // We want to check at least one barrel every time
-                random.checked = false;
-            }
-            if (numBarrels > 50) {
-                Barrel randomInTheBack = barrels.get(numBarrels - 1 - (int) (Math.random() * (numBarrels >>> 2)));
-                if (randomInTheBack != null) {
-                    // Prioritize checking one of the less recently used barrels as well
-                    randomInTheBack.checked = false;
+            for (Barrel barrel : barrelMap.values()) {
+                if (barrel != null) {
+                    barrel.time += (float) (1.0 / config.getAgingYearDuration());
                 }
             }
-            new BarrelCheck().runTaskTimer(BreweryPlugin.getInstance(), 1, 1);
         }
+    }
+
+    public static void addBarrels(Collection<Barrel> list) {
+        list.forEach(Barrel::addBarrel);
+    }
+
+    public static void addBarrel(Barrel barrel) {
+        Location spigot = barrel.getSpigot().getLocation();
+        UUID worldUUID = spigot.getWorld().getUID();
+        BlockVector position = spigot.toVector().toBlockVector();
+        barrelSpigots.computeIfAbsent(worldUUID, ignored -> new HashMap<>()).put(position, barrel);
+        Map<BlockVector, Barrel> barrelMap = barrels.computeIfAbsent(worldUUID, ignored -> new HashMap<>());
+        barrel.getBounds().getPositions()
+            .forEach(block -> barrelMap.put(block, barrel));
+    }
+
+    public static Collection<Barrel> getBarrels() {
+        return barrelSpigots.values().stream()
+            .map(Map::values)
+            .flatMap(Collection::stream)
+            .toList();
+    }
+
+    public static Collection<Barrel> getBarrels(World world) {
+        return barrelSpigots.computeIfAbsent(world.getUID(), ignored -> new HashMap<>())
+            .values();
     }
 
     public boolean hasPermsOpen(Player player, PlayerInteractEvent event) {
@@ -281,32 +294,30 @@ public class Barrel extends BarrelBody implements InventoryHolder {
         }
     }
 
+    private static int getYOffset(Block block1, Block block2) {
+        if (!block2.equals(block1)) {
+            return (byte) (block1.getY() - block2.getY());
+        }
+        return 0;
+    }
+
     /**
      * Get the Barrel by Sign or Spigot (Fastest)
      */
     @Nullable
-    public static Barrel getBySpigot(Block sign) {
+    public static Barrel getBySpigot(Block spigot) {
         // convert spigot if neccessary
-        Block spigot = BarrelBody.getSpigotOfSign(sign);
-
-        byte signoffset = 0;
-        if (!spigot.equals(sign)) {
-            signoffset = (byte) (sign.getY() - spigot.getY());
-        }
-
-        int i = 0;
-        for (Barrel barrel : barrels) {
-            if (barrel != null && barrel.isSignOfBarrel(signoffset)) {
-                if (barrel.spigot.equals(spigot)) {
-                    if (barrel.getSignoffset() == 0 && signoffset != 0) {
-                        // Barrel has no signOffset even though we clicked a sign, may be old
-                        barrel.setSignoffset(signoffset);
-                    }
-                    moveMRU(i);
-                    return barrel;
-                }
+        Set<Block> spigots = BarrelBody.getSpigotOfSign(spigot);
+        for (Block possibleSpigot : spigots) {
+            Location location = possibleSpigot.getLocation();
+            if (location.getWorld() == null) {
+                continue;
             }
-            i++;
+            UUID worldUuid = location.getWorld().getUID();
+            Barrel barrel = barrelSpigots.computeIfAbsent(worldUuid, ignored -> new HashMap<>()).get(location.toVector().toBlockVector());
+            if (barrel != null) {
+                return barrel;
+            }
         }
         return null;
     }
@@ -317,68 +328,57 @@ public class Barrel extends BarrelBody implements InventoryHolder {
     @Nullable
     public static Barrel getByWood(Block wood) {
         if (BarrelAsset.isBarrelAsset(BarrelAsset.PLANKS, wood.getType()) || BarrelAsset.isBarrelAsset(BarrelAsset.STAIRS, wood.getType())) {
-            int i = 0;
-            for (Barrel barrel : barrels) {
-                if (barrel.getSpigot().getWorld().equals(wood.getWorld()) && barrel.getBounds().contains(wood)) {
-                    moveMRU(i);
-                    return barrel;
-                }
-                i++;
-            }
+            UUID worldUuid = wood.getWorld().getUID();
+            BlockVector position = wood.getLocation().toVector().toBlockVector();
+            return barrels.computeIfAbsent(worldUuid, ignored -> new HashMap<>()).get(position);
         }
         return null;
     }
 
-    // Move Barrel that was recently used more towards the front of the List
-    // Optimizes retrieve by Block over time
-    private static void moveMRU(int index) {
-        if (index > 0) {
-            // Swap entry at the index with the one next to it
-            barrels.set(index - 1, barrels.set(index, barrels.get(index - 1)));
+    /**
+     * @param sign   Initiating sign position
+     * @param player The player that initiated the creation
+     * @return True, if barrel was created
+     */
+    public static boolean create(Block sign, Player player) {
+        Set<Block> spigots = BarrelBody.getSpigotOfSign(sign);
+
+        for (Block spigot : spigots) {
+            // Assume if any of the possible spigots are already registered as a barrel no valid barrel can be found.
+            if (Barrel.get(spigot) != null) {
+                return false;
+            }
+            if (tryBarrelCreation(spigot, player)) {
+                return true;
+            }
         }
+        return false;
     }
 
     /**
-     * creates a new Barrel out of a sign
+     * @param spigot The barrel spigot block (a sign or fence)
+     * @return True, if successfully created a barrel
      */
-    public static boolean create(Block sign, Player player) {
-        Block spigot = BarrelBody.getSpigotOfSign(sign);
-
-        // Check for already existing barrel at this location
-        if (Barrel.get(spigot) != null) return false;
-
-        byte signoffset = 0;
-        if (!spigot.equals(sign)) {
-            signoffset = (byte) (sign.getY() - spigot.getY());
+    private static boolean tryBarrelCreation(Block spigot, Player player) {
+        Barrel barrel = new Barrel(spigot);
+        if (barrel.getBrokenBlock(true) != null) {
+            return false;
+        }
+        if (BarrelAsset.isBarrelAsset(BarrelAsset.SIGN, spigot.getType())) {
+            if (!player.hasPermission("brewery.createbarrel.small")) {
+                lang.sendEntry(player, "Perms_NoBarrelCreate");
+                return false;
+            }
+        } else if (!player.hasPermission("brewery.createbarrel.big")) {
+            lang.sendEntry(player, "Perms_NoBigBarrelCreate");
+            return false;
         }
 
-        Barrel barrel = getBySpigot(spigot);
-        if (barrel == null) {
-            barrel = new Barrel(spigot, signoffset);
-            if (barrel.getBrokenBlock(true) == null) {
-                if (BarrelAsset.isBarrelAsset(BarrelAsset.SIGN, spigot.getType())) {
-                    if (!player.hasPermission("brewery.createbarrel.small")) {
-                        lang.sendEntry(player, "Perms_NoBarrelCreate");
-                        return false;
-                    }
-                } else {
-                    if (!player.hasPermission("brewery.createbarrel.big")) {
-                        lang.sendEntry(player, "Perms_NoBigBarrelCreate");
-                        return false;
-                    }
-                }
-                BarrelCreateEvent createEvent = new BarrelCreateEvent(barrel, player);
-                BreweryPlugin.getInstance().getServer().getPluginManager().callEvent(createEvent);
-                if (!createEvent.isCancelled()) {
-                    barrels.add(0, barrel);
-                    return true;
-                }
-            }
-        } else {
-            if (barrel.getSignoffset() == 0 && signoffset != 0) {
-                barrel.setSignoffset(signoffset);
-                return true;
-            }
+        BarrelCreateEvent createEvent = new BarrelCreateEvent(barrel, player);
+        BreweryPlugin.getInstance().getServer().getPluginManager().callEvent(createEvent);
+        if (!createEvent.isCancelled()) {
+            addBarrel(barrel);
+            return true;
         }
         return false;
     }
@@ -414,7 +414,7 @@ public class Barrel extends BarrelBody implements InventoryHolder {
             if (event.willDropItems()) {
                 if (getBounds() == null) {
                     Logging.debugLog("Barrel Body is null, can't drop items: " + this.id);
-                    barrels.remove(this);
+                    clearBarrel(this);
                     return;
                 }
 
@@ -444,7 +444,15 @@ public class Barrel extends BarrelBody implements InventoryHolder {
             }
         }
 
-        barrels.remove(this);
+        clearBarrel(this);
+    }
+
+    private static void clearBarrel(Barrel barrel) {
+        Block spigot = barrel.getSpigot();
+        UUID worldUuid = spigot.getWorld().getUID();
+        barrelSpigots.computeIfAbsent(worldUuid, ignored -> new HashMap<>()).remove(spigot.getLocation().toVector().toBlockVector());
+        Map<BlockVector, Barrel> barrelMap = barrels.computeIfAbsent(worldUuid, ignored -> new HashMap<>());
+        barrel.getBounds().getPositions().forEach(barrelMap::remove);
     }
 
     @Override
@@ -473,77 +481,26 @@ public class Barrel extends BarrelBody implements InventoryHolder {
             return BarrelAsset.isBarrelAsset(BarrelAsset.SIGN, spigot.getType());
         }
 
-
+        // TODO: Invalid scheduling, will always return false if it's Folia
         AtomicBoolean type = new AtomicBoolean(false);
         BreweryPlugin.getScheduler().runTask(spigot.getLocation(),
             () -> type.set(BarrelAsset.isBarrelAsset(BarrelAsset.SIGN, spigot.getType())));
         return type.get();
     }
 
-
-    /**
-     * returns the fence above/below a block, itself if there is none
-     */
-    public static Block getSpigotOfSign(Block block) {
-        return BarrelBody.getSpigotOfSign(block);
-    }
-
     /**
      * Are any Barrels in that World
      */
     public static boolean hasDataInWorld(World world) {
-        return barrels.stream().anyMatch(barrel -> barrel.spigot.getWorld().equals(world));
+        Map<BlockVector, Barrel> barrelMap = barrelSpigots.get(world.getUID());
+        return barrelMap != null && !barrelMap.isEmpty();
     }
 
     /**
-     * unloads barrels that are in a unloading world
+     * Clears barrels that are in  world
      */
-    public static void onUnload(World world) {
-        barrels.removeIf(barrel -> barrel.spigot.getWorld().equals(world));
+    public static void clear(World world) {
+        barrelSpigots.remove(world.getUID());
+        barrels.remove(world.getUID());
     }
-
-    /**
-     * Unload all Barrels that have a Block in a unloaded World
-     */
-    public static void unloadWorlds() {
-        List<World> worlds = BreweryPlugin.getInstance().getServer().getWorlds();
-        barrels.removeIf(barrel -> !worlds.contains(barrel.spigot.getWorld()));
-    }
-
-    public static class BarrelCheck extends UniversalRunnable {
-        @Override
-        public void run() {
-            boolean repeat = true;
-            while (repeat) {
-                if (check < barrels.size()) {
-                    Barrel barrel = barrels.get(check);
-                    if (!barrel.checked) {
-                        BreweryPlugin.getScheduler().runTask(barrel.getSpigot().getLocation(), () -> {
-                            Block broken = barrel.getBrokenBlock(false);
-                            if (broken != null) {
-                                Logging.debugLog("Barrel at "
-                                    + broken.getWorld().getName() + "/" + broken.getX() + "/" + broken.getY() + "/" + broken.getZ()
-                                    + " has been destroyed unexpectedly, contents will drop");
-                                // remove the barrel if it was destroyed
-                                barrel.remove(broken, null, true);
-                            } else {
-                                // Dont check this barrel again, its enough to check it once after every restart (and when randomly chosen)
-                                // as now this is only the backup if we dont register the barrel breaking,
-                                // for example when removing it with some world editor
-                                barrel.checked = true;
-                            }
-                        });
-                        repeat = false;
-                    }
-                    check++;
-                } else {
-                    check = 0;
-                    repeat = false;
-                    cancel();
-                }
-            }
-        }
-
-    }
-
 }
