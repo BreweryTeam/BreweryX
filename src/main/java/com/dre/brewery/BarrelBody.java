@@ -135,13 +135,7 @@ public abstract class BarrelBody {
         if (direction == null) {
             return BarrelWoodType.ANY;
         }
-        // TODO: replace this with Block#getRelative(BlockFace)
-        Block wood = switch (direction) {
-            case WEST -> spigot.getRelative(1, 0, 0);
-            case EAST -> spigot.getRelative(-1, 0, 0);
-            case SOUTH -> spigot.getRelative(0, 0, 1);
-            case NORTH -> spigot.getRelative(0, 0, -1);
-        };
+        Block wood = spigot.getRelative(direction.getFace());
         return BarrelWoodType.fromMaterial(wood.getType());
     }
 
