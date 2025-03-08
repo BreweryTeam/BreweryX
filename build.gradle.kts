@@ -59,7 +59,6 @@ repositories {
     maven("https://repo.oraxen.com/releases") // Oraxen
     maven("https://storehouse.okaeri.eu/repository/maven-public/") // Okaeri Config
     maven("https://repo.papermc.io/repository/maven-public/") // PaperLib
-    maven("https://maven.playpro.com") // CoreProtect
 }
 
 dependencies {
@@ -117,7 +116,6 @@ dependencies {
     compileOnly("me.clip:placeholderapi:2.11.5") // https://www.spigotmc.org/resources/placeholderapi.6245/history
     compileOnly("io.th0rgal:oraxen:1.163.0") // https://www.spigotmc.org/resources/%E2%98%84%EF%B8%8F-oraxen-custom-items-blocks-emotes-furniture-resourcepack-and-gui-1-18-1-21-3.72448/
     compileOnly("com.github.LoneDev6:API-ItemsAdder:3.6.1") // https://www.spigotmc.org/resources/%E2%9C%A8itemsadder%E2%AD%90emotes-mobs-items-armors-hud-gui-emojis-blocks-wings-hats-liquids.73355/updates
-    compileOnly("net.coreprotect:coreprotect:22.4") // https://github.com/PlayPro/CoreProtect
 
 
 
