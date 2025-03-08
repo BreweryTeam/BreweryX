@@ -27,6 +27,7 @@ import org.bukkit.Location;
 public class LandsBarrel {
     public static boolean checkAccess(BarrelAccessEvent event) {
         Location bLoc = event.getSpigot().getLocation();
+
         return LandsHook.LANDS.hasBarrelAccess(event.getPlayer(), bLoc);
     }
 }

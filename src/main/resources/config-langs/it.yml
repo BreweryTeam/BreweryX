@@ -81,6 +81,7 @@ config:
     This option no longer does anything anymore, and will be removed in future releases of BreweryX.
     BreweryX will load data asynchronously always, with the exception of server startup and shutdown.
   hangoverDays: "Tempo in giorni che la sbronza resta in memoria dopo che il giocatore va offline, cioè il tempo per cui i postumi della sbornia durano. [7]"
+  onlyAllowBrewsInBarrels: "If only Brewery drinks can be put into barrels [false]"
   colorInBarrels-Brewer: "Colora la descrizione dell'item in base alla qualità mentre è in un barile o in un alambicco [true, true]"
   openLargeBarrelEverywhere: "Se un barile grande può essere aperto  cliccandoci sopra, non solo sul cartello e sulla staccionata. Questo è sempre true per i barili piccoli. [true]"
   barrelInvSizes: |

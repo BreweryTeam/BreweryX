@@ -117,7 +117,7 @@ public class InventoryListener implements Listener {
 
         HumanEntity player = event.getWhoClicked();
         Inventory inv = event.getInventory();
-        if (player == null || !(inv instanceof BrewerInventory)) return;
+        if (!(inv instanceof BrewerInventory)) return;
 
         UUID puid = player.getUniqueId();
         if (!trackedBrewmen.contains(puid)) return;
@@ -142,6 +142,7 @@ public class InventoryListener implements Listener {
     }
 
     // Clicked a Brew somewhere, do some updating
+    // TODO: Remove this? This was for legacy potion conversion - Jsinco
     @EventHandler(priority = EventPriority.LOW, ignoreCancelled = false)
     public void onInventoryClickLow(InventoryClickEvent event) {
         if (event.getCurrentItem() != null && event.getCurrentItem().getType().equals(Material.POTION)) {
@@ -175,7 +176,7 @@ public class InventoryListener implements Listener {
     }
 
     // convert to non colored Lore when taking out of Barrel/Brewer
-    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onInventoryClick(InventoryClickEvent event) {
         Inventory inv = event.getInventory();
         if (inv.getType() == InventoryType.BREWING) {
@@ -188,31 +189,42 @@ public class InventoryListener implements Listener {
             return;
         }
 
+
         ItemStack item = event.getCurrentItem();
-        if (item != null && item.getType() == Material.POTION && item.hasItemMeta()) {
-            PotionMeta meta = (PotionMeta) item.getItemMeta();
-            assert meta != null;
-            Brew brew = Brew.get(meta);
-            if (brew != null) {
-                BrewLore lore = null;
-                if (BrewLore.hasColorLore(meta)) {
-                    lore = new BrewLore(brew, meta);
-                    lore.convertLore(false);
-                } else if (!config.isAlwaysShowAlc() && event.getInventory().getType() == InventoryType.BREWING) {
-                    lore = new BrewLore(brew, meta);
-                    lore.updateAlc(false);
-                }
-                if (lore != null) {
-                    lore.write();
-                    item.setItemMeta(meta);
-                    if (event.getWhoClicked() instanceof Player) {
-                        switch (event.getAction()) {
-                            case MOVE_TO_OTHER_INVENTORY:
-                            case HOTBAR_SWAP:
-                                // Fix a Graphical glitch of item still showing colors until clicking it
-                                BreweryPlugin.getScheduler().runTask(() -> ((Player) event.getWhoClicked()).updateInventory());
-                        }
-                    }
+        if (item == null) {
+            return;
+        }
+
+        Brew brew = null;
+        PotionMeta meta = null;
+        if (item.hasItemMeta() && item.getItemMeta() instanceof PotionMeta m) {
+            brew = Brew.get(m);
+            meta = m;
+        }
+
+
+        if (brew == null) {
+            if (config.isOnlyAllowBrewsInBarrels()) {
+                event.setCancelled(true);
+            }
+            return;
+        }
+
+        BrewLore lore = null;
+        if (BrewLore.hasColorLore(meta)) {
+            lore = new BrewLore(brew, meta);
+            lore.convertLore(false);
+        } else if (!config.isAlwaysShowAlc() && event.getInventory().getType() == InventoryType.BREWING) {
+            lore = new BrewLore(brew, meta);
+            lore.updateAlc(false);
+        }
+        if (lore != null) {
+            lore.write();
+            item.setItemMeta(meta);
+            if (event.getWhoClicked() instanceof Player player) {
+                switch (event.getAction()) {
+                    // Fix a Graphical glitch of item still showing colors until clicking it
+                    case MOVE_TO_OTHER_INVENTORY, HOTBAR_SWAP -> BreweryPlugin.getScheduler().runTask(player::updateInventory);
                 }
             }
         }

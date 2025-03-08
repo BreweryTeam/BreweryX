@@ -81,6 +81,7 @@ config:
     Esta opción ya no hace nada, y se eliminará en futuras versiones de BreweryX.
     BreweryX siempre carga los datos de forma asíncrona, con las excepciones del inicio y el apagado del servidor.
   hangoverDays: "Tiempo (en días) por el que se guarda los datos de borrachera en la memoria después de que un jugador se desconecte, para aplicar resaca. [7]"
+  onlyAllowBrewsInBarrels: "If only Brewery drinks can be put into barrels [false]"
   colorInBarrels-Brewer: "Colorea la información (lore) de un objeto dependiendo de su calidad mientras está A) en un tonel y/o B) en un estante de pociones [true, true]"
   openLargeBarrelEverywhere: "Si un tonel grande puede abrirse desde cualquiera de sus bloques, no solo el grifo o el cartel. Esto está siempre activado para los toneles pequeños. [true]"
   barrelInvSizes: |

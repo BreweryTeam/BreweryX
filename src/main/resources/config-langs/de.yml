@@ -72,6 +72,7 @@ config:
     This option no longer does anything anymore, and will be removed in future releases of BreweryX.
     BreweryX will load data asynchronously always, with the exception of server startup and shutdown.
   hangoverDays: "Zeit (in Tagen) die Trunkenheitsdaten nach offlinegehen eines Spielers im Speicher verbleiben, um z.B. Kater-Effekte anzuwenden. [7]"
+  onlyAllowBrewsInBarrels: "If only Brewery drinks can be put into barrels [false]"
   colorInBarrels: "Färben der Iteminformationen je nach Qualität während sie sich 1. im Fass und/oder 2. im Braustand befinden [true, true]"
   openLargeBarrelEverywhere: "Ob große Fässer an jedem Block geöffnet werden können, nicht nur an Zapfhahn und Schild. Bei kleinen Fässern geht dies immer. [true]"
   barrelInvSizes: |

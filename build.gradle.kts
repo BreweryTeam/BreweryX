@@ -284,6 +284,7 @@ hangarPublish {
 
 fun getGitBranch(): String = ByteArrayOutputStream().use { stream ->
     var branch = "none"
+    // TODO: can some nice person replace this deprecated method please? :)
     project.exec {
         commandLine = listOf("git", "rev-parse", "--abbrev-ref", "HEAD")
         standardOutput = stream
