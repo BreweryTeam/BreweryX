@@ -21,8 +21,7 @@
 package com.dre.brewery.integration;
 
 import com.dre.brewery.BreweryPlugin;
-import lombok.Getter;
-import lombok.Setter;
+import com.dre.brewery.utility.BUtil;
 import me.angeschossen.lands.api.LandsIntegration;
 import me.angeschossen.lands.api.flags.enums.FlagTarget;
 import me.angeschossen.lands.api.flags.enums.RoleFlagCategory;
@@ -33,37 +32,31 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.List;
-
-@Getter
-@Setter
 public class LandsHook extends Hook {
 
-    public static final LandsIntegration LANDS_API = LandsIntegration.of(BreweryPlugin.getInstance());
-    public static RoleFlag barrelAccessFlag;
+    public static LandsHook LANDS = new LandsHook("Lands", config.isUseLands());
 
-    public static LandsHook LANDS;
-    public static void load() {
-        LANDS = new LandsHook("Lands", config.isUseLands());
-    }
+    private LandsIntegration landsApi;
+    private RoleFlag barrelAccessFlag;
 
     public LandsHook(String name, boolean enabled) {
         super(name, enabled);
 
-        if (!enabled) return;
-        barrelAccessFlag = RoleFlag.of(LANDS_API, FlagTarget.PLAYER, RoleFlagCategory.ACTION, "barrel_access")
+        if (!this.isEnabled()) return;
+        this.landsApi = LandsIntegration.of(BreweryPlugin.getInstance());
+        this.barrelAccessFlag = RoleFlag.of(landsApi, FlagTarget.PLAYER, RoleFlagCategory.ACTION, "barrel_access")
             .setDisplayName("Barrel Access")
-            .setDescription(List.of("§r§7Allows opening", "§r§7BreweryX barrels."))
+            .setDescription(BUtil.colorArray("&r&7Allows opening", "&r&7BreweryX barrels."))
             .setIcon(new ItemStack(Material.BARREL))
             .setDisplay(true);
     }
 
     public boolean hasBarrelAccess(Player player, Location location) {
-        if (!enabled || location.getWorld() == null) return true;
-        LandWorld lWorld = LANDS_API.getWorld(location.getWorld());
+        if (!this.isEnabled() || location.getWorld() == null) return true;
+        LandWorld lWorld = landsApi.getWorld(location.getWorld());
         if (lWorld == null) return true;
 
-        return lWorld.hasRoleFlag(player.getUniqueId(), location, barrelAccessFlag);
+        return lWorld.hasRoleFlag(player.getUniqueId(), location, this.barrelAccessFlag);
     }
 
 }
