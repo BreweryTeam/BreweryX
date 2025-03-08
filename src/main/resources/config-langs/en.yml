@@ -90,6 +90,7 @@ config:
     This option no longer does anything anymore, and will be removed in future releases of BreweryX.
     BreweryX will load data asynchronously always, with the exception of server startup and shutdown.
   hangoverDays: "Time (in days) that drunkenness-data stays in memory after a player goes offline, to apply hangover etc. [7]"
+  onlyAllowBrewsInBarrels: "If only Brewery drinks can be put into barrels [false]"
   colorInBarrels-Brewer: "Color the Item information (lore) depending on quality while it is 1. in a barrel and/or 2. in a brewing stand [true, true]"
   openLargeBarrelEverywhere: "If a Large Barrel can be opened by clicking on any of its blocks, not just Spigot or Sign. This is always true for Small Barrels. [true]"
   barrelInvSizes: |

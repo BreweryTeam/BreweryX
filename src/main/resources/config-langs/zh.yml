@@ -85,6 +85,7 @@ config:
     This option no longer does anything anymore, and will be removed in future releases of BreweryX.
     BreweryX will load data asynchronously always, with the exception of server startup and shutdown.
   hangoverDays: "玩家下线后，醉酒数据在内存中保留的天数，以施加宿醉等后续效果 [7]"
+  onlyAllowBrewsInBarrels: "If only Brewery drinks can be put into barrels [false]"
   colorInBarrels-Brewer: |
     饮品上是否显示带颜色的提示, 颜色由执行步骤的正误决定
     是否在陈酿酒桶内显示颜色 [true]

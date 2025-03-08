@@ -39,7 +39,7 @@ public class BlockLockerHook extends Hook {
             Class.forName("nl.rutgerkok.blocklocker.ProtectableBlocksSettings");
             BlockLockerBarrel.registerBarrelAsProtectable();
         } catch (ClassNotFoundException e) {
-            this.enabled = false;
+            this.setEnabled(false);
             Logging.log("Unsupported Version of 'BlockLocker', locking Brewery Barrels with LogBlock disabled.");
         }
     }

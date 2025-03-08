@@ -57,6 +57,7 @@ import java.util.Random;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 import java.util.stream.IntStream;
 
 public final class BUtil {
@@ -109,6 +110,11 @@ public final class BUtil {
     public static List<String> colorArrayList(List<String> list) {
         if (list == null) return null;
         return list.stream().map(BUtil::color).toList();
+    }
+
+    public static List<String> colorArray(String... list) {
+        if (list == null) return null;
+        return Stream.of(list).map(BUtil::color).toList();
     }
 
     /**

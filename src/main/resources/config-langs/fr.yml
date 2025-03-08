@@ -85,6 +85,7 @@ config:
     Ancienne description:
     Si les données des fûts et des chaudrons peuvent être chargés de manière asynchrone ou en arrière-plan [true]
   hangoverDays: "Temps (en jours) pour que les données d’ivresse restent sauvergardées lorsque le joueur est déconnecté, pour appliquer les effets. [7]"
+  onlyAllowBrewsInBarrels: "If only Brewery drinks can be put into barrels [false]"
   colorInBarrels-Brewer: "Colorer les informations d’objets (lore) au dépend de la qualité dans un tonneau et/ou dans un stand de brassage (l’alambic) [true, true]"
   openLargeBarrelEverywhere: "Si le grand tonneau peut être ouvert en cliquant sur n’importe quel bloc, non seulement le robinet ou le panneau. Toujours « true » pour les petits tonneaux. [true]"
   barrelInvSizes: |

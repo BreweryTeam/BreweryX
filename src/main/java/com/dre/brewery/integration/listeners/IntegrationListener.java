@@ -148,34 +148,30 @@ public class IntegrationListener implements Listener {
         }
 
         if (Hook.LWC.isEnabled()) {
-            Plugin plugin = BreweryPlugin.getInstance().getServer().getPluginManager().getPlugin("LWC");
-            if (plugin != null) {
-
-                // If the Clicked Block was the Sign, LWC already knows and we dont need to do anything here
-                if (!BarrelAsset.isBarrelAsset(BarrelAsset.SIGN, event.getClickedBlock().getType())) {
-                    Block sign = event.getBarrel().getSignOfSpigot();
-                    // If the Barrel does not have a Sign, it cannot be locked
-                    if (!sign.equals(event.getClickedBlock())) {
-                        Player player = event.getPlayer();
-                        try {
-                            if (!LWCBarrel.checkAccess(player, sign, plugin)) {
-                                lang.sendEntry(event.getPlayer(), "Error_NoBarrelAccess");
-                                event.setCancelled(true);
-                                return;
-                            }
-                        } catch (Throwable e) {
+            // If the Clicked Block was the Sign, LWC already knows and we dont need to do anything here
+            if (!BarrelAsset.isBarrelAsset(BarrelAsset.SIGN, event.getClickedBlock().getType())) {
+                Block sign = event.getBarrel().getSignOfSpigot();
+                // If the Barrel does not have a Sign, it cannot be locked
+                if (!sign.equals(event.getClickedBlock())) {
+                    Player player = event.getPlayer();
+                    try {
+                        if (!LWCBarrel.checkAccess(player, sign, Hook.LWC.getPlugin())) {
+                            lang.sendEntry(event.getPlayer(), "Error_NoBarrelAccess");
                             event.setCancelled(true);
-                            Logging.errorLog("Failed to Check LWC for Barrel Open Permissions!", e);
-                            Logging.errorLog("Brewery was tested with version 4.5.0 of LWC!");
-                            Logging.errorLog("Disable the LWC support in the config and do /brew reload");
-                            if (player.hasPermission("brewery.admin") || player.hasPermission("brewery.mod")) {
-                                Logging.msg(player, "&cLWC check Error, Brewery was tested with up to v4.5.0 of LWC");
-                                Logging.msg(player, "&cSet &7useLWC: false &cin the config and /brew reload");
-                            } else {
-                                Logging.msg(player, "&cError opening Barrel, please report to an Admin!");
-                            }
                             return;
                         }
+                    } catch (Throwable e) {
+                        event.setCancelled(true);
+                        Logging.errorLog("Failed to Check LWC for Barrel Open Permissions!", e);
+                        Logging.errorLog("Brewery was tested with version 4.5.0 of LWC!");
+                        Logging.errorLog("Disable the LWC support in the config and do /brew reload");
+                        if (player.hasPermission("brewery.admin") || player.hasPermission("brewery.mod")) {
+                            Logging.msg(player, "&cLWC check Error, Brewery was tested with up to v4.5.0 of LWC");
+                            Logging.msg(player, "&cSet &7useLWC: false &cin the config and /brew reload");
+                        } else {
+                            Logging.msg(player, "&cError opening Barrel, please report to an Admin!");
+                        }
+                        return;
                     }
                 }
             }

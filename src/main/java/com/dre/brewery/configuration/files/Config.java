@@ -200,6 +200,9 @@ public class Config extends AbstractOkaeriConfigFile {
     @LocalizedComment("config.hangoverDays")
     private int hangoverDays = 7;
 
+    @LocalizedComment("config.onlyAllowBrewsInBarrels")
+    private boolean onlyAllowBrewsInBarrels = false;
+
     @LocalizedComment("config.colorInBarrels-Brewer")
     private boolean colorInBarrels = true;
     private boolean colorInBrewer = true;

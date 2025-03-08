@@ -51,9 +51,9 @@ public class Hook {
     public static final Hook NEXO = new Hook("Nexo");
 
 
-    protected final String name;
-    protected boolean enabled;
-    protected boolean checked;
+    private final String name;
+    private boolean enabled; // Don't use this!! Use isEnabled() instead
+    private boolean checked;
 
     public Hook(String name) {
         this.name = name;
