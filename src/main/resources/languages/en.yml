@@ -37,6 +37,14 @@ CMD_UnLabel: '&aLabel removed!'
 CMD_Drink: '&aYou drank one &v1'
 CMD_DrinkOther: '&a&v1 drinks one &v2'
 CMD_Set: '&aSuccessfully set &v1''s drunkenness to &v2 with a quality of &v3.'
+CMD_Invalid_Cook_Time: '&cCook time "&v1" must be a positive integer'
+CMD_Invalid_Distill_Runs: '&cDistill runs "&v1" must be a non-negative integer'
+CMD_Invalid_Wood_Type: '&cCannot age a brew in barrel wood type "&v1"'
+CMD_Invalid_Age_Time: '&cAge time "&v1" must be a positive number'
+CMD_Cannot_Distill: '&cThose ingredients cannot be distilled'
+CMD_Distill_Ruined: '&eThe brew was ruined in the distillation process'
+CMD_Age_Ruined: '&eThe brew was ruined in the aging process'
+CMD_Simulated: '&aSimulated Brew Created'
 
 # Error
 Error_ConfigUpdate: 'Unknown Brewery config version: v&v1, config was not updated!'
@@ -53,6 +61,9 @@ Error_ShowHelp: Use &6/brew help &fto display the help
 Error_UnknownCommand: Unknown Command
 Error_YmlRead: 'Could not read file config.yml, please make sure the file is in valid yml format (correct spaces, using '' '' etc.)'
 Error_NoPlayer: 'Player not found: &v1'
+Error_InvalidAmount: '&cInvalid amount: &v1'
+Error_InvalidPluginItem: '&cCould not find plugin item: &v1'
+Error_InvalidMaterial: '&cCould not find material: &v1'
 
 # Etc
 Etc_Barrel: Barrel
@@ -65,6 +76,7 @@ Etc_NewRelease: '&rA new release of BreweryX is available! &2&v1 &r-> &2&v2&r Do
 Help_Copy: '&6/brew copy [Quantity]&9 Copies the potion in your hand'
 Help_Create: '&6/brew create <Recipe> [Quality] [Player] &9Create a Brew with optional quality (1-10)'
 Help_Give: '&6/brew give <Recipe> [Quality] [Player] &9Alias for /brew create'
+Help_Simulate: '&6/brew simulate <Cook Time> <Distill Runs> <Barrel Type> <Age Time> <Ingredients...> &9Simulate brewing'
 Help_Delete: '&6/brew delete &9Deletes the potion in your hand'
 Help_Help: '&6/brew help [Page] &9Shows a specific help-page'
 Help_Info: '&6/brew info&9 Displays your current Drunkenness and Quality'

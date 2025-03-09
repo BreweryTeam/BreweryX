@@ -36,6 +36,7 @@ import com.dre.brewery.commands.subcommands.ReloadCommand;
 import com.dre.brewery.commands.subcommands.SealCommand;
 import com.dre.brewery.commands.subcommands.SetCommand;
 import com.dre.brewery.commands.subcommands.ShowStatsCommand;
+import com.dre.brewery.commands.subcommands.SimulateCommand;
 import com.dre.brewery.commands.subcommands.StaticCommand;
 import com.dre.brewery.commands.subcommands.UnLabelCommand;
 import com.dre.brewery.commands.subcommands.VersionCommand;
@@ -81,6 +82,7 @@ public class CommandManager implements TabExecutor {
         addSubCommand("reloadaddons", new ReloadAddonsCommand());
         addSubCommand("version", new VersionCommand());
         addSubCommand("data", new DataManagerCommand());
+        addSubCommand("simulate", new SimulateCommand());
 
         addSubCommand(new CreateCommand(), "create", "give");
     }

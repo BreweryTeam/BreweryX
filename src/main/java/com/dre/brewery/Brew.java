@@ -360,7 +360,7 @@ public class Brew implements Cloneable {
     @Override
     public String toString() {
         return "Brew{" +
-            ingredients + " ingredients" +
+            "ingredients=" + ingredients +
             ", quality=" + quality +
             ", alc=" + alc +
             ", distillRuns=" + distillRuns +
@@ -692,7 +692,7 @@ public class Brew implements Cloneable {
 
         // if younger than half a day, it shouldnt get aged form
         if (ageTime > 0.5) {
-            if (wood == BarrelWoodType.ANY) {
+            if (wood == null || wood == BarrelWoodType.ANY) {
                 wood = woodType;
             } else if (wood != woodType) {
                 woodShift(time, woodType);

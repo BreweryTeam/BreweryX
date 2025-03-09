@@ -224,6 +224,22 @@ public class Lang extends AbstractOkaeriConfigFile {
     private String cmdDrinkOther;
     @CustomKey("CMD_Set")
     private String cmdSet;
+    @CustomKey("CMD_Invalid_Cook_Time")
+    private String cmdInvalidCookTime;
+    @CustomKey("CMD_Invalid_Distill_Runs")
+    private String cmdInvalidDistillRuns;
+    @CustomKey("CMD_Invalid_Wood_Type")
+    private String cmdInvalidWoodType;
+    @CustomKey("CMD_Invalid_Age_Time")
+    private String cmdInvalidAgeTime;
+    @CustomKey("CMD_Cannot_Distill")
+    private String cmdCannotDistill;
+    @CustomKey("CMD_Distill_Ruined")
+    private String cmdDistillRuined;
+    @CustomKey("CMD_Age_Ruined")
+    private String cmdAgeRuined;
+    @CustomKey("CMD_Simulated")
+    private String cmdSimulated;
 
 
     @Comment("Error")
@@ -255,6 +271,12 @@ public class Lang extends AbstractOkaeriConfigFile {
     private String errorYmlRead;
     @CustomKey("Error_NoPlayer")
     private String errorNoPlayer;
+    @CustomKey("Error_InvalidAmount")
+    private String errorInvalidAmount;
+    @CustomKey("Error_InvalidPluginItem")
+    private String errorInvalidPluginItem;
+    @CustomKey("Error_InvalidMaterial")
+    private String errorInvalidMaterial;
 
 
     @Comment("Etc")
@@ -277,6 +299,8 @@ public class Lang extends AbstractOkaeriConfigFile {
     private String helpCreate;
     @CustomKey("Help_Give")
     private String helpGive;
+    @CustomKey("Help_Simulate")
+    private String helpSimulate;
     @CustomKey("Help_Delete")
     private String helpDelete;
     @CustomKey("Help_Help")

@@ -274,6 +274,12 @@ public class CustomMatchAnyItem extends RecipeItem {
     }
 
     @Override
+    public String getDebugID() {
+        String id = getConfigId();
+        return id != null ? id : String.join("|", names);
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;

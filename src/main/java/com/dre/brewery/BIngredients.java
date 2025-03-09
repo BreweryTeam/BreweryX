@@ -28,6 +28,7 @@ import com.dre.brewery.lore.Base91EncoderStream;
 import com.dre.brewery.lore.BrewLore;
 import com.dre.brewery.recipe.BCauldronRecipe;
 import com.dre.brewery.recipe.BRecipe;
+import com.dre.brewery.recipe.DebuggableItem;
 import com.dre.brewery.recipe.Ingredient;
 import com.dre.brewery.recipe.ItemLoader;
 import com.dre.brewery.recipe.PotionColor;
@@ -52,6 +53,8 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.StringJoiner;
+import java.util.stream.Collectors;
 
 /**
  * Represents ingredients in Cauldron, Brew
@@ -123,15 +126,27 @@ public class BIngredients {
      * @param rItem      the RecipeItem that matches the ingredient
      */
     public void add(ItemStack ingredient, RecipeItem rItem) {
-        Ingredient ingredientItem = rItem.toIngredient(ingredient);
+        add(rItem.toIngredient(ingredient));
+    }
+
+    /**
+     * Add an ingredient to this based on the given RecipeItem
+     *
+     * @param rItem      the RecipeItem that matches the ingredient
+     */
+    public void addGeneric(RecipeItem rItem) {
+        add(rItem.toIngredientGeneric());
+    }
+
+    private void add(Ingredient ingredient) {
         for (Ingredient existing : ingredients) {
-            if (existing.isSimilar(ingredientItem)) {
+            if (existing.isSimilar(ingredient)) {
                 existing.setAmount(existing.getAmount() + 1);
                 return;
             }
         }
-        ingredientItem.setAmount(1);
-        ingredients.add(ingredientItem);
+        ingredient.setAmount(1);
+        ingredients.add(ingredient);
     }
 
     /**
@@ -161,7 +176,7 @@ public class BIngredients {
             lore.updateQualityStars(false);
             lore.updateCustomLore();
             lore.updateAlc(false);
-            lore.updateBrewer(brewer.getDisplayName());
+            lore.updateBrewer(brewer == null ? null : brewer.getDisplayName());
             lore.addOrReplaceEffects(brew.getEffects(), brew.getQuality());
             lore.write();
 
@@ -458,9 +473,13 @@ public class BIngredients {
 
     @Override
     public String toString() {
-        return "BIngredients{" +
-            "cookedTime=" + cookedTime +
-            ", total ingredients: " + getIngredientsCount() + '}';
+        String ingredientsStr = ingredients.stream()
+            .map(DebuggableItem::getDebugID)
+            .collect(Collectors.joining("[", "]", ", "));
+        return new StringJoiner(", ", "BIngredients{", "}")
+            .add("cookedTime=" + cookedTime)
+            .add("ingredients=" + ingredientsStr)
+            .toString();
     }
 
 	/*public void testStore(DataOutputStream out) throws IOException {
