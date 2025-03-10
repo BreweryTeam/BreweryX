@@ -32,6 +32,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 
 /**
@@ -140,9 +141,14 @@ public class SimpleItem extends RecipeItem implements Ingredient {
     @Override
     public String toString() {
         return "SimpleItem{" +
-            "mat=" + mat.name().toLowerCase() +
+            "mat=" + getDebugID() +
             " amount=" + getAmount() +
             '}';
+    }
+
+    @Override
+    public String getDebugID() {
+        return mat.name().toLowerCase(Locale.ROOT);
     }
 
     @Override

@@ -89,7 +89,7 @@ public class Brew implements Cloneable {
     private int alc;
     private byte distillRuns;
     private float ageTime;
-    private BarrelWoodType wood;
+    private BarrelWoodType wood = BarrelWoodType.ANY;
     // TODO: This should extend BRecipe, not hold a reference.
     private BRecipe currentRecipe; // Recipe this Brew is currently based off. May change between modifications and is often null when not modifying
     private boolean unlabeled;
@@ -360,7 +360,7 @@ public class Brew implements Cloneable {
     @Override
     public String toString() {
         return "Brew{" +
-            ingredients + " ingredients" +
+            "ingredients=" + ingredients +
             ", quality=" + quality +
             ", alc=" + alc +
             ", distillRuns=" + distillRuns +

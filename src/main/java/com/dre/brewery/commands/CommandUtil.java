@@ -183,6 +183,7 @@ public class CommandUtil {
         if (CREATE.checkCached(sender)) {
             cmds.add(lang.getEntry("Help_Create"));
             cmds.add(lang.getEntry("Help_Give"));
+            cmds.add(lang.getEntry("Help_Simulate"));
         }
 
         if (DRINK.checkCached(sender) || DRINK_OTHER.checkCached(sender)) {

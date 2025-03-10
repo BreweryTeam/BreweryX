@@ -51,7 +51,7 @@ Error_Recipeload: '&cNo se pudieron restaurar todas la recetas: ¡Más informaci
 Error_ShowHelp: Usa &6/brew help &fpara mostrar la ayuda
 Error_UnknownCommand: Comando desconocido
 Error_YmlRead: 'No se pudo leer el archivo config.yml, por favor asegurate de que el archivo esta en un formato yml válido (espacios correctos, usando '' '' etc.)'
-Error_NoPlayer: 'Jugador no encontrado(a): &v1'
+Error_NoPlayer: '&cJugador no encontrado(a): &v1'
 
 # Etc
 Etc_Barrel: Tonel

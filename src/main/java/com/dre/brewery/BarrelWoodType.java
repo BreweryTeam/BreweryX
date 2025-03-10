@@ -20,6 +20,8 @@
 
 package com.dre.brewery;
 
+import com.dre.brewery.utility.BUtil;
+import com.dre.brewery.utility.MaterialUtil;
 import lombok.Getter;
 import org.bukkit.Material;
 import org.jetbrains.annotations.Nullable;
@@ -116,6 +118,10 @@ public enum BarrelWoodType {
         }
     }
 
+    public boolean isSpecific() {
+        return this != ANY && this != NONE;
+    }
+
 
     public static BarrelWoodType fromName(String name) {
         for (BarrelWoodType type : values()) {
@@ -164,4 +170,27 @@ public enum BarrelWoodType {
         }
         return ANY;
     }
+
+    /**
+     * Parses a string to determine the corresponding BarrelWoodType.
+     *
+     * @param string The string to parse, which can be an integer index,
+     *               a material name, or a formatted name.
+     * @return The matching BarrelWoodType based on the provided string.
+     *         Returns BarrelWoodType.ANY if no match is found.
+     */
+    public static BarrelWoodType parse(String string) {
+        int index = BUtil.parseIntOr(string, -2);
+        for (BarrelWoodType type : values()) {
+            if (type.index == index) {
+                return type;
+            }
+        }
+        Material material = MaterialUtil.getMaterialSafely(string);
+        if (material != null) {
+            return fromMaterial(material);
+        }
+        return fromName(string);
+    }
+
 }

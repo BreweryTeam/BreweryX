@@ -283,6 +283,11 @@ public class CustomItem extends RecipeItem implements Ingredient {
     }
 
     @Override
+    public String getDebugID() {
+        return getConfigId();
+    }
+
+    @Override
     public void saveTo(DataOutputStream out) throws IOException {
         out.writeUTF("CI");
         if (mat != null) {

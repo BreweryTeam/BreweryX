@@ -53,7 +53,7 @@ Error_Recipeload: '&cНе всі рецепти були завантажені:
 Error_ShowHelp: Використовуйте &6/brew help &fдля відображення довідки
 Error_UnknownCommand: Невідома команда
 Error_YmlRead: Не можу прочитати config.yml, будь ласка, перевір, що там усе правильно
-Error_NoPlayer: 'Гравець не знайдений: &v1'
+Error_NoPlayer: '&cГравець не знайдений: &v1'
 
 # Etc
 Etc_Barrel: Бочка
