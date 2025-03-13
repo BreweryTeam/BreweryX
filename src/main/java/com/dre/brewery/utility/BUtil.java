@@ -31,7 +31,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Color;
 import org.bukkit.Material;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.command.CommandSender;
@@ -51,10 +50,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
+import java.util.OptionalDouble;
+import java.util.OptionalInt;
 import java.util.Random;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.IntStream;
 
 public final class BUtil {
 
@@ -268,6 +270,57 @@ public final class BUtil {
     }
 
     /**
+     * Escapes any backslashes or double quotes, and surrounds the string in double quotes if it contains spaces.
+     * @param input The input string
+     * @return The quoted string
+     */
+    public static String quote(String input) {
+        String escaped = input.replace("\\", "\\\\").replace("\"", "\\\"");
+        if (input.contains(" ")) {
+            return "\"" + escaped + "\"";
+        }
+        return escaped;
+    }
+
+    /**
+     * Splits a string by spaces, unless enclosed in double quotes.
+     * Uses backslash as escape character for quotes and other backslashes.
+     * Multiple spaces will be treated as one space.
+     * @param input The input string
+     * @return List of strings in the input, quoted strings will have their start and end quotes removed
+     */
+    public static List<String> splitStringKeepingQuotes(String input) {
+        List<String> result = new ArrayList<>();
+        StringBuilder current = new StringBuilder();
+        boolean inQuotes = false;
+        boolean escape = false;
+
+        for (char c : input.toCharArray()) {
+            if (escape) {
+                current.append(c);
+                escape = false;
+            } else if (c == '\\') {
+                escape = true;
+            } else if (c == '"') {
+                inQuotes = !inQuotes;
+            } else if (c == ' ' && !inQuotes) {
+                if (!current.isEmpty()) {
+                    result.add(current.toString());
+                    current.setLength(0);
+                }
+            } else {
+                current.append(c);
+            }
+        }
+
+        if (!current.isEmpty()) {
+            result.add(current.toString());
+        }
+
+        return result;
+    }
+
+    /**
      * Replaces the Placeholders %player_name% and %quality% in the given input string
      *
      * @param input   The String to replace the placeholders in
@@ -462,6 +515,12 @@ public final class BUtil {
         return worldName;
     }
 
+    public static List<String> numberRange(int startInclusive, int stopInclusive) {
+        return IntStream.range(startInclusive, stopInclusive + 1)
+            .mapToObj(String::valueOf)
+            .toList();
+    }
+
     public static int getRandomIntInRange(String string) {
         if (string == null) {
             return 0;
@@ -486,7 +545,67 @@ public final class BUtil {
         return 0;
     }
 
-    public static int parseIntOrZero(String string) {
+    public static boolean isInt(String string) {
+        try {
+            Integer.parseInt(string);
+            return true;
+        } catch (NumberFormatException ignored) {
+            return false;
+        }
+    }
+
+    public static OptionalInt parseInt(@Nullable String string) {
+        if (string == null) {
+            return OptionalInt.empty();
+        }
+        try {
+            return OptionalInt.of(Integer.parseInt(string));
+        } catch (NumberFormatException ignored) {
+            return OptionalInt.empty();
+        }
+    }
+
+    /**
+     * Parses a non-infinite, non-NaN floating-point double.
+     * @param string the input string
+     * @return the optional
+     */
+    public static OptionalDouble parseDouble(@Nullable String string) {
+        if (string == null) {
+            return OptionalDouble.empty();
+        }
+        try {
+            double d = Double.parseDouble(string);
+            if (Double.isFinite(d)) {
+                return OptionalDouble.of(d);
+            }
+            return OptionalDouble.empty();
+        } catch (NumberFormatException ignored) {
+            return OptionalDouble.empty();
+        }
+    }
+
+    /**
+     * Parses a non-infinite, non-NaN floating-point float.
+     * @param string the input string
+     * @return the optional
+     */
+    public static OptionalFloat parseFloat(@Nullable String string) {
+        if (string == null) {
+            return OptionalFloat.empty();
+        }
+        try {
+            float f = Float.parseFloat(string);
+            if (Float.isFinite(f)) {
+                return OptionalFloat.of(f);
+            }
+            return OptionalFloat.empty();
+        } catch (NumberFormatException ignored) {
+            return OptionalFloat.empty();
+        }
+    }
+
+    public static int parseIntOrZero(@Nullable String string) {
         if (string == null) {
             return 0;
         }
@@ -494,31 +613,28 @@ public final class BUtil {
         try {
             return Integer.parseInt(string);
         } catch (NumberFormatException ignored) {
-            Logging.debugLog("Could not parse integer: " + string);
             return 0;
         }
     }
 
-    public static double parseDoubleOrZero(String string) {
+    public static double parseDoubleOrZero(@Nullable String string) {
         if (string == null) {
             return 0;
         }
         try {
             return Double.parseDouble(string);
         } catch (NumberFormatException ignored) {
-            Logging.debugLog("Could not parse double: " + string);
             return 0;
         }
     }
 
-    public static float parseFloatOrZero(String string) {
+    public static float parseFloatOrZero(@Nullable String string) {
         if (string == null) {
             return 0;
         }
         try {
             return Float.parseFloat(string);
         } catch (NumberFormatException ignored) {
-            Logging.debugLog("Could not parse float: " + string);
             return 0;
         }
     }

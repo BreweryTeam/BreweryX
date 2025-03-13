@@ -56,7 +56,7 @@ Error_Recipeload: '&cToutes les recettes n´ont pu être restaurées: Plus d´in
 Error_ShowHelp: 'Utilisez &6/brew help &fpour trouver de l’aide'
 Error_UnknownCommand: 'Commande inconnue'
 Error_YmlRead: 'Ne peux pas lire le fichier config.yml, assurez-vous que le fichier est à la bonne format (bonnes espaces, utilisant '' '' etc.)'
-Error_NoPlayer: 'Le joueur n’a pas été trouvé : &v1'
+Error_NoPlayer: '&cLe joueur n’a pas été trouvé : &v1'
 
 # Etc.
 Etc_Barrel: 'Baril'

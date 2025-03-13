@@ -21,11 +21,13 @@
 package com.dre.brewery.commands;
 
 import com.dre.brewery.BreweryPlugin;
+import com.dre.brewery.commands.subcommands.AgeCommand;
 import com.dre.brewery.commands.subcommands.CopyCommand;
 import com.dre.brewery.commands.subcommands.CreateCommand;
 import com.dre.brewery.commands.subcommands.DataManagerCommand;
 import com.dre.brewery.commands.subcommands.DebugInfoCommand;
 import com.dre.brewery.commands.subcommands.DeleteCommand;
+import com.dre.brewery.commands.subcommands.DistillCommand;
 import com.dre.brewery.commands.subcommands.DrinkCommand;
 import com.dre.brewery.commands.subcommands.HelpCommand;
 import com.dre.brewery.commands.subcommands.InfoCommand;
@@ -36,6 +38,7 @@ import com.dre.brewery.commands.subcommands.ReloadCommand;
 import com.dre.brewery.commands.subcommands.SealCommand;
 import com.dre.brewery.commands.subcommands.SetCommand;
 import com.dre.brewery.commands.subcommands.ShowStatsCommand;
+import com.dre.brewery.commands.subcommands.SimulateCommand;
 import com.dre.brewery.commands.subcommands.StaticCommand;
 import com.dre.brewery.commands.subcommands.UnLabelCommand;
 import com.dre.brewery.commands.subcommands.VersionCommand;
@@ -81,6 +84,9 @@ public class CommandManager implements TabExecutor {
         addSubCommand("reloadaddons", new ReloadAddonsCommand());
         addSubCommand("version", new VersionCommand());
         addSubCommand("data", new DataManagerCommand());
+        addSubCommand("distill", new DistillCommand());
+        addSubCommand("age", new AgeCommand());
+        addSubCommand("simulate", new SimulateCommand());
 
         addSubCommand(new CreateCommand(), "create", "give");
     }

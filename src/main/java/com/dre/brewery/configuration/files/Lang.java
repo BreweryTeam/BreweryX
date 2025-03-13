@@ -224,6 +224,34 @@ public class Lang extends AbstractOkaeriConfigFile {
     private String cmdDrinkOther;
     @CustomKey("CMD_Set")
     private String cmdSet;
+    @CustomKey("CMD_Distilled")
+    private String cmdDistilled;
+    @CustomKey("CMD_Aged")
+    private String cmdAged;
+    @CustomKey("CMD_Simulated")
+    private String cmdSimulated;
+    @CustomKey("CMD_Invalid_Option")
+    private String cmdInvalidOption;
+    @CustomKey("CMD_Duplicate_Option")
+    private String cmdDuplicateOption;
+    @CustomKey("CMD_Invalid_Cook_Time")
+    private String cmdInvalidCookTime;
+    @CustomKey("CMD_Invalid_Distill_Runs")
+    private String cmdInvalidDistillRuns;
+    @CustomKey("CMD_Invalid_Wood_Type")
+    private String cmdInvalidWoodType;
+    @CustomKey("CMD_Invalid_Age_Time")
+    private String cmdInvalidAgeTime;
+    @CustomKey("CMD_Ingredient")
+    private String cmdIngredient;
+    @CustomKey("CMD_Invalid_Ingredient")
+    private String cmdInvalidIngredient;
+    @CustomKey("CMD_Cannot_Distill")
+    private String cmdCannotDistill;
+    @CustomKey("CMD_Distill_Ruined")
+    private String cmdDistillRuined;
+    @CustomKey("CMD_Age_Ruined")
+    private String cmdAgeRuined;
 
 
     @Comment("Error")
@@ -255,6 +283,12 @@ public class Lang extends AbstractOkaeriConfigFile {
     private String errorYmlRead;
     @CustomKey("Error_NoPlayer")
     private String errorNoPlayer;
+    @CustomKey("Error_InvalidAmount")
+    private String errorInvalidAmount;
+    @CustomKey("Error_InvalidPluginItem")
+    private String errorInvalidPluginItem;
+    @CustomKey("Error_InvalidMaterial")
+    private String errorInvalidMaterial;
 
 
     @Comment("Etc")
@@ -277,6 +311,24 @@ public class Lang extends AbstractOkaeriConfigFile {
     private String helpCreate;
     @CustomKey("Help_Give")
     private String helpGive;
+    @CustomKey("Help_Simulate")
+    private String helpSimulate;
+    @CustomKey("Help_Simulate2")
+    private String helpSimulate2;
+    @CustomKey("Help_Simulate_Options")
+    private String helpSimulateOptions;
+    @CustomKey("Help_Simulate_Distill")
+    private String helpSimulateDistill;
+    @CustomKey("Help_Simulate_Age")
+    private String helpSimulateAge;
+    @CustomKey("Help_Simulate_Brewer")
+    private String helpSimulateBrewer;
+    @CustomKey("Help_Simulate_Player")
+    private String helpSimulatePlayer;
+    @CustomKey("Help_Distill")
+    private String helpDistill;
+    @CustomKey("Help_Age")
+    private String helpAge;
     @CustomKey("Help_Delete")
     private String helpDelete;
     @CustomKey("Help_Help")

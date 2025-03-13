@@ -1,6 +1,6 @@
 /*
  * BreweryX Bukkit-Plugin for an alternate brewing process
- * Copyright (C) 2024 The Brewery Team
+ * Copyright (C) 2024-2025 The Brewery Team
  *
  * This file is part of BreweryX.
  *
@@ -20,49 +20,67 @@
 
 package com.dre.brewery.commands.subcommands;
 
+import com.dre.brewery.Brew;
 import com.dre.brewery.BreweryPlugin;
-import com.dre.brewery.commands.CommandUtil;
 import com.dre.brewery.commands.SubCommand;
 import com.dre.brewery.configuration.files.Lang;
 import com.dre.brewery.utility.BUtil;
 import com.dre.brewery.utility.Logging;
+import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.PotionMeta;
 
-import java.util.ArrayList;
 import java.util.List;
 
-public class HelpCommand implements SubCommand {
+public class DistillCommand implements SubCommand {
 
     @Override
     public void execute(BreweryPlugin breweryPlugin, Lang lang, CommandSender sender, String label, String[] args) {
-        int page = 1;
-        if (args.length > 1) {
-            page = BUtil.parseInt(args[1]).orElse(1);
+        if (args.length < 2) {
+            cmdDistill(lang, (Player) sender, 1);
+        } else {
+            int distillRuns = BUtil.parseInt(args[1]).orElse(0);
+            if (distillRuns <= 0) {
+                lang.sendEntry(sender, "CMD_Invalid_Distill_Runs", args[1]);
+                return;
+            }
+            cmdDistill(lang, (Player) sender, distillRuns);
         }
+    }
 
-        ArrayList<String> commands = CommandUtil.getCommands(sender);
-
-        if (page == 1) {
-            Logging.msg(sender, "&6" + breweryPlugin.getDescription().getName() + " v" + breweryPlugin.getDescription().getVersion());
+    private static void cmdDistill(Lang lang, Player player, int distillRuns) {
+        ItemStack item = player.getInventory().getItemInMainHand();
+        Brew brew = Brew.get(item);
+        if (brew == null) {
+            lang.sendEntry(player, "Error_ItemNotPotion");
+            return;
         }
+        PotionMeta meta = (PotionMeta) item.getItemMeta();
 
-        BUtil.list(sender, commands, page);
+        for (int i = 0; i < distillRuns; i++) {
+            brew.distillSlot(item, meta);
+        }
+        Logging.debugLog(String.format("distill: distilled for %d runs: %s",
+            distillRuns, ChatColor.stripColor(brew.toString())));
+        player.getInventory().setItemInMainHand(item);
+        lang.sendEntry(player, "CMD_Distilled", distillRuns);
     }
 
     @Override
     public List<String> tabComplete(BreweryPlugin breweryPlugin, CommandSender sender, String label, String[] args) {
-        return null;
+        return List.of();
     }
 
     @Override
     public String permission() {
-        return null;
+        return "brewery.cmd.create";
     }
 
     @Override
     public boolean playerOnly() {
-        return false;
+        return true;
     }
+
 }
-
-

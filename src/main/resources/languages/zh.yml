@@ -49,7 +49,7 @@ Error_Recipeload: '&c加载饮品配方时出现问题, 请查看控制台以获
 Error_ShowHelp: 使用&6/brew help&f以查看帮助
 Error_UnknownCommand: 未知命令.
 Error_YmlRead: '无法读取config.yml, 请保证该文件符合正确的yml格式!(例如更正错误的空格等试试看…)'
-Error_NoPlayer: '找不到玩家: &v1'
+Error_NoPlayer: '&c找不到玩家: &v1'
 
 # Etc
 Etc_Barrel: 酒桶

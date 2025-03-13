@@ -44,7 +44,7 @@ import java.util.Objects;
  * it can be used as mutable copy directly in a
  * BIngredients. Otherwise, it needs to be converted to an Ingredient
  */
-public abstract class RecipeItem implements Cloneable {
+public abstract class RecipeItem implements Cloneable, DebuggableItem {
 
     private static final MinecraftVersion VERSION = BreweryPlugin.getMCVersion();
 
@@ -301,13 +301,20 @@ public abstract class RecipeItem implements Cloneable {
      * @return The config String
      */
     public String toConfigString() {
-        String amtAppend = "/" + this.getAmount();
+        return toConfigStringNoAmount() + "/" + this.getAmount();
+    }
+    /**
+     * Converts this RecipeItem to a String that can be used in a config
+     *
+     * @return The config String
+     */
+    public String toConfigStringNoAmount() {
         if (this instanceof SimpleItem simpleItem) {
-            return simpleItem.getMaterial().toString().toLowerCase() + amtAppend;
+            return simpleItem.getMaterial().toString().toLowerCase();
         } else if (this instanceof PluginItem pluginItem) {
-            return pluginItem.getPlugin() + ":" + pluginItem.getItemId() + amtAppend;
+            return pluginItem.getPlugin() + ":" + pluginItem.getItemId();
         } else if (this instanceof CustomItem || this instanceof CustomMatchAnyItem) {
-            return this.getConfigId() + amtAppend;
+            return this.getConfigId();
         } else {
             throw new IllegalStateException("Unknown RecipeItem Type!");
         }

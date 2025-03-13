@@ -20,9 +20,15 @@
 
 package com.dre.brewery;
 
+import com.dre.brewery.utility.BUtil;
+import com.dre.brewery.utility.MaterialUtil;
 import lombok.Getter;
 import org.bukkit.Material;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.OptionalInt;
 
 
 @Getter
@@ -54,6 +60,12 @@ public enum BarrelWoodType {
     // If you're adding more wood types, add them above 'NONE'
     NONE("None", -1, true);
 
+
+    public static final List<String> TAB_COMPLETIONS = Arrays.stream(values())
+        .filter(BarrelWoodType::isSpecific)
+        .map(BarrelWoodType::getFormattedName)
+        .map(s -> s.replace(' ', '_'))
+        .toList();
 
     private final String formattedName;
     private final int index;
@@ -116,6 +128,10 @@ public enum BarrelWoodType {
         }
     }
 
+    public boolean isSpecific() {
+        return this != ANY && this != NONE;
+    }
+
 
     public static BarrelWoodType fromName(String name) {
         for (BarrelWoodType type : values()) {
@@ -164,4 +180,30 @@ public enum BarrelWoodType {
         }
         return ANY;
     }
+
+    /**
+     * Parses a string to determine the corresponding BarrelWoodType.
+     *
+     * @param string The string to parse, which can be an integer index,
+     *               a material name, or a formatted name.
+     * @return The matching BarrelWoodType based on the provided string.
+     *         Returns BarrelWoodType.ANY if no match is found.
+     */
+    public static BarrelWoodType parse(String string) {
+        OptionalInt indexOpt = BUtil.parseInt(string);
+        if (indexOpt.isPresent()) {
+            int index = indexOpt.getAsInt();
+            for (BarrelWoodType type : values()) {
+                if (type.index == index) {
+                    return type;
+                }
+            }
+        }
+        Material material = MaterialUtil.getMaterialSafely(string);
+        if (material != null) {
+            return fromMaterial(material);
+        }
+        return fromName(string);
+    }
+
 }

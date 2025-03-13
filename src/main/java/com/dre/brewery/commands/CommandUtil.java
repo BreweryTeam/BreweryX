@@ -73,7 +73,7 @@ public class CommandUtil {
 
         int page = 1;
         if (args.length > 1) {
-            page = BUtil.parseIntOrZero(args[1]);
+            page = BUtil.parseInt(args[1]).orElse(1);
         }
 
         ArrayList<String> commands = getCommands(sender);
@@ -183,6 +183,10 @@ public class CommandUtil {
         if (CREATE.checkCached(sender)) {
             cmds.add(lang.getEntry("Help_Create"));
             cmds.add(lang.getEntry("Help_Give"));
+            cmds.add(lang.getEntry("Help_Distill"));
+            cmds.add(lang.getEntry("Help_Age"));
+            cmds.add(lang.getEntry("Help_Simulate"));
+            cmds.add(lang.getEntry("Help_Simulate2"));
         }
 
         if (DRINK.checkCached(sender) || DRINK_OTHER.checkCached(sender)) {
@@ -229,40 +233,7 @@ public class CommandUtil {
 
     public static List<String> recipeNamesAndIds(String[] args) {
         if (args.length == 2) {
-
-            if (mainSet == null) {
-                mainSet = new HashSet<>();
-                altSet = new HashSet<>();
-                for (BRecipe recipe : BRecipe.getAllRecipes()) {
-                    mainSet.addAll(createLookupFromName(recipe.getName(5)));
-
-                    Set<String> altNames = new HashSet<>(3);
-                    altNames.add(recipe.getName(1));
-                    altNames.add(recipe.getName(10));
-                    if (recipe.getId() != null) { // Leaving a null check JUST in case. But ids are never null in the current implementation
-                        altNames.add(recipe.getId());
-                    }
-
-                    for (String altName : altNames) {
-                        altSet.addAll(createLookupFromName(altName));
-                    }
-
-                }
-            }
-
-            final String input = args[1].toLowerCase();
-
-            List<String> options = mainSet.stream()
-                .filter(s -> s.a().startsWith(input))
-                .map(Tuple::second)
-                .collect(Collectors.toList());
-            if (options.isEmpty()) {
-                options = altSet.stream()
-                    .filter(s -> s.a().startsWith(input))
-                    .map(Tuple::second)
-                    .collect(Collectors.toList());
-            }
-            return options;
+            return recipeNamesAndIds(args[1]);
         } else {
             if (args[args.length - 1].matches("10|[1-9]")) {
                 return null; // automatically suggests player names
@@ -270,7 +241,42 @@ public class CommandUtil {
                 return filterWithInput(QUALITY, args[args.length - 1]);
             }
         }
+    }
 
+    public static List<String> recipeNamesAndIds(String arg) {
+        if (mainSet == null) {
+            mainSet = new HashSet<>();
+            altSet = new HashSet<>();
+            for (BRecipe recipe : BRecipe.getAllRecipes()) {
+                mainSet.addAll(createLookupFromName(recipe.getName(5)));
+
+                Set<String> altNames = new HashSet<>(3);
+                altNames.add(recipe.getName(1));
+                altNames.add(recipe.getName(10));
+                if (recipe.getId() != null) { // Leaving a null check JUST in case. But ids are never null in the current implementation
+                    altNames.add(recipe.getId());
+                }
+
+                for (String altName : altNames) {
+                    altSet.addAll(createLookupFromName(altName));
+                }
+
+            }
+        }
+
+        final String input = arg.toLowerCase();
+
+        List<String> options = mainSet.stream()
+            .filter(s -> s.a().startsWith(input))
+            .map(Tuple::second)
+            .collect(Collectors.toList());
+        if (options.isEmpty()) {
+            options = altSet.stream()
+                .filter(s -> s.a().startsWith(input))
+                .map(Tuple::second)
+                .collect(Collectors.toList());
+        }
+        return options;
     }
 
     private static List<Tuple<String, String>> createLookupFromName(final String name) {

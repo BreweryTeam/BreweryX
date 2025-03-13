@@ -47,7 +47,7 @@ public class WakeupCommand implements SubCommand {
             int page = 1;
             String world = null;
             if (args.length > 2) {
-                page = BUtil.parseIntOrZero(args[2]);
+                page = BUtil.parseInt(args[2]).orElse(1);
             }
             if (args.length > 3) {
                 world = args[3];

@@ -26,6 +26,7 @@ import com.dre.brewery.Brew;
 import com.dre.brewery.BreweryPlugin;
 import com.dre.brewery.configuration.ConfigManager;
 import com.dre.brewery.configuration.files.CustomItemsFile;
+import com.dre.brewery.configuration.files.Lang;
 import com.dre.brewery.configuration.sector.capsule.ConfigRecipe;
 import com.dre.brewery.integration.Hook;
 import com.dre.brewery.integration.PlaceholderAPIHook;
@@ -34,6 +35,7 @@ import com.dre.brewery.utility.Logging;
 import com.dre.brewery.utility.MaterialUtil;
 import com.dre.brewery.utility.StringParser;
 import com.dre.brewery.utility.Tuple;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Bukkit;
@@ -212,6 +214,19 @@ public class BRecipe implements Cloneable {
     }
 
     public static List<RecipeItem> loadIngredients(List<String> stringList, String recipeId) {
+        IngredientsResult result = loadIngredientsVerbose(stringList);
+        if (result instanceof IngredientsResult.Success success) {
+            return success.ingredients;
+        } else {
+            IngredientsResult.Error error = (IngredientsResult.Error) result;
+            Lang lang = ConfigManager.getConfig(Lang.class);
+            String errorMessage = lang.getEntry(error.error().getTranslationKey(), error.invalidPart());
+            Logging.errorLog(recipeId + ": " + errorMessage);
+            return null;
+        }
+    }
+
+    public static IngredientsResult loadIngredientsVerbose(List<String> stringList) {
         if (stringList == null) {
             stringList = Collections.emptyList();
         }
@@ -224,8 +239,7 @@ public class BRecipe implements Cloneable {
             if (ingredParts.length == 2) {
                 amount = BUtil.getRandomIntInRange(ingredParts[1]);
                 if (amount < 1) {
-                    Logging.errorLog(recipeId + ": Invalid Item Amount: " + ingredParts[1]);
-                    return null;
+                    return new IngredientsResult.Error(IngredientsError.INVALID_AMOUNT, ingredParts[1]);
                 }
             }
             String[] matParts;
@@ -254,8 +268,7 @@ public class BRecipe implements Cloneable {
                     continue;
                 } else {
                     // TODO Maybe load later ie on first use of recipe?
-                    Logging.errorLog(recipeId + ": Could not Find Plugin: " + Arrays.toString(ingredParts));
-                    return null;
+                    return new IngredientsResult.Error(IngredientsError.INVALID_PLUGIN_ITEM, item);
                 }
             }
 
@@ -313,11 +326,25 @@ public class BRecipe implements Cloneable {
                 BCauldronRecipe.acceptedMaterials.add(mat);
                 BCauldronRecipe.acceptedSimple.add(mat);
             } else {
-                Logging.errorLog(recipeId + ": Unknown Material: " + ingredParts[0]);
-                return null;
+                return new IngredientsResult.Error(IngredientsError.INVALID_MATERIAL, ingredParts[0]);
             }
         }
-        return ingredients;
+        return new IngredientsResult.Success(ingredients);
+    }
+
+    public sealed interface IngredientsResult {
+        record Success(List<RecipeItem> ingredients) implements IngredientsResult {}
+        record Error(IngredientsError error, String invalidPart) implements IngredientsResult {}
+    }
+
+    @AllArgsConstructor
+    @Getter
+    public enum IngredientsError {
+        INVALID_AMOUNT("Error_InvalidAmount"),
+        INVALID_PLUGIN_ITEM("Error_InvalidPluginItem"),
+        INVALID_MATERIAL("Error_InvalidMaterial");
+
+        private final String translationKey;
     }
 
     /**
