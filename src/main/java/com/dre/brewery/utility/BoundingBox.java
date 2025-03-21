@@ -22,7 +22,9 @@ package com.dre.brewery.utility;
 
 import org.bukkit.Location;
 import org.bukkit.block.Block;
+import org.bukkit.util.BlockVector;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class BoundingBox {
@@ -119,5 +121,17 @@ public class BoundingBox {
             maxz = Math.max(locations.get(i + 2), maxz);
         }
         return new BoundingBox(minx, miny, minz, maxx, maxy, maxz);
+    }
+
+    public List<BlockVector> getPositions() {
+        List<BlockVector> output = new ArrayList<>();
+        for (int x = x1; x <= x2; x++) {
+            for (int y = y1; y <= y2; y++) {
+                for (int z = z1; z <= z2; z++) {
+                    output.add(new BlockVector(x, y, z));
+                }
+            }
+        }
+        return output;
     }
 }
