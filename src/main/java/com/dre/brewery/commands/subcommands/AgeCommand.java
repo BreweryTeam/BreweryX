@@ -53,7 +53,7 @@ public class AgeCommand implements SubCommand {
         }
 
         float ageTime = BUtil.parseFloat(args[2]).orElse(0);
-        if (ageTime < 1) {
+        if (ageTime <= 0) {
             lang.sendEntry(sender, "CMD_Invalid_Age_Time", args[2]);
             return;
         }
