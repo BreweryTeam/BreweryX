@@ -77,7 +77,7 @@ public class BRecipe implements Cloneable {
     private int cookingTime; // time to cook in cauldron
     private byte distillruns; // runs through the brewer
     private int distillTime; // time for one distill run in seconds
-    private BarrelWoodType wood; // type of wood the barrel has to consist of
+    private List<BarrelWoodType> barrelTypes = new ArrayList<>(); // barrel types the brew should be aged in
     private int age; // time in minecraft days for the potions to age in barrels
 
     // outcome
@@ -156,7 +156,7 @@ public class BRecipe implements Cloneable {
             recipe.distillruns = (byte) dis;
         }
         recipe.distillTime = (configRecipe.getDistillTime() != null ? configRecipe.getDistillTime() : 0) * 20;
-        recipe.wood = BarrelWoodType.fromAny(configRecipe.getWood());
+        recipe.setBarrelTypes(BarrelWoodType.listFromAny(configRecipe.getWood()));
         recipe.age = configRecipe.getAge() != null ? configRecipe.getAge() : 0;
         recipe.difficulty = configRecipe.getDifficulty() != null ? configRecipe.getDifficulty() : 0;
         recipe.alcohol = configRecipe.getAlcohol() != null ? configRecipe.getAlcohol() : 0;
@@ -436,10 +436,38 @@ public class BRecipe implements Cloneable {
     }
 
     /**
+     * Gets the <strong>primary</strong> barrel type out of all supported.
+     * @return the barrel type
+     * @see #getBarrelTypes() for the full list
+     */
+    public BarrelWoodType getWood() {
+        return barrelTypes.isEmpty() ? BarrelWoodType.ANY : barrelTypes.get(0);
+    }
+
+    public boolean usesAnyWood() {
+        return getWood() == BarrelWoodType.ANY;
+    }
+
+    public void setWood(BarrelWoodType wood) {
+        barrelTypes = Collections.singletonList(wood);
+    }
+
+    public void setBarrelTypes(List<BarrelWoodType> barrelTypes) {
+        if (barrelTypes.stream().anyMatch(b -> b == BarrelWoodType.ANY)) {
+            setWood(BarrelWoodType.ANY);
+        } else {
+            this.barrelTypes = barrelTypes;
+        }
+    }
+
+    /**
      * difference between given and recipe-wanted woodtype
      */
     public float getWoodDiff(float wood) {
-        return Math.abs(wood - this.wood.getIndex());
+        return (float) barrelTypes.stream()
+            .mapToDouble(w -> Math.abs(wood - w.getIndex()))
+            .min()
+            .orElse(0.0);
     }
 
     public boolean isCookingOnly() {
@@ -575,7 +603,7 @@ public class BRecipe implements Cloneable {
 
         BIngredients bIngredients = new BIngredients(list, cookingTime);
 
-        return new Brew(bIngredients, quality, 0, distillruns, getAge(), wood, getRecipeName(), false, true, 0);
+        return new Brew(bIngredients, quality, 0, distillruns, getAge(), getWood(), getRecipeName(), false, true, 0);
     }
 
     public void updateAcceptedLists() {
@@ -724,7 +752,7 @@ public class BRecipe implements Cloneable {
             ", cookingTime=" + cookingTime +
             ", distillruns=" + distillruns +
             ", distillTime=" + distillTime +
-            ", wood=" + wood +
+            ", barrelTypes=" + barrelTypes +
             ", age=" + age +
             ", color=" + color +
             ", alcohol=" + alcohol +
@@ -841,7 +869,7 @@ public class BRecipe implements Cloneable {
             clone.cookingTime = this.cookingTime;
             clone.distillruns = this.distillruns;
             clone.distillTime = this.distillTime;
-            clone.wood = this.wood;
+            clone.barrelTypes = this.barrelTypes;
             clone.age = this.age;
             clone.color = this.color;
             clone.alcohol = this.alcohol;
@@ -923,7 +951,13 @@ public class BRecipe implements Cloneable {
 
         public Builder age(int age, BarrelWoodType wood) {
             recipe.age = age;
-            recipe.wood = wood;
+            recipe.setWood(wood);
+            return this;
+        }
+
+        public Builder age(int age, BarrelWoodType... barrelTypes) {
+            recipe.age = age;
+            recipe.setBarrelTypes(List.of(barrelTypes));
             return this;
         }
 
