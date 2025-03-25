@@ -152,6 +152,7 @@ recipesFile:
     distilltime: How long (in seconds) one distill-run takes (0=Default time of 40 sec) MC Default would be 20 sec
 
     wood: Wood of the barrel:
+      Can be a string, a number (see conversion below), or a list of wood types.
       0=any 1=Birch 2=Oak 3=Jungle 4=Spruce
       5=Acacia 6=Dark Oak 7=Crimson 8=Warped
       9=Mangrove 10=Cherry 11=Bamboo 12=Cut Copper 13=Pale Oak

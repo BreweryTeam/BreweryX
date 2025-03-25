@@ -438,7 +438,7 @@ public class BIngredients {
      * returns the quality regarding the barrel wood conditioning given Recipe
      */
     public int getWoodQuality(BRecipe recipe, BarrelWoodType wood) {
-        if (recipe.getWood().equals(BarrelWoodType.ANY)) {
+        if (recipe.usesAnyWood()) {
             // type of wood doesnt matter
             return 10;
         }

@@ -27,6 +27,7 @@ import org.bukkit.Material;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.OptionalInt;
@@ -234,6 +235,16 @@ public enum BarrelWoodType {
         }
         return ANY;
     }
+
+    public static List<BarrelWoodType> listFromAny(Object intOrStringOrList) {
+        if (intOrStringOrList instanceof List<?> list) {
+            return list.stream()
+                .map(BarrelWoodType::fromAny)
+                .toList();
+        }
+        return Collections.singletonList(fromAny(intOrStringOrList));
+    }
+
 
     /**
      * Parses a string to determine the corresponding BarrelWoodType.
