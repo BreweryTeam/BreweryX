@@ -152,6 +152,9 @@ public class Config extends AbstractOkaeriConfigFile {
     @LocalizedComment("config.alwaysShowAlcIndicator")
     private boolean alwaysShowAlcIndicator = true;
 
+    @LocalizedComment("config.showRuinedBrewHints")
+    private boolean showRuinedBrewHints = false;
+
     @LocalizedComment("config.showBrewer")
     private boolean showBrewer = false;
 

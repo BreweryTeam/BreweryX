@@ -29,10 +29,12 @@ import com.dre.brewery.lore.Base91EncoderStream;
 import com.dre.brewery.lore.BrewLore;
 import com.dre.brewery.recipe.BCauldronRecipe;
 import com.dre.brewery.recipe.BRecipe;
+import com.dre.brewery.recipe.BestRecipeResult;
 import com.dre.brewery.recipe.DebuggableItem;
 import com.dre.brewery.recipe.Ingredient;
 import com.dre.brewery.recipe.ItemLoader;
 import com.dre.brewery.recipe.PotionColor;
+import com.dre.brewery.recipe.RecipeEvaluation;
 import com.dre.brewery.recipe.RecipeItem;
 import com.dre.brewery.utility.BUtil;
 import com.dre.brewery.utility.Logging;
@@ -260,60 +262,108 @@ public class BIngredients {
     /**
      * best recipe for current state of potion, STILL not always returns the correct one...
      */
-    public BRecipe getBestRecipe(BarrelWoodType wood, float time, boolean distilled) {
-        float quality = 0;
-        int ingredientQuality;
-        int cookingQuality;
-        int woodQuality;
-        int ageQuality;
+    public @Nullable BRecipe getBestRecipe(BarrelWoodType wood, float time, boolean distilled) {
+        return getBestRecipeFull(wood, time, distilled).getSuccessRecipe();
+    }
+    /**
+     * best recipe for current state of potion, STILL not always returns the correct one...
+     */
+    public BestRecipeResult getBestRecipeFull(BarrelWoodType wood, float time, boolean distilled) {
+        if (BRecipe.getAllRecipes().isEmpty()) {
+            return new BestRecipeResult.NoRecipesRegistered();
+        }
+
+        // tracks the highest quality recipe using exact numbers, no rounding or clamping
+        // if no legacy recipe can be found, this is the plugin's best guess at what the player is trying to make
         BRecipe bestRecipe = null;
+        RecipeEvaluation bestEval = null;
+        // the original Brewery plugin uses a different algorithm that rounds and clamps ingredient/cook/age/wood
+        // qualities before adding them, so we have to do the same here to avoid breaking backward compatibility
+        float quality = 0;
+        BRecipe bestRecipeLegacy = null;
+        RecipeEvaluation bestEvalLegacy = null;
+
         // FIXME: This should include BCauldronRecipes too. (Proper parent class needed!)
         for (BRecipe recipe : BRecipe.getAllRecipes()) {
-            ingredientQuality = getIngredientQuality(recipe);
-            cookingQuality = getCookingQuality(recipe, distilled);
+            RecipeEvaluation completeRecipeEval;
 
-            if (ingredientQuality > -1 && cookingQuality > -1) {
-                if (recipe.needsToAge() || time > 0.5) {
-                    // needs riping in barrel
-                    ageQuality = getAgeQuality(recipe, time);
-                    woodQuality = getWoodQuality(recipe, wood);
-                    Logging.debugLog("Ingredient Quality: " + ingredientQuality + " Cooking Quality: " + cookingQuality +
-                        " Wood Quality: " + woodQuality + " age Quality: " + ageQuality + " for " + recipe.getName(5));
+            RecipeEvaluation ingredientEval = getIngredientQualityFull(recipe);
+            int ingredientQuality = ingredientEval.getQuality();
 
-                    // is this recipe better than the previous best?
-                    if ((((float) ingredientQuality + cookingQuality + woodQuality + ageQuality) / 4) > quality) {
-                        quality = ((float) ingredientQuality + cookingQuality + woodQuality + ageQuality) / 4;
-                        bestRecipe = recipe;
-                    }
-                } else {
-                    Logging.debugLog("Ingredient Quality: " + ingredientQuality + " Cooking Quality: " + cookingQuality + " for " + recipe.getName(5));
-                    // calculate quality without age and barrel
-                    if ((((float) ingredientQuality + cookingQuality) / 2) > quality) {
-                        quality = ((float) ingredientQuality + cookingQuality) / 2;
-                        bestRecipe = recipe;
-                    }
+            RecipeEvaluation cookingEval = getCookingQualityFull(recipe, distilled);
+            int cookingQuality = cookingEval.getQuality();
+
+            // age and wood quality cannot be fatal, only need to check ingredient and cooking
+            boolean isFatal = ingredientEval.hasFatalDefect() || cookingEval.hasFatalDefect();
+
+            if (recipe.needsToAge() || time > 0.5) {
+                // needs riping in barrel
+                RecipeEvaluation ageEval = getAgeQualityFull(recipe, time);
+                int ageQuality = ageEval.getQuality();
+
+                RecipeEvaluation woodEval = getWoodQualityFull(recipe, wood);
+                int woodQuality = woodEval.getQuality();
+
+                // is this recipe better than the previous best?
+                Logging.debugLog("Ingredient Quality: " + ingredientQuality + " Cooking Quality: " + cookingQuality +
+                    " Wood Quality: " + woodQuality + " age Quality: " + ageQuality + " for " + recipe.getName(5));
+                completeRecipeEval = RecipeEvaluation.combine(ingredientEval, cookingEval, ageEval, woodEval);
+
+                float averageQuality = ((float) ingredientQuality + cookingQuality + woodQuality + ageQuality) / 4;
+                if (!isFatal && averageQuality > quality) {
+                    quality = ((float) ingredientQuality + cookingQuality + woodQuality + ageQuality) / 4;
+                    bestRecipeLegacy = recipe;
+                    bestEvalLegacy = completeRecipeEval;
+                }
+
+            } else {
+                // calculate quality without age and barrel
+                Logging.debugLog("Ingredient Quality: " + ingredientQuality + " Cooking Quality: " + cookingQuality + " for " + recipe.getName(5));
+                completeRecipeEval = RecipeEvaluation.combine(ingredientEval, cookingEval);
+
+                float averageQuality = ((float) ingredientQuality + cookingQuality) / 2;
+                if (!isFatal && averageQuality > quality) {
+                    quality = averageQuality;
+                    bestRecipeLegacy = recipe;
+                    bestEvalLegacy = completeRecipeEval;
                 }
             }
+
+            if (bestEval == null || completeRecipeEval.compareMostToLeastComplexity(bestEval) > 0) {
+                bestRecipe = recipe;
+                bestEval = completeRecipeEval;
+            }
         }
-        if (bestRecipe != null) {
-            Logging.debugLog("best recipe: " + bestRecipe.getName(5) + " has Quality= " + quality);
+
+        if (bestRecipeLegacy != null) {
+            Logging.debugLog("best recipe: " + bestRecipeLegacy.getName(5) + " has Quality= " + quality);
+            return new BestRecipeResult.Found(bestRecipeLegacy, bestEvalLegacy);
+        } else {
+            // quality is guaranteed to be 0 or less, so constructor will never throw an exception
+            return new BestRecipeResult.Error(bestRecipe, bestEval);
         }
-        return bestRecipe;
     }
 
     /**
      * returns recipe that is cooking only and matches the ingredients and cooking time
      */
-    public BRecipe getCookRecipe() {
-        BRecipe bestRecipe = getBestRecipe(BarrelWoodType.ANY, 0, false);
+    public @Nullable BRecipe getCookRecipe() {
+        return getCookRecipeFull().getSuccessRecipe();
+    }
+    public BestRecipeResult getCookRecipeFull() {
+        BestRecipeResult result = getBestRecipeFull(BarrelWoodType.ANY, 0, false);
 
         // Check if best recipe is cooking only
-        if (bestRecipe != null) {
-            if (bestRecipe.isCookingOnly()) {
-                return bestRecipe;
+        if (result instanceof BestRecipeResult.Found found) {
+            if (found.recipe().isCookingOnly()) {
+                return result;
+            } else {
+                RecipeEvaluation eval = found.eval();
+                eval.fatal(new BrewDefect.CookTimeMismatch(cookedTime, 0));
+                return new BestRecipeResult.Error(found.recipe(), eval);
             }
         }
-        return null;
+        return result;
     }
 
     /**
@@ -340,92 +390,113 @@ public class BIngredients {
     /**
      * returns the currently best matching recipe for distilling for the ingredients and cooking time
      */
-    public BRecipe getDistillRecipe(BarrelWoodType wood, float time) {
-        BRecipe bestRecipe = getBestRecipe(wood, time, true);
+    public @Nullable BRecipe getDistillRecipe(BarrelWoodType wood, float time) {
+        return getDistillRecipeFull(wood, time).getSuccessRecipe();
+    }
+    public BestRecipeResult getDistillRecipeFull(BarrelWoodType wood, float time) {
+        BestRecipeResult result = getBestRecipeFull(wood, time, true);
 
-        // Check if best recipe needs to be destilled
-        if (bestRecipe != null) {
-            if (bestRecipe.needsDistilling()) {
-                return bestRecipe;
+        // Check if best recipe needs to be distilled
+        if (result instanceof BestRecipeResult.Found found) {
+            if (found.recipe().needsDistilling()) {
+                return result;
+            } else {
+                RecipeEvaluation eval = found.eval();
+                eval.fatal(new BrewDefect.DistillMismatch(true, false));
+                return new BestRecipeResult.Error(found.recipe(), eval);
             }
         }
-        return null;
+        return result;
     }
 
     /**
      * returns currently best matching recipe for ingredients, cooking- and ageingtime
      */
-    public BRecipe getAgeRecipe(BarrelWoodType wood, float time, boolean distilled) {
-        BRecipe bestRecipe = getBestRecipe(wood, time, distilled);
+    public @Nullable BRecipe getAgeRecipe(BarrelWoodType wood, float time, boolean distilled) {
+        return getAgeRecipeFull(wood, time, distilled).getSuccessRecipe();
+    }
+    public BestRecipeResult getAgeRecipeFull(BarrelWoodType wood, float time, boolean distilled) {
+        BestRecipeResult result = getBestRecipeFull(wood, time, distilled);
 
-        if (bestRecipe != null) {
-            if (bestRecipe.needsToAge()) {
-                return bestRecipe;
+        if (result instanceof BestRecipeResult.Found found) {
+            if (found.recipe().needsToAge()) {
+                return result;
+            } else {
+                RecipeEvaluation eval = found.eval();
+                eval.fatal(new BrewDefect.AgeMismatch(time, found.recipe().getAge()));
+                return new BestRecipeResult.Error(found.recipe(), eval);
             }
         }
-        return null;
+        return result;
     }
 
     /**
      * returns the quality of the ingredients conditioning given recipe, -1 if no recipe is near them
      */
     public int getIngredientQuality(BRecipe recipe) {
-        float quality = 10;
-        int count;
-        int badStuff = 0;
-        if (recipe.isMissingIngredients(ingredients)) {
+        return getIngredientQualityFull(recipe).getQuality();
+    }
+    public RecipeEvaluation getIngredientQualityFull(BRecipe recipe) {
+        RecipeEvaluation eval = new RecipeEvaluation();
+
+        List<RecipeItem> missingIngredients = recipe.getMissingIngredients(ingredients);
+        if (!missingIngredients.isEmpty()) {
             // when ingredients are not complete
-            return -1;
+            for (RecipeItem missing : missingIngredients) {
+                eval.fatal(new BrewDefect.MissingIngredient(missing, missing.getAmount()));
+            }
         }
+
+        int badStuff = 0;
         for (Ingredient ingredient : ingredients) {
             int amountInRecipe = recipe.amountOf(ingredient);
-            count = ingredient.getAmount();
+            int count = ingredient.getAmount();
             if (amountInRecipe == 0) {
-                // this ingredient doesnt belong into the recipe
-                if (count > (getIngredientsCount() / 2)) {
-                    // when more than half of the ingredients dont fit into the
-                    // recipe
-                    return -1;
-                }
+                // this ingredient doesn't belong into the recipe
                 badStuff++;
-                if (badStuff < ingredients.size()) {
+                if (count > (getIngredientsCount() / 2)) {
+                    // when more than half of the ingredients don't fit into the recipe
+                    eval.fatal(new BrewDefect.WrongIngredient(ingredient));
+                } else if (badStuff < ingredients.size()) {
                     // when there are other ingredients
-                    quality -= count * (recipe.getDifficulty() / 2.0);
-                    continue;
+                    float badIngredientDeduction = count * (recipe.getDifficulty() / 2.0f);
+                    eval.deduct(new BrewDefect.WrongIngredient(ingredient), badIngredientDeduction);
                 } else {
-                    // ingredients dont fit at all
-                    return -1;
+                    // ingredients don't fit at all
+                    eval.fatal(new BrewDefect.WrongIngredient(ingredient));
                 }
+            } else if (count != amountInRecipe) {
+                // calculate the quality
+                float ingredientCountDeduction = ((float) Math.abs(count - amountInRecipe) / recipe.allowedCountDiff(amountInRecipe)) * 10.0f;
+                eval.deduct(new BrewDefect.WrongCount(ingredient, amountInRecipe), ingredientCountDeduction);
             }
-            // calculate the quality
-            quality -= ((float) Math.abs(count - amountInRecipe) / recipe.allowedCountDiff(amountInRecipe)) * 10.0;
         }
-        if (quality >= 0) {
-            return Math.round(quality);
-        }
-        return -1;
+        return eval;
     }
 
     /**
      * returns the quality regarding the cooking-time conditioning given Recipe
      */
     public int getCookingQuality(BRecipe recipe, boolean distilled) {
-        if (!recipe.needsDistilling() == distilled) {
-            return -1;
+        return getCookingQualityFull(recipe, distilled).getQuality();
+    }
+    public RecipeEvaluation getCookingQualityFull(BRecipe recipe, boolean distilled) {
+        RecipeEvaluation eval = new RecipeEvaluation();
+        if (recipe.needsDistilling() != distilled) {
+            eval.fatal(new BrewDefect.DistillMismatch(distilled, recipe.needsDistilling()));
         }
-        int quality = 10 - (int) Math.round(((float) Math.abs(cookedTime - recipe.getCookingTime()) / recipe.allowedTimeDiff(recipe.getCookingTime())) * 10.0);
 
-        if (quality >= 0) {
-            if (cookedTime < 1) {
-                return 0;
-            }
-            return quality;
+        if (cookedTime < 1) {
+            eval.deduct(new BrewDefect.CookTimeMismatch(0, recipe.getCookingTime()), 10);
+        } else if (cookedTime != recipe.getCookingTime()) {
+            float cookTimeDeduction = ((float) Math.abs(cookedTime - recipe.getCookingTime()) / recipe.allowedTimeDiff(recipe.getCookingTime())) * 10.0f;
+            eval.deduct(new BrewDefect.CookTimeMismatch(cookedTime, recipe.getCookingTime()), cookTimeDeduction);
         }
-        return -1;
+        return eval;
     }
 
     /**
-     * returns pseudo quality of distilling. 0 if doesnt match the need of the recipes distilling
+     * returns pseudo quality of distilling. 0 if doesn't match the need of the recipes distilling
      */
     public int getDistillQuality(BRecipe recipe, byte distillRuns) {
         if (recipe.needsDistilling() != distillRuns > 0) {
@@ -438,16 +509,26 @@ public class BIngredients {
      * returns the quality regarding the barrel wood conditioning given Recipe
      */
     public int getWoodQuality(BRecipe recipe, BarrelWoodType wood) {
+        return getWoodQualityFull(recipe, wood).getQuality();
+    }
+
+    public RecipeEvaluation getWoodQualityFull(BRecipe recipe, BarrelWoodType wood) {
+        RecipeEvaluation eval = new RecipeEvaluation();
         if (recipe.usesAnyWood()) {
             // type of wood doesnt matter
-            return 10;
+            return eval;
         }
-        if (config.isNewBarrelTypeAlgorithm()) {
-            return getWoodQualityNew(recipe, wood);
-        }
-        int quality = 10 - Math.round(recipe.getWoodDiff(wood.getIndex()) * recipe.getDifficulty());
 
-        return Math.max(quality, 0);
+        if (wood != recipe.getWood()) {
+            float woodDeduction;
+            if (config.isNewBarrelTypeAlgorithm()) {
+                woodDeduction = getWoodQualityNew(recipe, wood);
+            } else {
+                woodDeduction = recipe.getWoodDiff(wood.getIndex()) * recipe.getDifficulty();
+            }
+            eval.deduct(new BrewDefect.WrongWood(wood, recipe.getWood()), woodDeduction);
+        }
+        return eval;
     }
     // At difficulty 1, distances 0-5 have quality 10, 10, 9, 8, 7, 6
     // At difficulty 5, distances 0-5 have quality 10, 8, 4, 1, 0, 0
@@ -475,9 +556,15 @@ public class BIngredients {
      * returns the quality regarding the ageing time conditioning given Recipe
      */
     public int getAgeQuality(BRecipe recipe, float time) {
-        int quality = 10 - Math.round(Math.abs(time - recipe.getAge()) * ((float) recipe.getDifficulty() / 2));
-
-        return Math.max(quality, 0);
+        return getAgeQualityFull(recipe, time).getQuality();
+    }
+    public RecipeEvaluation getAgeQualityFull(BRecipe recipe, float time) {
+        RecipeEvaluation eval = new RecipeEvaluation();
+        if (!BUtil.isClose(time, recipe.getAge())) {
+            float ageDeduction = Math.abs(time - recipe.getAge()) * ((float) recipe.getDifficulty() / 2);
+            eval.deduct(new BrewDefect.AgeMismatch(time, recipe.getAge()), ageDeduction);
+        }
+        return eval;
     }
 
     @Override

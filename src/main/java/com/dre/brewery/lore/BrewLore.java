@@ -306,6 +306,16 @@ public class BrewLore {
         }
     }
 
+    public void updateDefect(@Nullable String defectMessage) {
+        if (defectMessage != null) {
+            if (Type.DEFECT.findInLore(lore) == -1) {
+                addOrReplaceLore(Type.DEFECT, "§c", defectMessage);
+            }
+        } else {
+            removeLore(Type.DEFECT);
+        }
+    }
+
     public void updateBrewer(String name) {
         if (name != null && config.isShowBrewer()) {
             addOrReplaceLore(Type.BREWER, "§8", lang.getEntry("Brew_Brewer", name));
@@ -603,7 +613,9 @@ public class BrewLore {
         AGE("§y"),
         WOOD("§z"),
         ALC("§q"),
+        DEFECT("§i"),
         BREWER("§g");
+        // Available: j, non-letters (server deletes §x)
 
         public final String id;
 
