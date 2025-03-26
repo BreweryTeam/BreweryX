@@ -26,10 +26,13 @@ import com.dre.brewery.BreweryPlugin;
 import com.dre.brewery.commands.SubCommand;
 import com.dre.brewery.configuration.files.Lang;
 import com.dre.brewery.recipe.BRecipe;
+import com.dre.brewery.recipe.BestRecipeResult;
 import com.dre.brewery.recipe.Ingredient;
+import com.dre.brewery.recipe.RecipeEvaluation;
 import com.dre.brewery.recipe.RecipeItem;
 import com.dre.brewery.utility.Logging;
 import com.dre.brewery.utility.MinecraftVersion;
+import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -76,22 +79,19 @@ public class DebugInfoCommand implements SubCommand {
                 }
                 Logging.log("&lTesting Recipes");
                 for (BRecipe recipe : BRecipe.getAllRecipes()) {
-                    int ingQ = ingredients.getIngredientQuality(recipe);
-                    int cookQ = ingredients.getCookingQuality(recipe, false);
-                    int cookDistQ = ingredients.getCookingQuality(recipe, true);
-                    int ageQ = ingredients.getAgeQuality(recipe, brew.getAgeTime());
-                    Logging.log(recipe.getRecipeName() + ": ingQlty: " + ingQ + ", cookQlty:" + cookQ + ", cook+DistQlty: " + cookDistQ + ", ageQlty: " + ageQ);
+                    logRecipe(recipe, brew);
                 }
-                BRecipe distill = ingredients.getBestRecipe(brew.getWood(), brew.getAgeTime(), true);
-                BRecipe nonDistill = ingredients.getBestRecipe(brew.getWood(), brew.getAgeTime(), false);
-                Logging.log("&lWould prefer Recipe: " + (nonDistill == null ? "none" : nonDistill.getRecipeName()) + " and Distill-Recipe: " + (distill == null ? "none" : distill.getRecipeName()));
+                BestRecipeResult distill = ingredients.getBestRecipeFull(brew.getWood(), brew.getAgeTime(), true);
+                Logging.log("&lDistill-Recipe: &r" + ChatColor.stripColor(distill.toString()));
+                BestRecipeResult nonDistill = ingredients.getBestRecipeFull(brew.getWood(), brew.getAgeTime(), false);
+                Logging.log("&lRecipe: &r" + ChatColor.stripColor(nonDistill.toString()));
             } else {
                 BRecipe recipe = BRecipe.getMatching(recipeName);
                 if (recipe == null) {
                     Logging.msg(player, "Could not find Recipe " + recipeName);
                     return;
                 }
-                Logging.log("&lIngredients in Recipe " + recipe.getRecipeName() + ":");
+                Logging.log("&lIngredients in Recipe " + recipe.getRecipeName() + "&r&l:&r");
                 for (RecipeItem ri : recipe.getIngredients()) {
                     Logging.log(ri.toString());
                 }
@@ -100,14 +100,25 @@ public class DebugInfoCommand implements SubCommand {
                     int amountInRecipe = recipe.amountOf(ingredient);
                     Logging.log(ingredient.toString() + ": " + amountInRecipe + " of this are in the Recipe");
                 }
-                int ingQ = ingredients.getIngredientQuality(recipe);
-                int cookQ = ingredients.getCookingQuality(recipe, false);
-                int cookDistQ = ingredients.getCookingQuality(recipe, true);
-                int ageQ = ingredients.getAgeQuality(recipe, brew.getAgeTime());
-                Logging.log("ingQlty: " + ingQ + ", cookQlty:" + cookQ + ", cook+DistQlty: " + cookDistQ + ", ageQlty: " + ageQ);
+                logRecipe(recipe, brew);
             }
 
             Logging.msg(player, "Debug Info for item written into Log");
         }
     }
+
+    private static void logRecipe(BRecipe recipe, Brew brew) {
+        BIngredients ingredients = brew.getIngredients();
+        RecipeEvaluation ingQ = ingredients.getIngredientQualityFull(recipe);
+        Logging.log(String.format("%s&r ingQlty: %s", recipe.getRecipeName(), ingQ));
+        RecipeEvaluation cookQ = ingredients.getCookingQualityFull(recipe, false);
+        Logging.log(String.format("%s&r cookQlty: %s", recipe.getRecipeName(), cookQ));
+        RecipeEvaluation cookDistQ = ingredients.getCookingQualityFull(recipe, true);
+        Logging.log(String.format("%s&r cook+DistQlty: %s", recipe.getRecipeName(), cookDistQ));
+        RecipeEvaluation ageQ = ingredients.getAgeQualityFull(recipe, brew.getAgeTime());
+        Logging.log(String.format("%s&r ageQlty: %s", recipe.getRecipeName(), ageQ));
+        RecipeEvaluation woodQ = ingredients.getWoodQualityFull(recipe, brew.getWood());
+        Logging.log(String.format("%s&r woodQlty: %s", recipe.getRecipeName(), woodQ));
+    }
+
 }
