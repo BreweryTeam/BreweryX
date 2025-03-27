@@ -402,7 +402,7 @@ public class BIngredients {
                 return result;
             } else {
                 RecipeEvaluation eval = found.eval();
-                eval.fatal(new BrewDefect.DistillMismatch(true, false));
+                eval.fatal(new BrewDefect.DistillMismatch(true, false, found.recipe().isAlcoholic()));
                 return new BestRecipeResult.Error(found.recipe(), eval);
             }
         }
@@ -423,7 +423,7 @@ public class BIngredients {
                 return result;
             } else {
                 RecipeEvaluation eval = found.eval();
-                eval.fatal(new BrewDefect.AgeMismatch(time, found.recipe().getAge()));
+                eval.fatal(new BrewDefect.AgeMismatch(time, found.recipe().getAge(), found.recipe().isAlcoholic()));
                 return new BestRecipeResult.Error(found.recipe(), eval);
             }
         }
@@ -483,7 +483,7 @@ public class BIngredients {
     public RecipeEvaluation getCookingQualityFull(BRecipe recipe, boolean distilled) {
         RecipeEvaluation eval = new RecipeEvaluation();
         if (recipe.needsDistilling() != distilled) {
-            eval.fatal(new BrewDefect.DistillMismatch(distilled, recipe.needsDistilling()));
+            eval.fatal(new BrewDefect.DistillMismatch(distilled, recipe.needsDistilling(), recipe.isAlcoholic()));
         }
 
         if (cookedTime < 1) {
@@ -562,7 +562,7 @@ public class BIngredients {
         RecipeEvaluation eval = new RecipeEvaluation();
         if (!BUtil.isClose(time, recipe.getAge())) {
             float ageDeduction = Math.abs(time - recipe.getAge()) * ((float) recipe.getDifficulty() / 2);
-            eval.deduct(new BrewDefect.AgeMismatch(time, recipe.getAge()), ageDeduction);
+            eval.deduct(new BrewDefect.AgeMismatch(time, recipe.getAge(), recipe.isAlcoholic()), ageDeduction);
         }
         return eval;
     }

@@ -302,6 +302,8 @@ public class Lang extends AbstractOkaeriConfigFile {
     private List<String> defectHighCount;
     @CustomKey("Defect_NeedsDistill")
     private List<String> defectNeedsDistill;
+    @CustomKey("Defect_NeedsDistillAlc")
+    private List<String> defectNeedsDistillAlc;
     @CustomKey("Defect_BadDistill")
     private List<String> defectBadDistill;
     @CustomKey("Defect_Uncooked")
@@ -312,6 +314,8 @@ public class Lang extends AbstractOkaeriConfigFile {
     private List<String> defectUnderAged;
     @CustomKey("Defect_OverAged")
     private List<String> defectOverAged;
+    @CustomKey("Defect_OverAgedAlc")
+    private List<String> defectOverAgedAlc;
     @CustomKey("Defect_BadAged")
     private List<String> defectBadAged;
     @CustomKey("Defect_WrongWood")

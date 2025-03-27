@@ -68,11 +68,12 @@ Defect_HighCount:
   - 'One of the ingredients is overpowering...'
   - 'The flavor of one of the ingredients is too strong...'
 Defect_NeedsDistill:
-  - 'You can''t taste the alcohol...'
   - 'This needs some distillation...'
+Defect_NeedsDistillAlc:
+  - 'You can''t taste the alcohol...'
 Defect_BadDistill:
   - 'The brew evaporated...'
-  - 'This definitely didn''t need distillation...'
+  - 'The flavor disappeared...'
 Defect_Uncooked:
   - 'It''s still raw...'
   - 'Not enough time in the oven...'
@@ -81,9 +82,12 @@ Defect_Overcooked:
   - 'Too much time in the oven...'
 Defect_UnderAged:
   - 'This needs fermentation...'
-  - 'Not enough time in the barrel...'
+  - 'The brew tastes too harsh...'
 Defect_OverAged:
   - 'This brew smells expired...'
+  - 'This brew is ancient...'
+Defect_OverAgedAlc:
+  - 'This brew smells like vinegar...'
   - 'This brew is ancient...'
 Defect_BadAged:
   - 'This brew shouldn''t have been aged...'

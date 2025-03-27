@@ -81,7 +81,7 @@ public interface BrewDefect {
         }
     }
 
-    record DistillMismatch(boolean actual, boolean needed) implements BrewDefect {
+    record DistillMismatch(boolean actual, boolean needed, boolean alcoholic) implements BrewDefect {
         public DistillMismatch {
             if (actual == needed) {
                 throw new IllegalArgumentException("DistillMismatch actual and needed were equal");
@@ -91,7 +91,11 @@ public interface BrewDefect {
         @Override
         public List<String> getMessages(Lang lang) {
             if (needed) {
-                return lang.getEntries("Defect_NeedsDistill");
+                if (alcoholic) {
+                    return lang.getEntries("Defect_NeedsDistillAlc");
+                } else {
+                    return lang.getEntries("Defect_NeedsDistill");
+                }
             } else {
                 return lang.getEntries("Defect_BadDistill");
             }
@@ -125,7 +129,7 @@ public interface BrewDefect {
         }
     }
 
-    record AgeMismatch(float actual, float needed) implements BrewDefect {
+    record AgeMismatch(float actual, float needed, boolean alcoholic) implements BrewDefect {
         public AgeMismatch {
             if (BUtil.isClose(actual, needed)) {
                 throw new IllegalArgumentException("AgeMismatch actual and needed were equal");
@@ -139,7 +143,11 @@ public interface BrewDefect {
             } else if (actual < needed) {
                 return lang.getEntries("Defect_UnderAged");
             } else {
-                return lang.getEntries("Defect_OverAged");
+                if (alcoholic) {
+                    return lang.getEntries("Defect_OverAgedAlc");
+                } else {
+                    return lang.getEntries("Defect_OverAged");
+                }
             }
         }
 

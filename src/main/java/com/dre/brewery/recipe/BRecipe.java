@@ -367,6 +367,10 @@ public class BRecipe implements Cloneable {
         return result;
     }
 
+    public boolean isAlcoholic() {
+        return alcohol > 0;
+    }
+
     /**
      * check every part of the recipe for validity.
      */
