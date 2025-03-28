@@ -68,6 +68,8 @@ public class ReloadCommand implements SubCommand {
             ConfigManager.loadCauldronIngredients();
             // Reload Recipes
             ConfigManager.loadRecipes();
+            // Reload Seed
+            ConfigManager.loadSeed();
 
             // Reload Cauldron Particle Recipes
             BCauldron.reload();

@@ -20,6 +20,7 @@
 
 package com.dre.brewery.configuration;
 
+import com.dre.brewery.Brew;
 import com.dre.brewery.DistortChat;
 import com.dre.brewery.configuration.annotation.OkaeriConfigFileOptions;
 import com.dre.brewery.configuration.files.CauldronFile;
@@ -184,6 +185,13 @@ public class ConfigManager {
                 DistortChat.getIgnoreText().add(bypass.split(","));
             }
             DistortChat.getCommands().addAll(config.getDistortCommands());
+        }
+    }
+
+    public static void loadSeed() {
+        Config config = getConfig(Config.class);
+        if (config.isEnableEncode()) {
+            Brew.loadSeed(config.getEncodeKey());
         }
     }
 

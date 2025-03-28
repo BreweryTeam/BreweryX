@@ -134,6 +134,7 @@ public final class BreweryPlugin extends JavaPlugin {
         ConfigManager.loadCauldronIngredients();
         ConfigManager.loadRecipes();
         ConfigManager.loadDistortWords();
+        ConfigManager.loadSeed();
         this.breweryStats = new BreweryStats(); // Load metrics
 
 
