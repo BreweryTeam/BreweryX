@@ -24,8 +24,10 @@ import com.dre.brewery.BIngredients;
 import com.dre.brewery.BarrelWoodType;
 import com.dre.brewery.Brew;
 import com.dre.brewery.BreweryPlugin;
+import com.dre.brewery.Translatable;
 import com.dre.brewery.commands.CommandUtil;
 import com.dre.brewery.commands.SubCommand;
+import com.dre.brewery.configuration.ConfigManager;
 import com.dre.brewery.configuration.files.Lang;
 import com.dre.brewery.recipe.BCauldronRecipe;
 import com.dre.brewery.recipe.BRecipe;
@@ -34,113 +36,74 @@ import com.dre.brewery.utility.BUtil;
 import com.dre.brewery.utility.Logging;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.ToString;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.Recipe;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.util.StringUtil;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.OptionalInt;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class SimulateCommand implements SubCommand {
 
     @Override
     public void execute(BreweryPlugin breweryPlugin, Lang lang, CommandSender sender, String label, String[] args) {
-        SimulationParser parser = new SimulationParser();
-        int currentArgIdx = 1;
-        while (true) {
-            // check one arg ahead since we need at least one ingredient arg
-            if (currentArgIdx >= args.length) {
-                sendUsage(lang, sender);
-                return;
-            }
-            String arg = args[currentArgIdx];
+        List<String> arguments = BUtil.splitStringKeepingQuotes(String.join(" ", args));
 
-            Status status = parser.parse(arg);
+        SimulationParser parser = new SimulationParser();
+        for (int i = 1; i <= arguments.size(); i++) {
+            Status status;
+            if (i < arguments.size()) {
+                String arg = arguments.get(i);
+                status = parser.parse(arg);
+            } else {
+                status = parser.finish();
+            }
+
             if (status instanceof Status.Help) {
                 sendUsage(lang, sender);
                 return;
-            } else if (status instanceof Status.Recipe) {
-                simulateRecipe(lang, sender, args);
-                return;
             } else if (status instanceof Status.Finished finished) {
-                simulateIngredients(lang, sender, args, currentArgIdx, finished.simulation());
+                simulate(lang, sender, finished.simulation());
                 return;
             } else if (status instanceof Status.Error error) {
-                lang.sendEntry(sender, error.errorType().getTranslationKey(), arg);
+                lang.sendEntry(sender, error.error().getTranslationKey(), error.args());
                 return;
-            } else {
-                currentArgIdx++;
             }
         }
-
+        throw new AssertionError("parser.finish() must not return Status.Updated()");
     }
 
     private static void sendUsage(Lang lang, CommandSender sender) {
         lang.sendEntry(sender, "Etc_Usage");
         lang.sendEntry(sender, "Help_Simulate");
-        lang.sendEntry(sender, "Help_Simulate2");
         lang.sendEntry(sender, "Help_Simulate_Options");
+        lang.sendEntry(sender, "Help_Simulate_Recipe");
+        lang.sendEntry(sender, "Help_Simulate_No_Recipe_Ingredients");
+        lang.sendEntry(sender, "Help_Simulate_Cook");
         lang.sendEntry(sender, "Help_Simulate_Distill");
         lang.sendEntry(sender, "Help_Simulate_Age");
         lang.sendEntry(sender, "Help_Simulate_Brewer");
         lang.sendEntry(sender, "Help_Simulate_Player");
     }
 
-    private static void simulateIngredients(Lang lang, CommandSender sender, String[] args, int currentArgIdx,
-                                            SimulationParameters simulationParameters) {
-        String ingredientsStr = Arrays.stream(args, currentArgIdx, args.length)
-            .collect(Collectors.joining(" "));
-        List<String> ingredientsList = BUtil.splitStringKeepingQuotes(ingredientsStr);
-        for (int i = 0; i < ingredientsList.size(); i++) {
-            String ingredient = ingredientsList.get(i);
-            if (BUtil.isInt(ingredient)) {
-                String prevIngredient = i > 0 ? ingredientsList.get(i - 1) : lang.getEntry("CMD_Ingredient");
-                lang.sendEntry(sender, "CMD_Invalid_Ingredient", ingredient, prevIngredient);
-                return;
-            }
-        }
-
-        BRecipe.IngredientsResult result = BRecipe.loadIngredientsVerbose(ingredientsList);
-        if (result instanceof BRecipe.IngredientsResult.Error error) {
-            lang.sendEntry(sender, error.error().getTranslationKey(), error.invalidPart());
-            return;
-        }
-        List<RecipeItem> itemList = ((BRecipe.IngredientsResult.Success) result).ingredients();
-
-        simulate(lang, sender, simulationParameters, itemList);
-    }
-
-    private static void simulateRecipe(Lang lang, CommandSender sender, String[] args) {
-        String recipeArg = Arrays.stream(args)
-            .skip(1)
-            .collect(Collectors.joining(" "));
-        BRecipe recipe = BRecipe.getMatching(recipeArg);
-        if (recipe == null) {
-            lang.sendEntry(sender, "Error_NoBrewName", recipeArg);
-            return;
-        }
-
-        Logging.debugLog("simulate: simulating recipe " + recipe.getId());
-        simulate(lang, sender, SimulationParameters.of(recipe), recipe.getIngredients());
-    }
-
-    private static void simulate(Lang lang, CommandSender sender, SimulationParameters simulation, List<RecipeItem> itemList) {
+    private static void simulate(Lang lang, CommandSender sender, SimulationParameters simulation) {
         BIngredients ingredients = new BIngredients();
-        for (RecipeItem item : itemList) {
+        for (RecipeItem item : simulation.ingredients()) {
             for (int i = 0; i < item.getAmount(); i++) {
                 ingredients.addGeneric(item);
             }
         }
+        Logging.debugLog(String.format("simulate: ingredients=%s", ingredients));
 
         ItemStack item = ingredients.cook(simulation.cookedTime(), simulation.brewer());
         Brew brew = new Brew(ingredients);
@@ -200,43 +163,144 @@ public class SimulateCommand implements SubCommand {
 
     @Override
     public List<String> tabComplete(BreweryPlugin breweryPlugin, CommandSender sender, String label, String[] args) {
+        List<String> arguments = BUtil.splitStringKeepingQuotes(String.join(" ", args));
+
         SimulationParser parser = new SimulationParser();
-        int currentArgIdx = 1;
-        while (true) {
-            String arg = args[currentArgIdx];
-            if (currentArgIdx >= args.length - 1) {
-                List<String> completions = parser.getTabCompletions(arg);
-                return completions == null ? null : StringUtil.copyPartialMatches(arg, completions, new ArrayList<>());
+        for (int i = 1; i <= arguments.size(); i++) {
+            String arg = arguments.size() == 1 ? args[1] : arguments.get(i);
+
+            if (i >= arguments.size() - 1) {
+                String rawLastArg = args[args.length - 1];
+
+                // supporting tab complete mid-quote is too complicated
+                if (rawLastArg.equals("\"")) {
+                    return List.of();
+                }
+
+                // If player inputs `/brew simulate --age ` (notice the trailing space), rawLastArg will be blank.
+                // Since splitStringKeepingQuotes() will remove the trailing space,
+                // we need to first parse `--age` then tab complete on `` (blank).
+                if (rawLastArg.isBlank()) {
+                    Status status = parser.parse(arg);
+                    if (status instanceof Status.Help || status instanceof Status.Error) {
+                        return List.of();
+                    }
+                    return tabComplete(parser, rawLastArg);
+                }
+
+                return tabComplete(parser, arg);
             }
 
             Status status = parser.parse(arg);
-            if (status instanceof Status.Help || status instanceof Status.Error || status instanceof Status.Recipe) {
+            if (status instanceof Status.Help || status instanceof Status.Error) {
                 return List.of();
-            } else if (status instanceof Status.Finished) {
-                break;
-            } else {
-                currentArgIdx++;
             }
         }
-
-        String lastArg = args[args.length - 1];
-        return StringUtil.copyPartialMatches(lastArg, getIngredientCompletions(), new ArrayList<>());
+        throw new AssertionError("unreachable");
     }
 
+    private static @Nullable List<String> tabComplete(SimulationParser parser, String arg) {
+        List<String> completions = parser.getTabCompletions(arg);
+        return completions == null ? null : StringUtil.copyPartialMatches(arg, completions, new ArrayList<>());
+    }
+
+//    @Override
+//    public List<String> tabComplete(BreweryPlugin breweryPlugin, CommandSender sender, String label, String[] args) {
+//        Logging.debugLog("");
+//        Logging.debugLog("tabComplete start");
+//        BUtil.SplitResult splitResult = BUtil.splitStringKeepingQuotesVerbose(String.join(" ", args));
+//        List<String> arguments = splitResult.strings();
+////        boolean inQuotes = splitResult.inQuotes();
+//        boolean inQuotes = false;
+//
+//        SimulationParser parser = new SimulationParser();
+//        int currentArgIdx = 1;
+//        while (true) {
+//            String arg = arguments.size() == 1 ? args[1] : arguments.get(currentArgIdx);
+//            Logging.debugLog(String.format("tabComplete: %d `%s` | `%s`", currentArgIdx, arg, args[args.length - 1]));
+//            if (currentArgIdx >= arguments.size() - 1) {
+//                String quoted = inQuotes ? '"' + arg : arg;
+//                String rawLastArg = args[args.length - 1];
+//                if (rawLastArg.equals("\"")) {
+//                    return List.of(); // supporting tab complete mid-quote is too complicated
+//                }
+//                if (!inQuotes && rawLastArg.isBlank()) {
+//                    Status status = parser.parse(arg);
+//                    Logging.debugLog(String.format("tabComplete: parse %s %s", status, parser));
+//                    if (status instanceof Status.Help || status instanceof Status.Error) {
+//                        return List.of();
+//                    }
+//                    Logging.debugLog(String.format("tabComplete: completing rawLastArg `%s`", rawLastArg));
+//                    List<String> completions = parser.getTabCompletions(rawLastArg);
+//                    Logging.debugLog("tabComplete: completions " + completions);
+//                    return completions == null ? null : StringUtil.copyPartialMatches(rawLastArg, completions, new ArrayList<>());
+//                }
+//                Logging.debugLog(String.format("tabComplete: completing arg `%s`", quoted));
+//                List<String> completions = parser.getTabCompletions(quoted);
+//                Logging.debugLog("tabComplete: completions " + completions);
+//                return completions == null ? null : StringUtil.copyPartialMatches(quoted, completions, new ArrayList<>());
+//            }
+//
+//            Status status = parser.parse(arg);
+//            Logging.debugLog(String.format("tabComplete: parse %s %s", status, parser));
+//            if (status instanceof Status.Help || status instanceof Status.Error) {
+//                return List.of();
+//            } else {
+//                currentArgIdx++;
+//            }
+//        }
+//    }
+
+//    @Override
+//    public List<String> tabComplete(BreweryPlugin breweryPlugin, CommandSender sender, String label, String[] args) {
+//        List<String> arguments = BUtil.splitStringKeepingQuotes(String.join(" ", args));
+//
+//        SimulationParser parser = new SimulationParser();
+//        for (int i = 1; i < arguments.size(); i++) {
+//            String arg = arguments.get(i);
+//            Logging.debugLog(String.format("tabComplete: %d `%s`", i, arg));
+//            if (i >= arguments.size() - 1) {
+//                Logging.debugLog("tabComplete: break");
+//                return tabComplete(parser, arg);
+//            }
+//            Status status = parser.parse(arg);
+//            Logging.debugLog("tabComplete: status " + status);
+//            if (status instanceof Status.Help || status instanceof Status.Error) {
+//                return List.of();
+//            }
+//        }
+//        Logging.debugLog("tabComplete: end");
+//        String lastArg = args[args.length - 1];
+//        return tabComplete(parser, lastArg);
+//    }
+//    private static List<String> tabComplete(SimulationParser parser, String arg) {
+//        Logging.debugLog("tabComplete: completing on `" + arg + "`");
+//        List<String> completions = parser.getTabCompletions(arg);
+//        return completions == null ? null : StringUtil.copyPartialMatches(arg, completions, new ArrayList<>());
+//    }
+
+    @ToString
     private static class SimulationParser {
 
+        @Nullable
+        private BRecipe recipe = null;
         private int cookedTime = -1;
         private int distillRuns = -1;
         @Nullable
         BarrelWoodType woodType = null;
         private float ageTime = Float.NaN;
+        private List<RecipeItem> ingredients = new ArrayList<>();
         @Nullable
         private Player brewer = null;
         @Nullable
         private Player player = null;
 
         private final EnumSet<Option> options = EnumSet.noneOf(Option.class);
-        private State state = State.START;
+        private State state = State.OPTIONS;
+        private boolean noRecipeIngredients = false;
+
+        @Nullable
+        private String prevArg = null;
 
         public Status parse(String arg) {
             if (arg.isBlank()) {
@@ -245,40 +309,56 @@ public class SimulateCommand implements SubCommand {
 
             switch (state) {
 
-                case START -> {
-                    if (arg.equalsIgnoreCase("help")) {
+                case OPTIONS -> {
+                    if (prevArg == null && arg.equalsIgnoreCase("help")) {
                         return new Status.Help();
                     }
-                    if (BUtil.isInt(arg)) {
-                        int cookedTime = BUtil.parseInt(arg).orElse(-1);
-                        if (cookedTime < 0) {
-                            return new Status.Error(ErrorType.COOK);
+                    if (!arg.startsWith("-")) {
+                        if (prevArg == null) {
+                            return new Status.Error(ErrorType.INVALID_OPTION, arg);
+                        } else {
+                            state = State.INGREDIENTS;
+                            return parseIngredient(arg);
                         }
-                        this.cookedTime = cookedTime;
-                        state = State.OPTIONS;
-                    } else {
-                        return new Status.Recipe();
+                    }
+
+                    Option option = Option.get(arg);
+                    if (option == null) {
+                        return new Status.Error(ErrorType.INVALID_OPTION, arg);
+                    }
+                    if (!options.add(option)) {
+                        return new Status.Error(ErrorType.DUPLICATE_OPTION, arg);
+                    }
+                    state = option.getState();
+
+                    if (option == Option.NO_RECIPE_INGREDIENTS) {
+                        ingredients = new ArrayList<>();
+                        noRecipeIngredients = true;
                     }
                 }
 
-                case OPTIONS -> {
-                    if (!arg.startsWith("-")) {
-                        return new Status.Finished(createSimulation());
+                case RECIPE -> {
+                    BRecipe recipe = BRecipe.getMatching(arg);
+                    if (recipe == null) {
+                        return new Status.Error(ErrorType.RECIPE, arg);
                     }
-                    Option option = Option.get(arg);
-                    if (option == null) {
-                        return new Status.Error(ErrorType.INVALID_OPTION);
+                    this.recipe = recipe;
+                    state = State.OPTIONS;
+                }
+
+                case COOK -> {
+                    int cookedTime = BUtil.parseInt(arg).orElse(-1);
+                    if (cookedTime <= 0) {
+                        return new Status.Error(ErrorType.COOK, arg);
                     }
-                    if (!options.add(option)) {
-                        return new Status.Error(ErrorType.DUPLICATE_OPTION);
-                    }
-                    state = option.getState();
+                    this.cookedTime = cookedTime;
+                    state = State.OPTIONS;
                 }
 
                 case DISTILL -> {
                     int distillRuns = BUtil.parseInt(arg).orElse(-1);
-                    if (distillRuns < 0) {
-                        return new Status.Error(ErrorType.DISTILL_RUNS);
+                    if (distillRuns <= 0) {
+                        return new Status.Error(ErrorType.DISTILL_RUNS, arg);
                     }
                     this.distillRuns = distillRuns;
                     state = State.OPTIONS;
@@ -287,15 +367,15 @@ public class SimulateCommand implements SubCommand {
                 case WOOD -> {
                     BarrelWoodType woodType = BarrelWoodType.fromName(arg);
                     if (woodType == null || !woodType.isSpecific()) {
-                        return new Status.Error(ErrorType.WOOD_TYPE);
+                        return new Status.Error(ErrorType.WOOD_TYPE, arg);
                     }
                     this.woodType = woodType;
                     state = State.AGE;
                 }
                 case AGE -> {
                     float ageTime = BUtil.parseFloat(arg).orElse(-1);
-                    if (ageTime < 0) {
-                        return new Status.Error(ErrorType.AGE_TIME);
+                    if (ageTime <= 0) {
+                        return new Status.Error(ErrorType.AGE_TIME, arg);
                     }
                     this.ageTime = ageTime;
                     state = State.OPTIONS;
@@ -304,7 +384,7 @@ public class SimulateCommand implements SubCommand {
                 case BREWER -> {
                     Player brewer = BUtil.getPlayerfromString(arg);
                     if (brewer == null) {
-                        return new Status.Error(ErrorType.PLAYER);
+                        return new Status.Error(ErrorType.PLAYER, arg);
                     }
                     this.brewer = brewer;
                     state = State.OPTIONS;
@@ -313,49 +393,112 @@ public class SimulateCommand implements SubCommand {
                 case PLAYER -> {
                     Player player = BUtil.getPlayerfromString(arg);
                     if (player == null) {
-                        return new Status.Error(ErrorType.PLAYER);
+                        return new Status.Error(ErrorType.PLAYER, arg);
                     }
                     this.player = player;
                     state = State.OPTIONS;
                 }
 
+                case INGREDIENTS -> {
+                    return parseIngredient(arg);
+                }
+
             }
+            return update(arg);
+        }
+
+        private Status parseIngredient(String arg) {
+            // user probably meant "ingredient/#" instead of "ingredient #"
+            if (BUtil.isInt(arg)) {
+                String prevIngredient = prevArg != null ? prevArg : ConfigManager.getConfig(Lang.class).getEntry("CMD_Ingredient");
+                return new Status.Error(ErrorType.INVALID_INGREDIENT, arg, prevIngredient);
+            }
+
+            BRecipe.IngredientResult result = BRecipe.loadIngredientVerbose(arg);
+            if (result instanceof BRecipe.IngredientResult.Error error) {
+                return new Status.Error(error.error(), error.invalidPart());
+            }
+            ingredients.add(((BRecipe.IngredientResult.Success) result).ingredient());
+
+            return update(arg);
+        }
+
+        private Status update(String arg) {
+            prevArg = arg;
             return new Status.Updated();
         }
 
-        // assumes cook time has been parsed
-        private SimulationParameters createSimulation() {
-            if (cookedTime < 0) {
-                throw new IllegalStateException("cookedTime < 0");
+        public Status finish() {
+            int cookedTime;
+            if (options.contains(Option.COOK)) {
+                cookedTime = this.cookedTime;
+            } else if (recipe != null) {
+                cookedTime = recipe.getCookingTime();
+            } else {
+                return new Status.Error(ErrorType.MISSING_COOK);
             }
-            OptionalInt distill = distillRuns <= 0 ? OptionalInt.empty() : OptionalInt.of(distillRuns);
 
-            boolean hasAge = woodType != null && Float.isFinite(ageTime) && ageTime > 0;
-            Age age = !hasAge ? null : new Age(woodType, ageTime);
+            OptionalInt distill;
+            if (options.contains(Option.DISTILL)) {
+                distill = OptionalInt.of(distillRuns);
+            } else if (recipe != null && recipe.needsDistilling()) {
+                distill = OptionalInt.of(recipe.getDistillruns());
+            } else {
+                distill = OptionalInt.empty();
+            }
 
-            return new SimulationParameters(cookedTime, distill, age, brewer, player);
+            Age age;
+            if (options.contains(Option.AGE)) {
+                age = new Age(woodType, ageTime);
+            } else if (recipe != null) {
+                age = Age.of(recipe);
+            } else {
+                age = null;
+            }
+
+            List<RecipeItem> ingredients = new ArrayList<>(this.ingredients);
+            if (recipe != null && !noRecipeIngredients) {
+                ingredients.addAll(recipe.getIngredients());
+            }
+            if (ingredients.isEmpty()) {
+                return new Status.Error(ErrorType.MISSING_INGREDIENTS);
+            }
+
+            return new Status.Finished(new SimulationParameters(cookedTime, distill, age, ingredients, brewer, player));
         }
 
         @Nullable
         public List<String> getTabCompletions(String arg) {
             return switch (state) {
-                case START -> {
-                    List<String> completions = new ArrayList<>(List.of("help"));
-                    completions.addAll(BUtil.numberRange(0, 30));
-                    completions.addAll(CommandUtil.recipeNamesAndIds(arg));
-                    yield completions;
-                }
+
                 case OPTIONS -> {
                     List<String> completions = new ArrayList<>();
+                    if (prevArg == null) {
+                        completions.add("help");
+                    }
+                    if (options.contains(Option.RECIPE) || options.contains(Option.COOK)) {
+                        completions.addAll(getIngredientCompletions());
+                    }
                     completions.addAll(getOptionCompletions());
-                    completions.addAll(getIngredientCompletions());
                     yield completions;
                 }
+
+                case RECIPE -> getRecipeCompletions();
+                case COOK -> BUtil.numberRange(1, 30);
                 case DISTILL -> BUtil.numberRange(1, 10);
                 case WOOD -> BarrelWoodType.TAB_COMPLETIONS;
                 case AGE -> BUtil.numberRange(1, 50);
                 case BREWER, PLAYER -> null;
+                case INGREDIENTS -> getIngredientCompletions();
+
             };
+        }
+
+        private static String stripLeadingQuote(String str) {
+            if (str.startsWith("\"")) {
+                return str.substring(1);
+            }
+            return str;
         }
 
         private List<String> getOptionCompletions() {
@@ -367,6 +510,9 @@ public class SimulateCommand implements SubCommand {
 
         @Getter
         private enum Option {
+            RECIPE(State.RECIPE, "-r", "--recipe"),
+            NO_RECIPE_INGREDIENTS(State.OPTIONS, "-n", "--no-recipe-ingredients"),
+            COOK(State.COOK, "-c", "--cook"),
             DISTILL(State.DISTILL, "-d", "--distill"),
             AGE(State.WOOD, "-a", "--age"),
             BREWER(State.BREWER, "-b", "--brewer"),
@@ -395,9 +541,7 @@ public class SimulateCommand implements SubCommand {
         }
 
         private enum State {
-            /** Either a number (cook time), string (recipe), or "help" */
-            START,
-            OPTIONS, DISTILL, WOOD, AGE, BREWER, PLAYER
+            OPTIONS, RECIPE, COOK, DISTILL, WOOD, AGE, BREWER, PLAYER, INGREDIENTS
         }
 
     }
@@ -407,32 +551,20 @@ public class SimulateCommand implements SubCommand {
         record Updated() implements Status {}
         /** Need to display command usage */
         record Help() implements Status {}
-        /** Command is {@code /brew simulate <Recipe>} */
-        record Recipe() implements Status {}
         /** Parsing finished, next arguments are ingredients */
         record Finished(SimulationParameters simulation) implements Status {}
         /** User error */
-        record Error(ErrorType errorType) implements Status {}
+        record Error(Translatable error, Object... args) implements Status {}
     }
 
     private record SimulationParameters(
         int cookedTime,
         OptionalInt distillRuns,
         @Nullable Age age,
+        List<RecipeItem> ingredients,
         @Nullable Player brewer,
         @Nullable Player player
-    ) {
-        public static SimulationParameters of(BRecipe recipe) {
-            return new SimulationParameters(
-                recipe.getCookingTime(),
-                recipe.needsDistilling() ? OptionalInt.of(recipe.getDistillruns()) : OptionalInt.empty(),
-                Age.of(recipe),
-                null,
-                null
-            );
-        }
-    }
-
+    ) {}
     private record Age(BarrelWoodType barrelType, float ageTime) {
         public static @Nullable Age of(BRecipe recipe) {
             if (recipe.needsToAge()) {
@@ -445,16 +577,38 @@ public class SimulateCommand implements SubCommand {
 
     @AllArgsConstructor
     @Getter
-    private enum ErrorType {
-        COOK("CMD_Invalid_Cook_Time"),
+    private enum ErrorType implements Translatable {
         INVALID_OPTION("CMD_Invalid_Option"),
         DUPLICATE_OPTION("CMD_Duplicate_Option"),
+        RECIPE("Error_NoBrewName"),
+        COOK("CMD_Invalid_Cook_Time"),
         DISTILL_RUNS("CMD_Invalid_Distill_Runs"),
         WOOD_TYPE("CMD_Invalid_Wood_Type"),
         AGE_TIME("CMD_Invalid_Age_Time"),
-        PLAYER("Error_NoPlayer");
+        PLAYER("Error_NoPlayer"),
+        /** Takes 2 parameters, [arg, prevArg] */
+        INVALID_INGREDIENT("CMD_Invalid_Ingredient"),
+        /** Takes 0 parameters */
+        MISSING_COOK("CMD_Missing_Cook_Time"),
+        /** Takes 0 parameters */
+        MISSING_INGREDIENTS("CMD_Missing_Ingredients");
 
         private final String translationKey;
+    }
+
+    private static List<String> getRecipeCompletions() {
+        return Stream.concat(
+            BCauldronRecipe.getAllRecipes().stream()
+                .map(BCauldronRecipe::getName),
+            BRecipe.getAllRecipes().stream()
+                .mapMulti((recipe, consumer) -> {
+                    consumer.accept(recipe.getRecipeName());
+                    consumer.accept(recipe.getId());
+                })
+        ).sorted()
+            .distinct()
+            .map(BUtil::quote)
+            .toList();
     }
 
     private static List<String> getIngredientCompletions() {

@@ -295,13 +295,21 @@ public abstract class RecipeItem implements Cloneable, DebuggableItem {
         return "RecipeItem{(" + getClass().getSimpleName() + ") ID: " + getConfigId() + " Materials: " + (hasMaterials() ? getMaterials().size() : 0) + " Amount: " + getAmount();
     }
 
+    @Override
+    public String debug() {
+        if (getAmount() == 1) {
+            return getDebugID();
+        }
+        return getDebugID() + "/" + getAmount();
+    }
+
     /**
      * Converts this RecipeItem to a String that can be used in a config
      *
      * @return The config String
      */
     public String toConfigString() {
-        return toConfigStringNoAmount() + "/" + this.getAmount();
+        return toConfigStringNoAmount() + "/" + getAmount();
     }
     /**
      * Converts this RecipeItem to a String that can be used in a config

@@ -474,8 +474,8 @@ public class BIngredients {
     @Override
     public String toString() {
         String ingredientsStr = ingredients.stream()
-            .map(DebuggableItem::getDebugID)
-            .collect(Collectors.joining("[", "]", ", "));
+            .map(DebuggableItem::debug)
+            .collect(Collectors.joining(", ", "[", "]"));
         return new StringJoiner(", ", "BIngredients{", "}")
             .add("cookedTime=" + cookedTime)
             .add("ingredients=" + ingredientsStr)
