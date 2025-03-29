@@ -502,6 +502,7 @@ public class Brew implements Cloneable {
             lore.updateCookLore(false);
             lore.updateDistillLore(false);
             lore.updateAgeLore(false);
+            lore.updateWoodLore(false);
             lore.updateQualityStars(false);
             lore.updateAlc(false);
             lore.write();
