@@ -32,6 +32,9 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * The Blocks that make up a Barrel in the World
  */
@@ -41,11 +44,9 @@ public abstract class BarrelBody {
 
     protected final Block spigot;
     protected final BoundingBox bounds;
-    protected byte signoffset;
 
-    public BarrelBody(Block spigot, byte signoffset) {
+    public BarrelBody(Block spigot) {
         this.spigot = spigot;
-        this.signoffset = signoffset;
         this.bounds = new BoundingBox(0, 0, 0, 0, 0, 0);
 
         if (MinecraftVersion.isFolia()) { // Issues#70
@@ -61,9 +62,8 @@ public abstract class BarrelBody {
     /**
      * Loading from file
      */
-    public BarrelBody(Block spigot, byte signoffset, BoundingBox bounds) {
+    public BarrelBody(Block spigot, BoundingBox bounds) {
         this.spigot = spigot;
-        this.signoffset = signoffset;
         this.bounds = bounds;
         if (this.bounds == null || this.bounds.isBad()) {
             // If loading from old data, or block locations are missing, or other error, regenerate BoundingBox
@@ -76,14 +76,6 @@ public abstract class BarrelBody {
                 BreweryPlugin.getScheduler().runTask(spigot.getLocation(), this::regenerateBounds);
             }
         }
-    }
-
-
-    /**
-     * If the Sign of a Large Barrel gets destroyed, set signOffset to 0
-     */
-    public void destroySign() {
-        signoffset = 0;
     }
 
 
@@ -160,47 +152,21 @@ public abstract class BarrelBody {
     }
 
     /**
-     * Returns true if the Offset of the clicked Sign matches the Barrel.
-     * <p>This prevents adding another sign to the barrel and clicking that.
-     */
-    public boolean isSignOfBarrel(byte offset) {
-        return offset == 0 || signoffset == 0 || signoffset == offset;
-    }
-
-    /**
-     * returns the Sign of a large barrel, the spigot if there is none
-     */
-    public Block getSignOfSpigot() {
-        if (signoffset != 0) {
-            if (BarrelAsset.isBarrelAsset(BarrelAsset.SIGN, spigot.getType())) {
-                return spigot;
-            }
-
-            Block relative = spigot.getRelative(0, signoffset, 0);
-            if (BarrelAsset.isBarrelAsset(BarrelAsset.SIGN, relative.getType())) {
-                return relative;
-            } else {
-                signoffset = 0;
-            }
-        }
-        return spigot;
-    }
-
-    /**
      * returns the fence above/below a block, itself if there is none
      */
-    public static Block getSpigotOfSign(Block block) {
-
+    public static Set<Block> getSpigotOfSign(Block block) {
+        Set<Block> output = new HashSet<>();
+        output.add(block);
         int y = -2;
         while (y <= 1) {
             // Fence and Netherfence
             Block relative = block.getRelative(0, y, 0);
             if (BarrelAsset.isBarrelAsset(BarrelAsset.FENCE, relative.getType())) {
-                return relative;
+                output.add(relative);
             }
             y++;
         }
-        return block;
+        return output;
     }
 
     public abstract void remove(@Nullable Block broken, @Nullable Player breaker, boolean dropItems);
