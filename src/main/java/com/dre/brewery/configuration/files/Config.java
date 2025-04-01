@@ -165,6 +165,9 @@ public class Config extends AbstractOkaeriConfigFile {
     @LocalizedComment("config.agingYearDuration")
     private int agingYearDuration = 20;
 
+    @LocalizedComment("config.newBarrelTypeAlgorithm")
+    private boolean newBarrelTypeAlgorithm = false;
+
     @LocalizedComment("config.commandAliases")
     private List<String> commandAliases = List.of("brewery", "brew");
 

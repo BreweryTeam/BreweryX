@@ -60,6 +60,10 @@ config:
   requireKeywordOnSigns: "If barrels are only created when the sign placed contains the word \"barrel\" (or a translation when using another language) [true]"
   ageInMCBarrels: "If aging in -Minecraft- Barrels in enabled [true] and how many Brewery drinks can be put into them [6]"
   agingYearDuration: "Duration (in minutes) of a 'year' when aging drinks [20]"
+  newBarrelTypeAlgorithm: |
+    Whether to use the new algorithm for calculating wood type quality and shifting wood type when a brew is aged in different barrels.
+    False is the behavior of the original Brewery plugin.
+    True groups similar barrel types (such as oak and pale oak) together in a more intuitive way. [false]
   commandAliases: |
     Aliases for the '/breweryx' command. Requires a server restart to take effect. (list) [brewery, brew]
   enableEncode: |

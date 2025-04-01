@@ -22,6 +22,7 @@ package com.dre.brewery;
 
 import com.dre.brewery.api.events.brew.BrewModifyEvent;
 import com.dre.brewery.configuration.ConfigManager;
+import com.dre.brewery.configuration.files.Config;
 import com.dre.brewery.configuration.files.Lang;
 import com.dre.brewery.lore.Base91DecoderStream;
 import com.dre.brewery.lore.Base91EncoderStream;
@@ -64,6 +65,7 @@ public class BIngredients {
 
     private static final MinecraftVersion VERSION = BreweryPlugin.getMCVersion();
     private static final BreweryPlugin plugin = BreweryPlugin.getInstance();
+    private static final Config config = ConfigManager.getConfig(Config.class);
     private static final Lang lang = ConfigManager.getConfig(Lang.class);
     private static int lastId = 0; // Legacy
 
@@ -440,9 +442,33 @@ public class BIngredients {
             // type of wood doesnt matter
             return 10;
         }
+        if (config.isNewBarrelTypeAlgorithm()) {
+            return getWoodQualityNew(recipe, wood);
+        }
         int quality = 10 - Math.round(recipe.getWoodDiff(wood.getIndex()) * recipe.getDifficulty());
 
         return Math.max(quality, 0);
+    }
+    // At difficulty 1, distances 0-5 have quality 10, 10, 9, 8, 7, 6
+    // At difficulty 5, distances 0-5 have quality 10, 8, 4, 1, 0, 0
+    // At difficulty 10, distances 0-5 have quality 10, 5, 0, 0, 0, 0
+    // See: https://www.desmos.com/calculator/aaoixs2qo7
+    private int getWoodQualityNew(BRecipe recipe, BarrelWoodType wood) {
+        BarrelWoodType recipeWood = recipe.getWood();
+        float baseQuality = switch (recipeWood.getDistance(wood)) {
+            case 0 -> 10.0f;
+            case 1 -> 9.0f;
+            case 2 -> 7.75f;
+            case 3 -> 6.25f;
+            case 4 -> 4.5f;
+            case 5 -> 2.5f;
+            default -> 0.0f;
+        };
+        if (baseQuality == 0.0f) {
+            return 0;
+        }
+        float quality = 10f - (10f - baseQuality) * 0.5f * recipe.getDifficulty();
+        return Math.max(Math.round(quality), 0);
     }
 
     /**
