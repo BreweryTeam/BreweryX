@@ -1059,23 +1059,24 @@ public class Brew implements Cloneable {
         ingredients.save(out);
     }
 
+    public static void loadSeed(long seed) {
+        saveSeed = seed;
+        updatePrevSeeds();
+    }
+
     public static void loadPrevSeeds(ConfigurationSection section) {
         if (section.contains("prevSaveSeeds")) {
             prevSaveSeeds = section.getLongList("prevSaveSeeds");
-            if (!prevSaveSeeds.contains(saveSeed)) {
-                prevSaveSeeds.add(saveSeed);
-            }
-        }
-    }
-
-    public static void writePrevSeeds(ConfigurationSection section) {
-        if (!prevSaveSeeds.isEmpty()) {
-            section.set("prevSaveSeeds", prevSaveSeeds);
+            updatePrevSeeds();
         }
     }
 
     public static void loadPrevSeeds(List<Long> list) {
         prevSaveSeeds = list;
+        updatePrevSeeds();
+    }
+
+    private static void updatePrevSeeds() {
         if (!prevSaveSeeds.contains(saveSeed)) {
             prevSaveSeeds.add(saveSeed);
         }
