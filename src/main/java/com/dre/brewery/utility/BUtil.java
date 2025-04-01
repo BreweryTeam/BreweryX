@@ -27,6 +27,7 @@ import com.dre.brewery.BreweryPlugin;
 import com.dre.brewery.api.events.barrel.BarrelDestroyEvent;
 import com.dre.brewery.configuration.ConfigManager;
 import com.dre.brewery.configuration.files.Lang;
+import com.github.Anon8281.universalScheduler.scheduling.schedulers.TaskScheduler;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Color;
@@ -178,22 +179,24 @@ public final class BUtil {
      */
     public static void reapplyPotionEffect(Player player, PotionEffect effect, boolean onlyIfStronger) {
         final PotionEffectType type = effect.getType();
-        if (player.hasPotionEffect(type)) {
+        BreweryPlugin.getScheduler().execute(player, () -> {
+            if (!player.hasPotionEffect(type)) {
+                return;
+            }
+
             PotionEffect plEffect;
             if (VERSION.isOrLater(MinecraftVersion.V1_11)) {
                 plEffect = player.getPotionEffect(type);
             } else {
                 plEffect = player.getActivePotionEffects().stream().filter(e -> e.getType().equals(type)).findAny().get();
             }
+
             if (!onlyIfStronger ||
                 plEffect.getAmplifier() < effect.getAmplifier() ||
                 (plEffect.getAmplifier() == effect.getAmplifier() && plEffect.getDuration() < effect.getDuration())) {
                 player.removePotionEffect(type);
-            } else {
-                return;
             }
-        }
-        effect.apply(player);
+        });
     }
 
     /**
