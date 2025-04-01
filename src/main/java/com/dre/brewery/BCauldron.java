@@ -527,14 +527,20 @@ public class BCauldron {
      * Recalculate the Cauldron Particle Recipe
      */
     public static void reload() {
+        if (!config.isEnableCauldronParticles()) {
+            return;
+        }
+        
+        var scheduler = BreweryPlugin.getScheduler();
         for (BCauldron cauldron : bcauldrons.values()) {
             cauldron.particleRecipe = null;
             cauldron.particleColor = null;
-            if (config.isEnableCauldronParticles()) {
+
+            scheduler.execute(cauldron.block.getLocation(), () -> {
                 if (BUtil.isChunkLoaded(cauldron.block) && MaterialUtil.isCauldronHeatSource(cauldron.block.getRelative(BlockFace.DOWN))) {
                     cauldron.getParticleColor();
                 }
-            }
+            });
         }
     }
 
