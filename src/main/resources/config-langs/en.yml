@@ -57,6 +57,12 @@ config:
     Always show that a brew is alcoholic by putting "Alcoholic" in the item's lore
     Sealed brews will show that a brew is alcoholic, but not its alcohol content
   showBrewer: "If we should show who brewed the drink [false]"
+  showRuinedBrewHints: |
+    If ruined brews show hints about why they were ruined [false].
+    Examples:
+    - "Too much time in the oven..."
+    - "One of the ingredients doesn't taste good..."
+    Note that the hints are for the closest recipe based on the ingredients and may not be 100% accurate.
   requireKeywordOnSigns: "If barrels are only created when the sign placed contains the word \"barrel\" (or a translation when using another language) [true]"
   ageInMCBarrels: "If aging in -Minecraft- Barrels in enabled [true] and how many Brewery drinks can be put into them [6]"
   agingYearDuration: "Duration (in minutes) of a 'year' when aging drinks [20]"

@@ -370,6 +370,10 @@ public class BRecipe implements Cloneable {
         return result;
     }
 
+    public boolean isAlcoholic() {
+        return alcohol > 0;
+    }
+
     /**
      * check every part of the recipe for validity.
      */
@@ -474,6 +478,22 @@ public class BRecipe implements Cloneable {
             }
         }
         return false;
+    }
+    public List<RecipeItem> getMissingIngredients(List<Ingredient> list) {
+        List<RecipeItem> missing = new ArrayList<>();
+        for (RecipeItem rItem : ingredients) {
+            boolean matches = false;
+            for (Ingredient used : list) {
+                if (rItem.matches(used)) {
+                    matches = true;
+                    break;
+                }
+            }
+            if (!matches) {
+                missing.add(rItem);
+            }
+        }
+        return missing;
     }
 
     public void applyDrinkFeatures(Player player, int quality) {
