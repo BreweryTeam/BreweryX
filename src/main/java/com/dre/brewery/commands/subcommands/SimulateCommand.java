@@ -25,7 +25,6 @@ import com.dre.brewery.BarrelWoodType;
 import com.dre.brewery.Brew;
 import com.dre.brewery.BreweryPlugin;
 import com.dre.brewery.Translatable;
-import com.dre.brewery.commands.CommandUtil;
 import com.dre.brewery.commands.SubCommand;
 import com.dre.brewery.configuration.ConfigManager;
 import com.dre.brewery.configuration.files.Lang;
@@ -41,7 +40,6 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.Recipe;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.util.StringUtil;
 import org.jetbrains.annotations.Nullable;
@@ -200,87 +198,14 @@ public class SimulateCommand implements SubCommand {
     }
 
     private static @Nullable List<String> tabComplete(SimulationParser parser, String arg) {
-        List<String> completions = parser.getTabCompletions(arg);
+        List<String> completions = parser.getTabCompletions();
         return completions == null ? null : StringUtil.copyPartialMatches(arg, completions, new ArrayList<>());
     }
 
-//    @Override
-//    public List<String> tabComplete(BreweryPlugin breweryPlugin, CommandSender sender, String label, String[] args) {
-//        Logging.debugLog("");
-//        Logging.debugLog("tabComplete start");
-//        BUtil.SplitResult splitResult = BUtil.splitStringKeepingQuotesVerbose(String.join(" ", args));
-//        List<String> arguments = splitResult.strings();
-////        boolean inQuotes = splitResult.inQuotes();
-//        boolean inQuotes = false;
-//
-//        SimulationParser parser = new SimulationParser();
-//        int currentArgIdx = 1;
-//        while (true) {
-//            String arg = arguments.size() == 1 ? args[1] : arguments.get(currentArgIdx);
-//            Logging.debugLog(String.format("tabComplete: %d `%s` | `%s`", currentArgIdx, arg, args[args.length - 1]));
-//            if (currentArgIdx >= arguments.size() - 1) {
-//                String quoted = inQuotes ? '"' + arg : arg;
-//                String rawLastArg = args[args.length - 1];
-//                if (rawLastArg.equals("\"")) {
-//                    return List.of(); // supporting tab complete mid-quote is too complicated
-//                }
-//                if (!inQuotes && rawLastArg.isBlank()) {
-//                    Status status = parser.parse(arg);
-//                    Logging.debugLog(String.format("tabComplete: parse %s %s", status, parser));
-//                    if (status instanceof Status.Help || status instanceof Status.Error) {
-//                        return List.of();
-//                    }
-//                    Logging.debugLog(String.format("tabComplete: completing rawLastArg `%s`", rawLastArg));
-//                    List<String> completions = parser.getTabCompletions(rawLastArg);
-//                    Logging.debugLog("tabComplete: completions " + completions);
-//                    return completions == null ? null : StringUtil.copyPartialMatches(rawLastArg, completions, new ArrayList<>());
-//                }
-//                Logging.debugLog(String.format("tabComplete: completing arg `%s`", quoted));
-//                List<String> completions = parser.getTabCompletions(quoted);
-//                Logging.debugLog("tabComplete: completions " + completions);
-//                return completions == null ? null : StringUtil.copyPartialMatches(quoted, completions, new ArrayList<>());
-//            }
-//
-//            Status status = parser.parse(arg);
-//            Logging.debugLog(String.format("tabComplete: parse %s %s", status, parser));
-//            if (status instanceof Status.Help || status instanceof Status.Error) {
-//                return List.of();
-//            } else {
-//                currentArgIdx++;
-//            }
-//        }
-//    }
-
-//    @Override
-//    public List<String> tabComplete(BreweryPlugin breweryPlugin, CommandSender sender, String label, String[] args) {
-//        List<String> arguments = BUtil.splitStringKeepingQuotes(String.join(" ", args));
-//
-//        SimulationParser parser = new SimulationParser();
-//        for (int i = 1; i < arguments.size(); i++) {
-//            String arg = arguments.get(i);
-//            Logging.debugLog(String.format("tabComplete: %d `%s`", i, arg));
-//            if (i >= arguments.size() - 1) {
-//                Logging.debugLog("tabComplete: break");
-//                return tabComplete(parser, arg);
-//            }
-//            Status status = parser.parse(arg);
-//            Logging.debugLog("tabComplete: status " + status);
-//            if (status instanceof Status.Help || status instanceof Status.Error) {
-//                return List.of();
-//            }
-//        }
-//        Logging.debugLog("tabComplete: end");
-//        String lastArg = args[args.length - 1];
-//        return tabComplete(parser, lastArg);
-//    }
-//    private static List<String> tabComplete(SimulationParser parser, String arg) {
-//        Logging.debugLog("tabComplete: completing on `" + arg + "`");
-//        List<String> completions = parser.getTabCompletions(arg);
-//        return completions == null ? null : StringUtil.copyPartialMatches(arg, completions, new ArrayList<>());
-//    }
-
     @ToString
     private static class SimulationParser {
+
+        private static final List<String> helpStrings = List.of("help", "-h", "--help");
 
         @Nullable
         private BRecipe recipe = null;
@@ -310,7 +235,7 @@ public class SimulateCommand implements SubCommand {
             switch (state) {
 
                 case OPTIONS -> {
-                    if (prevArg == null && arg.equalsIgnoreCase("help")) {
+                    if (prevArg == null && helpStrings.contains(arg.toLowerCase(Locale.ROOT))) {
                         return new Status.Help();
                     }
                     if (!arg.startsWith("-")) {
@@ -468,13 +393,13 @@ public class SimulateCommand implements SubCommand {
         }
 
         @Nullable
-        public List<String> getTabCompletions(String arg) {
+        public List<String> getTabCompletions() {
             return switch (state) {
 
                 case OPTIONS -> {
                     List<String> completions = new ArrayList<>();
                     if (prevArg == null) {
-                        completions.add("help");
+                        completions.addAll(helpStrings);
                     }
                     if (options.contains(Option.RECIPE) || options.contains(Option.COOK)) {
                         completions.addAll(getIngredientCompletions());
@@ -492,13 +417,6 @@ public class SimulateCommand implements SubCommand {
                 case INGREDIENTS -> getIngredientCompletions();
 
             };
-        }
-
-        private static String stripLeadingQuote(String str) {
-            if (str.startsWith("\"")) {
-                return str.substring(1);
-            }
-            return str;
         }
 
         private List<String> getOptionCompletions() {
