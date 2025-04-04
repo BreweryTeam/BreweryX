@@ -18,14 +18,10 @@
  * along with BreweryX. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-package com.dre.brewery.recipe;
+package com.dre.brewery;
 
-public interface DebuggableItem {
+public interface Translatable {
 
-    String getDebugID();
-
-    default String debug() {
-        return getDebugID();
-    }
+    String getTranslationKey();
 
 }

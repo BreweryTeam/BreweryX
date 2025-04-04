@@ -290,6 +290,16 @@ public final class BUtil {
      * @return List of strings in the input, quoted strings will have their start and end quotes removed
      */
     public static List<String> splitStringKeepingQuotes(String input) {
+        return splitStringKeepingQuotesVerbose(input).strings;
+    }
+    /**
+     * Splits a string by spaces, unless enclosed in double quotes.
+     * Uses backslash as escape character for quotes and other backslashes.
+     * Multiple spaces will be treated as one space.
+     * @param input The input string
+     * @return List of strings in the input, quoted strings will have their start and end quotes removed
+     */
+    public static SplitResult splitStringKeepingQuotesVerbose(String input) {
         List<String> result = new ArrayList<>();
         StringBuilder current = new StringBuilder();
         boolean inQuotes = false;
@@ -317,8 +327,10 @@ public final class BUtil {
             result.add(current.toString());
         }
 
-        return result;
+        return new SplitResult(result, inQuotes);
     }
+
+    public record SplitResult(List<String> strings, boolean inQuotes) {}
 
     /**
      * Replaces the Placeholders %player_name% and %quality% in the given input string
