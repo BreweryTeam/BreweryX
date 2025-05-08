@@ -294,7 +294,7 @@ public class BIngredients {
             int cookingQuality = cookingEval.getQuality();
 
             // age and wood quality cannot be fatal, only need to check ingredient and cooking
-            boolean isFatal = ingredientEval.hasFatalDefect() || cookingEval.hasFatalDefect();
+            boolean isFatal = ingredientEval.isFatal() || cookingEval.isFatal();
 
             if (recipe.needsToAge() || time > 0.5) {
                 // needs riping in barrel

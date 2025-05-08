@@ -76,16 +76,16 @@ public class RecipeEvaluation {
     }
 
     /**
-     * @return whether {@link #getQuality()} is greater than 0
+     * @return whether {@link #getQuality()} is -1
      */
-    public boolean isUsable() {
-        return getQuality() > 0;
+    public boolean isFatal() {
+        return getTrueQuality() < 0;
     }
 
     /**
      * @return whether there are any fatal defects
      */
-    public boolean hasFatalDefect() {
+    private boolean hasFatalDefect() {
         return deductions.stream().anyMatch(QualityDeduction::isFatal);
     }
 
