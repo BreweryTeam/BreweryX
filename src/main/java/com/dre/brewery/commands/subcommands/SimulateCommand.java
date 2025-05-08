@@ -86,7 +86,6 @@ public class SimulateCommand implements SubCommand {
         lang.sendEntry(sender, "Help_Simulate");
         lang.sendEntry(sender, "Help_Simulate_Options");
         lang.sendEntry(sender, "Help_Simulate_Recipe");
-        lang.sendEntry(sender, "Help_Simulate_No_Recipe_Ingredients");
         lang.sendEntry(sender, "Help_Simulate_Cook");
         lang.sendEntry(sender, "Help_Simulate_Distill");
         lang.sendEntry(sender, "Help_Simulate_Age");
@@ -214,7 +213,7 @@ public class SimulateCommand implements SubCommand {
         @Nullable
         BarrelWoodType woodType = null;
         private float ageTime = Float.NaN;
-        private List<RecipeItem> ingredients = new ArrayList<>();
+        private final List<RecipeItem> ingredients = new ArrayList<>();
         @Nullable
         private Player brewer = null;
         @Nullable
@@ -222,7 +221,6 @@ public class SimulateCommand implements SubCommand {
 
         private final EnumSet<Option> options = EnumSet.noneOf(Option.class);
         private State state = State.OPTIONS;
-        private boolean noRecipeIngredients = false;
 
         @Nullable
         private String prevArg = null;
@@ -255,11 +253,6 @@ public class SimulateCommand implements SubCommand {
                         return new Status.Error(ErrorType.DUPLICATE_OPTION, arg);
                     }
                     state = option.getState();
-
-                    if (option == Option.NO_RECIPE_INGREDIENTS) {
-                        ingredients = new ArrayList<>();
-                        noRecipeIngredients = true;
-                    }
                 }
 
                 case RECIPE -> {
@@ -381,11 +374,12 @@ public class SimulateCommand implements SubCommand {
                 age = null;
             }
 
-            List<RecipeItem> ingredients = new ArrayList<>(this.ingredients);
-            if (recipe != null && !noRecipeIngredients) {
+            List<RecipeItem> ingredients = new ArrayList<>();
+            if (recipe != null && this.ingredients.isEmpty()) {
                 ingredients.addAll(recipe.getIngredients());
-            }
-            if (ingredients.isEmpty()) {
+            } else if (!this.ingredients.isEmpty()) {
+                ingredients.addAll(this.ingredients);
+            } else {
                 return new Status.Error(ErrorType.MISSING_INGREDIENTS);
             }
 
@@ -429,7 +423,6 @@ public class SimulateCommand implements SubCommand {
         @Getter
         private enum Option {
             RECIPE(State.RECIPE, "-r", "--recipe"),
-            NO_RECIPE_INGREDIENTS(State.OPTIONS, "-n", "--no-recipe-ingredients"),
             COOK(State.COOK, "-c", "--cook"),
             DISTILL(State.DISTILL, "-d", "--distill"),
             AGE(State.WOOD, "-a", "--age"),

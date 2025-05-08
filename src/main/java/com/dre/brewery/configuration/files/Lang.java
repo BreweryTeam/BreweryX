@@ -321,8 +321,6 @@ public class Lang extends AbstractOkaeriConfigFile {
     private String helpSimulateOptions;
     @CustomKey("Help_Simulate_Recipe")
     private String helpSimulateRecipe;
-    @CustomKey("Help_Simulate_No_Recipe_Ingredients")
-    private String helpSimulateNoRecipeIngredients;
     @CustomKey("Help_Simulate_Cook")
     private String helpSimulateCook;
     @CustomKey("Help_Simulate_Distill")
