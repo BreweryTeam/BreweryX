@@ -83,7 +83,7 @@ public sealed interface BestRecipeResult {
          * @throws IllegalArgumentException if quality is greater than 0
          */
         public Error {
-            if (eval.isUsable()) {
+            if (eval.getQuality() > 0) {
                 throw new IllegalArgumentException("quality must be 0 or lower to error!");
             }
         }
