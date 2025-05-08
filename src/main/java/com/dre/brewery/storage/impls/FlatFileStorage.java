@@ -39,6 +39,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
@@ -195,15 +196,14 @@ public class FlatFileStorage extends DataManager {
 
         BoundingBox boundingBox = BoundingBox.fromPoints(bounds);
         float time = (float) dataFile.getDouble(path + ".time", 0.0);
-        byte sign = (byte) dataFile.getInt(path + ".sign", 0);
         ItemStack[] items = BukkitSerialization.itemStackArrayFromBase64(dataFile.getString(path + ".items", null));
 
 
-        return new Barrel(spigotLoc.getBlock(), sign, boundingBox, items, time, id);
+        return new Barrel(spigotLoc.getBlock(), boundingBox, items, time, id);
     }
 
     @Override
-    public Collection<Barrel> getAllBarrels() {
+    public Collection<Barrel> getAllBarrels(World world) {
         ConfigurationSection section = dataFile.getConfigurationSection("barrels");
         if (section == null) {
             return Collections.emptyList();
@@ -213,6 +213,9 @@ public class FlatFileStorage extends DataManager {
 
         for (String key : section.getKeys(false)) {
             Barrel barrel = getBarrel(BUtil.uuidFromString(key));
+            if (!barrel.getSpigot().getWorld().equals(world)) {
+                continue;
+            }
             if (barrel != null) {
                 barrels.add(barrel);
             }
@@ -238,7 +241,6 @@ public class FlatFileStorage extends DataManager {
         dataFile.set(path + ".spigot", serializeLocation(barrel.getSpigot().getLocation()));
         dataFile.set(path + ".bounds", barrel.getBounds().serialize());
         dataFile.set(path + ".time", barrel.getTime());
-        dataFile.set(path + ".sign", barrel.getSignoffset());
         dataFile.set(path + ".items", BukkitSerialization.itemStackArrayToBase64(barrel.getInventory().getContents()));
         save();
     }
