@@ -79,15 +79,6 @@ public sealed interface BestRecipeResult {
      */
     record Error(BRecipe guess, RecipeEvaluation eval) implements BestRecipeResult {
 
-        /**
-         * @throws IllegalArgumentException if quality is greater than 0
-         */
-        public Error {
-            if (eval.getQuality() > 0) {
-                throw new IllegalArgumentException("quality must be 0 or lower to error!");
-            }
-        }
-
         @Override
         public @Nullable BRecipe getSuccessRecipe() {
             return null;
@@ -125,7 +116,7 @@ public sealed interface BestRecipeResult {
 
         @Override
         public String toString() {
-            return "NoRecipesAvailable{}";
+            return "NoRecipesRegistered{}";
         }
 
     }

@@ -336,10 +336,12 @@ public class BIngredients {
         }
 
         if (bestRecipeLegacy != null) {
-            Logging.debugLog("best recipe: " + bestRecipeLegacy.getName(5) + " has Quality= " + quality);
+            Logging.debugLog(String.format("best recipe: %s has Quality=%.3f",
+                bestRecipeLegacy.getName(5), quality));
             return new BestRecipeResult.Found(bestRecipeLegacy, bestEvalLegacy);
         } else {
-            // quality is guaranteed to be 0 or less, so constructor will never throw an exception
+            Logging.debugLog(String.format("guess recipe: %s has Quality=%.3f",
+                bestRecipe.getName(5), bestEval.getTrueQuality()));
             return new BestRecipeResult.Error(bestRecipe, bestEval);
         }
     }
