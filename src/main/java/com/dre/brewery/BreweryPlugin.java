@@ -37,6 +37,9 @@ import com.dre.brewery.integration.listeners.ChestShopListener;
 import com.dre.brewery.integration.listeners.IntegrationListener;
 import com.dre.brewery.integration.listeners.ShopKeepersListener;
 import com.dre.brewery.integration.listeners.SlimefunListener;
+import com.dre.brewery.integration.listeners.movecraft.RotationListener;
+import com.dre.brewery.integration.listeners.movecraft.SinkListener;
+import com.dre.brewery.integration.listeners.movecraft.TranslationListener;
 import com.dre.brewery.listeners.BlockListener;
 import com.dre.brewery.listeners.CauldronListener;
 import com.dre.brewery.listeners.EntityListener;
@@ -213,6 +216,11 @@ public final class BreweryPlugin extends JavaPlugin {
             getServer().getPluginManager().registerEvents(new ShopKeepersListener(), this);
         if (Hook.SLIMEFUN.isEnabled() && getMCVersion().isOrLater(MinecraftVersion.V1_14))
             getServer().getPluginManager().registerEvents(new SlimefunListener(), this);
+        if (Hook.MOVECRAFT.isEnabled()) {
+            getServer().getPluginManager().registerEvents(new TranslationListener(), this);
+            getServer().getPluginManager().registerEvents(new RotationListener(), this);
+            getServer().getPluginManager().registerEvents(new SinkListener(), this);
+        }
 
         // Heartbeat
         BreweryPlugin.getScheduler().runTaskTimer(new BreweryRunnable(), 650, 1200);
