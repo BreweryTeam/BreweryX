@@ -196,6 +196,8 @@ public final class BUtil {
                 (plEffect.getAmplifier() == effect.getAmplifier() && plEffect.getDuration() < effect.getDuration())) {
                 player.removePotionEffect(type);
             }
+
+            effect.apply(player);
         });
     }
 
