@@ -179,11 +179,7 @@ public final class BUtil {
      */
     public static void reapplyPotionEffect(Player player, PotionEffect effect, boolean onlyIfStronger) {
         final PotionEffectType type = effect.getType();
-        BreweryPlugin.getScheduler().execute(player, () -> {
-            if (!player.hasPotionEffect(type)) {
-                return;
-            }
-
+        if (player.hasPotionEffect(type)) {
             PotionEffect plEffect;
             if (VERSION.isOrLater(MinecraftVersion.V1_11)) {
                 plEffect = player.getPotionEffect(type);
@@ -195,10 +191,12 @@ public final class BUtil {
                 plEffect.getAmplifier() < effect.getAmplifier() ||
                 (plEffect.getAmplifier() == effect.getAmplifier() && plEffect.getDuration() < effect.getDuration())) {
                 player.removePotionEffect(type);
+            } else {
+                return;
             }
+        }
 
-            effect.apply(player);
-        });
+        BreweryPlugin.getScheduler().execute(player, () -> effect.apply(player));
     }
 
     /**
