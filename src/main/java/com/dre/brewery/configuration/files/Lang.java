@@ -39,12 +39,13 @@ import java.io.File;
 import java.lang.reflect.Field;
 import java.nio.file.Path;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 // Our bind file for this class should vary based on what language the user has set in the config.
 @OkaeriConfigFileOptions(useLangFileName = true, removeOrphans = true)
-@Header({ "!!! IMPORTANT: BreweryX configuration files do NOT support external comments! If you add any comments, they will be overwritten !!!",
-    "Translations for BreweryX" })
+@Header({"!!! IMPORTANT: BreweryX configuration files do NOT support external comments! If you add any comments, they will be overwritten !!!",
+    "Translations for BreweryX"})
 @DefaultCommentSpace(1)
 @SuppressWarnings("unused")
 public class Lang extends AbstractOkaeriConfigFile {
@@ -52,7 +53,7 @@ public class Lang extends AbstractOkaeriConfigFile {
     @Exclude
     private transient final Config config = ConfigManager.getConfig(Config.class);
     @Exclude
-    private transient Map<String, String> mappedEntries;
+    private transient Map<String, Object> mappedEntries; // String or List<String> only
 
     @SneakyThrows
     @Override // Should override because we need to remap our strings after a reload of this file.
@@ -77,13 +78,13 @@ public class Lang extends AbstractOkaeriConfigFile {
         }
 
         for (Field field : this.getClass().getDeclaredFields()) {
-            if (field.getType() != String.class) {
+            if (field.getType() != String.class && field.getType() != List.class) {
                 continue;
             }
 
             try {
-                String thisValue = (String) field.get(this);
-                String otherValue = (String) field.get(other);
+                Object thisValue = field.get(this);
+                Object otherValue = field.get(other);
                 if (thisValue == null && otherValue != null) {
                     field.set(this, otherValue);
                 }
@@ -99,16 +100,16 @@ public class Lang extends AbstractOkaeriConfigFile {
 
         this.mappedEntries = new HashMap<>();
         for (Field field : this.getClass().getDeclaredFields()) {
-            if (field.getType() != String.class) {
+            if (field.getType() != String.class && field.getType() != List.class) {
                 continue;
             }
 
             try {
                 CustomKey customKey = field.getAnnotation(CustomKey.class);
                 if (customKey != null) {
-                    this.mappedEntries.put(customKey.value(), (String) field.get(this));
+                    this.mappedEntries.put(customKey.value(), field.get(this));
                 } else {
-                    this.mappedEntries.put(field.getName(), (String) field.get(this));
+                    this.mappedEntries.put(field.getName(), field.get(this));
                 }
             } catch (IllegalAccessException e) {
                 Logging.errorLog("Lang failed to get a field value! &6(" + field.getName() + ")", e);
@@ -132,21 +133,53 @@ public class Lang extends AbstractOkaeriConfigFile {
         if (mappedEntries == null) {
             mapStrings();
         }
-        String entry = mappedEntries.get(key);
 
-        if (entry != null) {
-            int i = 0;
-            for (Object arg : args) {
-                if (arg != null) {
-                    i++;
-                    entry = entry.replace("&v" + i, arg.toString());
-                }
-            }
+        String msg;
+        Object entry = mappedEntries.get(key);
+        if (entry instanceof String) {
+            msg = format((String) entry, args);
+        } else if (entry instanceof List) {
+            msg = "&c[LanguageReader] Config entry for key '" + key + "' is a list!";
         } else {
-            entry = "&c[LanguageReader] Failed to retrieve a config entry for key '" + key + "'!";
+            msg = "&c[LanguageReader] Failed to retrieve a config entry for key '" + key + "'!";
+        }
+        return color ? BUtil.color(msg) : msg;
+    }
+
+    public List<String> getEntries(String key, Object... args) {
+        return this.getEntries(key, true, args);
+    }
+
+    @SuppressWarnings("unchecked") // All lists in this class are List<String>
+    public List<String> getEntries(String key, boolean color, Object... args) {
+        if (mappedEntries == null) {
+            mapStrings();
         }
 
-        return color ? BUtil.color(entry) : entry;
+        List<String> msgs;
+        Object entry = mappedEntries.get(key);
+        if (entry instanceof String) {
+            msgs = List.of((String) entry);
+        } else if (entry instanceof List) {
+            msgs = (List<String>) entry;
+        } else {
+            msgs = List.of("&c[LanguageReader] Failed to retrieve a config entry for key '" + key + "'!");
+        }
+        return msgs.stream()
+            .map(s -> format(s, args))
+            .map(s -> color ? BUtil.color(s) : s)
+            .toList();
+    }
+
+    private static String format(String entry, Object... args) {
+        int i = 0;
+        for (Object arg : args) {
+            if (arg != null) {
+                i++;
+                entry = entry.replace("&v" + i, arg.toString());
+            }
+        }
+        return entry;
     }
 
 
@@ -256,6 +289,39 @@ public class Lang extends AbstractOkaeriConfigFile {
     private String cmdDistillRuined;
     @CustomKey("CMD_Age_Ruined")
     private String cmdAgeRuined;
+
+
+    @Comment("Brew Defects")
+    @CustomKey("Defect_WrongIngredient")
+    private List<String> defectWrongIngredient;
+    @CustomKey("Defect_MissingIngredient")
+    private List<String> defectMissingIngredient;
+    @CustomKey("Defect_LowCount")
+    private List<String> defectLowCount;
+    @CustomKey("Defect_HighCount")
+    private List<String> defectHighCount;
+    @CustomKey("Defect_NeedsDistill")
+    private List<String> defectNeedsDistill;
+    @CustomKey("Defect_NeedsDistillAlc")
+    private List<String> defectNeedsDistillAlc;
+    @CustomKey("Defect_BadDistill")
+    private List<String> defectBadDistill;
+    @CustomKey("Defect_Uncooked")
+    private List<String> defectUncooked;
+    @CustomKey("Defect_Overcooked")
+    private List<String> defectOvercooked;
+    @CustomKey("Defect_UnderAged")
+    private List<String> defectUnderAged;
+    @CustomKey("Defect_OverAged")
+    private List<String> defectOverAged;
+    @CustomKey("Defect_OverAgedAlc")
+    private List<String> defectOverAgedAlc;
+    @CustomKey("Defect_BadAged")
+    private List<String> defectBadAged;
+    @CustomKey("Defect_WrongWood")
+    private List<String> defectWrongWood;
+    @CustomKey("Defect_NoRecipesRegistered")
+    private List<String> defectNoRecipesRegistered;
 
 
     @Comment("Error")
