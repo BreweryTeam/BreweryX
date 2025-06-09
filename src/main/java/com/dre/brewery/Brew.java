@@ -503,6 +503,7 @@ public class Brew implements Cloneable {
             lore.updateCookLore(false);
             lore.updateDistillLore(false);
             lore.updateAgeLore(false);
+            lore.updateWoodLore(false);
             lore.updateQualityStars(false);
             lore.updateAlc(false);
             lore.write();
@@ -699,11 +700,7 @@ public class Brew implements Cloneable {
 
         // if younger than half a day, it shouldnt get aged form
         if (ageTime > 0.5) {
-            if (wood == BarrelWoodType.ANY) {
-                wood = woodType;
-            } else if (wood != woodType) {
-                woodShift(time, woodType);
-            }
+            woodShift(time, woodType);
             BestRecipeResult result = ingredients.getAgeRecipeFull(wood, ageTime, distillRuns > 0);
             if (result instanceof BestRecipeResult.Found found) {
                 currentRecipe = found.recipe();
@@ -770,17 +767,22 @@ public class Brew implements Cloneable {
      * Slowly shift the wood of the Brew to the new Type
      */
     public void woodShift(float time, BarrelWoodType to) {
-        if (immutable) return;
+        if (immutable || wood == to) {
+            return;
+        }
+        if (wood == BarrelWoodType.ANY) {
+            wood = to;
+            return;
+        }
+        if (config.isNewBarrelTypeAlgorithm()) {
+            woodShiftNew(time, to);
+            return;
+        }
+
         int fromIndex = wood.getIndex();
         int toIndex = to.getIndex();
 
-        float factor = 1;
-        if (ageTime > 5) {
-            factor = 2;
-        }
-        if (ageTime > 10) {
-            factor += ageTime / 10F;
-        }
+        float factor = woodShiftFactor();
         if (fromIndex > toIndex) {
             fromIndex -= (int) (time / factor);
             if (fromIndex < toIndex) {
@@ -792,6 +794,27 @@ public class Brew implements Cloneable {
                 wood = to;
             }
         }
+    }
+    private void woodShiftNew(float time, BarrelWoodType to) {
+        BarrelWoodType old = wood;
+        float factor = woodShiftFactor();
+        float shift = time / factor;
+        // If the old algorithm would shift by 2 indexes,
+        // shift the barrel type by 1 group (or 1 barrel type within a group)
+        int steps = (int) (2.0f * shift);
+        wood = wood.stepTowards(to, steps);
+        Logging.debugLog(String.format("Shifted wood from %s to %s by %s steps", old, wood, steps));
+        Logging.debugLog(String.format("time=%.3f, factor=%.3f, shift=%.3f", time, factor, shift));
+    }
+    private float woodShiftFactor() {
+        float factor = 1;
+        if (ageTime > 5) {
+            factor = 2;
+        }
+        if (ageTime > 10) {
+            factor += ageTime / 10F;
+        }
+        return factor;
     }
 
     public ItemStack createItem() {
@@ -1072,23 +1095,24 @@ public class Brew implements Cloneable {
         ingredients.save(out);
     }
 
+    public static void loadSeed(long seed) {
+        saveSeed = seed;
+        updatePrevSeeds();
+    }
+
     public static void loadPrevSeeds(ConfigurationSection section) {
         if (section.contains("prevSaveSeeds")) {
             prevSaveSeeds = section.getLongList("prevSaveSeeds");
-            if (!prevSaveSeeds.contains(saveSeed)) {
-                prevSaveSeeds.add(saveSeed);
-            }
-        }
-    }
-
-    public static void writePrevSeeds(ConfigurationSection section) {
-        if (!prevSaveSeeds.isEmpty()) {
-            section.set("prevSaveSeeds", prevSaveSeeds);
+            updatePrevSeeds();
         }
     }
 
     public static void loadPrevSeeds(List<Long> list) {
         prevSaveSeeds = list;
+        updatePrevSeeds();
+    }
+
+    private static void updatePrevSeeds() {
         if (!prevSaveSeeds.contains(saveSeed)) {
             prevSaveSeeds.add(saveSeed);
         }

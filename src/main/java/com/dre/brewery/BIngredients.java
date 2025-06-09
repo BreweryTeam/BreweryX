@@ -22,6 +22,7 @@ package com.dre.brewery;
 
 import com.dre.brewery.api.events.brew.BrewModifyEvent;
 import com.dre.brewery.configuration.ConfigManager;
+import com.dre.brewery.configuration.files.Config;
 import com.dre.brewery.configuration.files.Lang;
 import com.dre.brewery.lore.Base91DecoderStream;
 import com.dre.brewery.lore.Base91EncoderStream;
@@ -66,6 +67,7 @@ public class BIngredients {
 
     private static final MinecraftVersion VERSION = BreweryPlugin.getMCVersion();
     private static final BreweryPlugin plugin = BreweryPlugin.getInstance();
+    private static final Config config = ConfigManager.getConfig(Config.class);
     private static final Lang lang = ConfigManager.getConfig(Lang.class);
     private static int lastId = 0; // Legacy
 
@@ -513,15 +515,39 @@ public class BIngredients {
     }
     public RecipeEvaluation getWoodQualityFull(BRecipe recipe, BarrelWoodType wood) {
         RecipeEvaluation eval = new RecipeEvaluation();
-        if (recipe.getWood().equals(BarrelWoodType.ANY)) {
-            // type of wood doesnt matter
+        if (recipe.usesAnyWood() || wood == recipe.getWood()) {
+            // type of wood doesnt matter or is same
             return eval;
         }
-        if (wood != recipe.getWood()) {
-            float woodDeduction = recipe.getWoodDiff(wood.getIndex()) * recipe.getDifficulty();
-            eval.deduct(new BrewDefect.WrongWood(wood, recipe.getWood()), woodDeduction);
+
+        float woodDeduction;
+        if (config.isNewBarrelTypeAlgorithm()) {
+            woodDeduction = getWoodDeductionNew(recipe, wood);
+        } else {
+            woodDeduction = recipe.getWoodDiff(wood.getIndex()) * recipe.getDifficulty();
         }
+        eval.deduct(new BrewDefect.WrongWood(wood, recipe.getWood()), woodDeduction);
         return eval;
+    }
+    // At difficulty 1, distances 0-5 have quality 10, 10, 9, 8, 7, 6
+    // At difficulty 5, distances 0-5 have quality 10, 8, 4, 1, 0, 0
+    // At difficulty 10, distances 0-5 have quality 10, 5, 0, 0, 0, 0
+    // See: https://www.desmos.com/calculator/aaoixs2qo7
+    private float getWoodDeductionNew(BRecipe recipe, BarrelWoodType wood) {
+        BarrelWoodType recipeWood = recipe.getWood();
+        float baseQuality = switch (recipeWood.getDistance(wood)) {
+            case 0 -> 10.0f;
+            case 1 -> 9.0f;
+            case 2 -> 7.75f;
+            case 3 -> 6.25f;
+            case 4 -> 4.5f;
+            case 5 -> 2.5f;
+            default -> 0.0f;
+        };
+        if (baseQuality == 0.0f) {
+            return 0;
+        }
+        return (10f - baseQuality) * 0.5f * recipe.getDifficulty();
     }
 
     /**
@@ -559,8 +585,8 @@ public class BIngredients {
     @Override
     public String toString() {
         String ingredientsStr = ingredients.stream()
-            .map(DebuggableItem::getDebugID)
-            .collect(Collectors.joining("[", "]", ", "));
+            .map(DebuggableItem::debug)
+            .collect(Collectors.joining(", ", "[", "]"));
         return new StringJoiner(", ", "BIngredients{", "}")
             .add("cookedTime=" + cookedTime)
             .add("ingredients=" + ingredientsStr)

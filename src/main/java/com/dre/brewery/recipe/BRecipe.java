@@ -24,6 +24,7 @@ import com.dre.brewery.BIngredients;
 import com.dre.brewery.BarrelWoodType;
 import com.dre.brewery.Brew;
 import com.dre.brewery.BreweryPlugin;
+import com.dre.brewery.Translatable;
 import com.dre.brewery.configuration.ConfigManager;
 import com.dre.brewery.configuration.files.CustomItemsFile;
 import com.dre.brewery.configuration.files.Lang;
@@ -77,7 +78,7 @@ public class BRecipe implements Cloneable {
     private int cookingTime; // time to cook in cauldron
     private byte distillruns; // runs through the brewer
     private int distillTime; // time for one distill run in seconds
-    private BarrelWoodType wood; // type of wood the barrel has to consist of
+    private List<BarrelWoodType> barrelTypes = new ArrayList<>(); // barrel types the brew should be aged in
     private int age; // time in minecraft days for the potions to age in barrels
 
     // outcome
@@ -156,7 +157,7 @@ public class BRecipe implements Cloneable {
             recipe.distillruns = (byte) dis;
         }
         recipe.distillTime = (configRecipe.getDistillTime() != null ? configRecipe.getDistillTime() : 0) * 20;
-        recipe.wood = BarrelWoodType.fromAny(configRecipe.getWood());
+        recipe.setBarrelTypes(BarrelWoodType.listFromAny(configRecipe.getWood()));
         recipe.age = configRecipe.getAge() != null ? configRecipe.getAge() : 0;
         recipe.difficulty = configRecipe.getDifficulty() != null ? configRecipe.getDifficulty() : 0;
         recipe.alcohol = configRecipe.getAlcohol() != null ? configRecipe.getAlcohol() : 0;
@@ -214,132 +215,128 @@ public class BRecipe implements Cloneable {
     }
 
     public static List<RecipeItem> loadIngredients(List<String> stringList, String recipeId) {
-        IngredientsResult result = loadIngredientsVerbose(stringList);
-        if (result instanceof IngredientsResult.Success success) {
-            return success.ingredients;
-        } else {
-            IngredientsResult.Error error = (IngredientsResult.Error) result;
-            Lang lang = ConfigManager.getConfig(Lang.class);
-            String errorMessage = lang.getEntry(error.error().getTranslationKey(), error.invalidPart());
-            Logging.errorLog(recipeId + ": " + errorMessage);
-            return null;
-        }
-    }
-
-    public static IngredientsResult loadIngredientsVerbose(List<String> stringList) {
         if (stringList == null) {
             stringList = Collections.emptyList();
         }
-        List<RecipeItem> ingredients = new ArrayList<>(stringList.size());
-
-        listLoop:
-        for (String item : stringList) {
-            String[] ingredParts = item.split("/");
-            int amount = 1;
-            if (ingredParts.length == 2) {
-                amount = BUtil.getRandomIntInRange(ingredParts[1]);
-                if (amount < 1) {
-                    return new IngredientsResult.Error(IngredientsError.INVALID_AMOUNT, ingredParts[1]);
-                }
-            }
-            String[] matParts;
-            if (ingredParts[0].contains(",")) {
-                matParts = ingredParts[0].split(",");
-            } else if (ingredParts[0].contains(";")) {
-                matParts = ingredParts[0].split(";");
+        List<RecipeItem> ingredients = new ArrayList<>();
+        for (String s : stringList) {
+            IngredientResult result = loadIngredientVerbose(s);
+            if (result instanceof IngredientResult.Success success) {
+                ingredients.add(success.ingredient);
             } else {
-                matParts = ingredParts[0].split("\\.");
-            }
-
-
-            // Check if this is a Plugin Item
-            String[] pluginItem = matParts[0].split(":");
-            if (pluginItem.length > 1) {
-                StringBuilder itemId = new StringBuilder();
-                for (int i = 1; i < pluginItem.length; i++) { // Append all but the first part to include namespaces.
-                    itemId.append(pluginItem[i]);
-                }
-                RecipeItem custom = PluginItem.fromConfig(pluginItem[0], itemId.toString());
-                if (custom != null) {
-                    custom.setAmount(amount);
-                    custom.makeImmutable();
-                    ingredients.add(custom);
-                    BCauldronRecipe.acceptedCustom.add(custom);
-                    continue;
-                } else {
-                    // TODO Maybe load later ie on first use of recipe?
-                    return new IngredientsResult.Error(IngredientsError.INVALID_PLUGIN_ITEM, item);
-                }
-            }
-
-            // Try to find this Ingredient as Custom Item
-            for (RecipeItem custom : ConfigManager.getConfig(CustomItemsFile.class).getRecipeItems().stream().filter(Objects::nonNull).toList()) {
-                if (custom.getConfigId().equalsIgnoreCase(matParts[0])) {
-                    custom = custom.getMutableCopy();
-                    custom.setAmount(amount);
-                    custom.makeImmutable();
-                    ingredients.add(custom);
-                    if (custom.hasMaterials()) {
-                        BCauldronRecipe.acceptedMaterials.addAll(custom.getMaterials());
-                    }
-                    // Add it as acceptedCustom
-                    if (!BCauldronRecipe.acceptedCustom.contains(custom)) {
-                        BCauldronRecipe.acceptedCustom.add(custom);
-                    }
-                    continue listLoop;
-                }
-            }
-
-            Material mat = MaterialUtil.getMaterialSafely(matParts[0]);
-            short durability = -1;
-            if (matParts.length == 2) {
-                durability = (short) BUtil.getRandomIntInRange(matParts[1]);
-            }
-            if (mat == null && Hook.VAULT.isEnabled()) {
-                try {
-                    net.milkbowl.vault.item.ItemInfo vaultItem = net.milkbowl.vault.item.Items.itemByString(matParts[0]);
-                    if (vaultItem != null) {
-                        mat = vaultItem.getType();
-                        if (durability == -1 && vaultItem.getSubTypeId() != 0) {
-                            durability = vaultItem.getSubTypeId();
-                        }
-                        if (mat.name().contains("LEAVES")) {
-                            if (durability > 3) {
-                                durability -= 4; // Vault has leaves with higher durability
-                            }
-                        }
-                    }
-                } catch (Throwable e) {
-                    Logging.errorLog("Could not check vault for Item Name", e);
-                }
-            }
-            if (mat != null) {
-                RecipeItem rItem;
-                if (durability > -1) {
-                    rItem = new SimpleItem(mat, durability);
-                } else {
-                    rItem = new SimpleItem(mat);
-                }
-                rItem.setAmount(amount);
-                rItem.makeImmutable();
-                ingredients.add(rItem);
-                BCauldronRecipe.acceptedMaterials.add(mat);
-                BCauldronRecipe.acceptedSimple.add(mat);
-            } else {
-                return new IngredientsResult.Error(IngredientsError.INVALID_MATERIAL, ingredParts[0]);
+                IngredientResult.Error error = (IngredientResult.Error) result;
+                Lang lang = ConfigManager.getConfig(Lang.class);
+                String errorMessage = lang.getEntry(error.error().getTranslationKey(), error.invalidPart());
+                Logging.errorLog(recipeId + ": " + errorMessage);
+                return null;
             }
         }
-        return new IngredientsResult.Success(ingredients);
+        return ingredients;
     }
 
-    public sealed interface IngredientsResult {
-        record Success(List<RecipeItem> ingredients) implements IngredientsResult {}
-        record Error(IngredientsError error, String invalidPart) implements IngredientsResult {}
+    public static IngredientResult loadIngredientVerbose(String item) {
+        String[] ingredParts = item.split("/");
+        int amount = 1;
+        if (ingredParts.length == 2) {
+            amount = BUtil.getRandomIntInRange(ingredParts[1]);
+            if (amount < 1) {
+                return new IngredientResult.Error(IngredientError.INVALID_AMOUNT, ingredParts[1]);
+            }
+        }
+        String[] matParts;
+        if (ingredParts[0].contains(",")) {
+            matParts = ingredParts[0].split(",");
+        } else if (ingredParts[0].contains(";")) {
+            matParts = ingredParts[0].split(";");
+        } else {
+            matParts = ingredParts[0].split("\\.");
+        }
+
+
+        // Check if this is a Plugin Item
+        String[] pluginItem = matParts[0].split(":");
+        if (pluginItem.length > 1) {
+            StringBuilder itemId = new StringBuilder();
+            for (int i = 1; i < pluginItem.length; i++) { // Append all but the first part to include namespaces.
+                itemId.append(pluginItem[i]);
+            }
+            RecipeItem custom = PluginItem.fromConfig(pluginItem[0], itemId.toString());
+            if (custom != null) {
+                custom.setAmount(amount);
+                custom.makeImmutable();
+                BCauldronRecipe.acceptedCustom.add(custom);
+                return new IngredientResult.Success(custom);
+            } else {
+                // TODO Maybe load later ie on first use of recipe?
+                return new IngredientResult.Error(IngredientError.INVALID_PLUGIN_ITEM, item);
+            }
+        }
+
+        // Try to find this Ingredient as Custom Item
+        for (RecipeItem custom : ConfigManager.getConfig(CustomItemsFile.class).getRecipeItems().stream().filter(Objects::nonNull).toList()) {
+            if (custom.getConfigId().equalsIgnoreCase(matParts[0])) {
+                custom = custom.getMutableCopy();
+                custom.setAmount(amount);
+                custom.makeImmutable();
+                if (custom.hasMaterials()) {
+                    BCauldronRecipe.acceptedMaterials.addAll(custom.getMaterials());
+                }
+                // Add it as acceptedCustom
+                if (!BCauldronRecipe.acceptedCustom.contains(custom)) {
+                    BCauldronRecipe.acceptedCustom.add(custom);
+                }
+                return new IngredientResult.Success(custom);
+            }
+        }
+
+        Material mat = MaterialUtil.getMaterialSafely(matParts[0]);
+        short durability = -1;
+        if (matParts.length == 2) {
+            durability = (short) BUtil.getRandomIntInRange(matParts[1]);
+        }
+        if (mat == null && Hook.VAULT.isEnabled()) {
+            try {
+                net.milkbowl.vault.item.ItemInfo vaultItem = net.milkbowl.vault.item.Items.itemByString(matParts[0]);
+                if (vaultItem != null) {
+                    mat = vaultItem.getType();
+                    if (durability == -1 && vaultItem.getSubTypeId() != 0) {
+                        durability = vaultItem.getSubTypeId();
+                    }
+                    if (mat.name().contains("LEAVES")) {
+                        if (durability > 3) {
+                            durability -= 4; // Vault has leaves with higher durability
+                        }
+                    }
+                }
+            } catch (Throwable e) {
+                Logging.errorLog("Could not check vault for Item Name", e);
+            }
+        }
+        if (mat != null) {
+            RecipeItem rItem;
+            if (durability > -1) {
+                rItem = new SimpleItem(mat, durability);
+            } else {
+                rItem = new SimpleItem(mat);
+            }
+            rItem.setAmount(amount);
+            rItem.makeImmutable();
+            BCauldronRecipe.acceptedMaterials.add(mat);
+            BCauldronRecipe.acceptedSimple.add(mat);
+            return new IngredientResult.Success(rItem);
+        } else {
+            return new IngredientResult.Error(IngredientError.INVALID_MATERIAL, ingredParts[0]);
+        }
+    }
+
+    public sealed interface IngredientResult {
+        record Success(RecipeItem ingredient) implements IngredientResult {}
+        record Error(IngredientError error, String invalidPart) implements IngredientResult {}
     }
 
     @AllArgsConstructor
     @Getter
-    public enum IngredientsError {
+    public enum IngredientError implements Translatable {
         INVALID_AMOUNT("Error_InvalidAmount"),
         INVALID_PLUGIN_ITEM("Error_InvalidPluginItem"),
         INVALID_MATERIAL("Error_InvalidMaterial");
@@ -440,10 +437,38 @@ public class BRecipe implements Cloneable {
     }
 
     /**
+     * Gets the <strong>primary</strong> barrel type out of all supported.
+     * @return the barrel type
+     * @see #getBarrelTypes() for the full list
+     */
+    public BarrelWoodType getWood() {
+        return barrelTypes.isEmpty() ? BarrelWoodType.ANY : barrelTypes.get(0);
+    }
+
+    public boolean usesAnyWood() {
+        return getWood() == BarrelWoodType.ANY;
+    }
+
+    public void setWood(BarrelWoodType wood) {
+        barrelTypes = Collections.singletonList(wood);
+    }
+
+    public void setBarrelTypes(List<BarrelWoodType> barrelTypes) {
+        if (barrelTypes.stream().anyMatch(b -> b == BarrelWoodType.ANY)) {
+            setWood(BarrelWoodType.ANY);
+        } else {
+            this.barrelTypes = barrelTypes;
+        }
+    }
+
+    /**
      * difference between given and recipe-wanted woodtype
      */
     public float getWoodDiff(float wood) {
-        return Math.abs(wood - this.wood.getIndex());
+        return (float) barrelTypes.stream()
+            .mapToDouble(w -> Math.abs(wood - w.getIndex()))
+            .min()
+            .orElse(0.0);
     }
 
     public boolean isCookingOnly() {
@@ -595,7 +620,7 @@ public class BRecipe implements Cloneable {
 
         BIngredients bIngredients = new BIngredients(list, cookingTime);
 
-        return new Brew(bIngredients, quality, 0, distillruns, getAge(), wood, getRecipeName(), false, true, 0);
+        return new Brew(bIngredients, quality, 0, distillruns, getAge(), getWood(), getRecipeName(), false, true, 0);
     }
 
     public void updateAcceptedLists() {
@@ -744,7 +769,7 @@ public class BRecipe implements Cloneable {
             ", cookingTime=" + cookingTime +
             ", distillruns=" + distillruns +
             ", distillTime=" + distillTime +
-            ", wood=" + wood +
+            ", barrelTypes=" + barrelTypes +
             ", age=" + age +
             ", color=" + color +
             ", alcohol=" + alcohol +
@@ -861,7 +886,7 @@ public class BRecipe implements Cloneable {
             clone.cookingTime = this.cookingTime;
             clone.distillruns = this.distillruns;
             clone.distillTime = this.distillTime;
-            clone.wood = this.wood;
+            clone.barrelTypes = this.barrelTypes;
             clone.age = this.age;
             clone.color = this.color;
             clone.alcohol = this.alcohol;
@@ -943,7 +968,13 @@ public class BRecipe implements Cloneable {
 
         public Builder age(int age, BarrelWoodType wood) {
             recipe.age = age;
-            recipe.wood = wood;
+            recipe.setWood(wood);
+            return this;
+        }
+
+        public Builder age(int age, BarrelWoodType... barrelTypes) {
+            recipe.age = age;
+            recipe.setBarrelTypes(List.of(barrelTypes));
             return this;
         }
 

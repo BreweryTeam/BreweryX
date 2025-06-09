@@ -147,7 +147,7 @@ public class RecipesSector extends AbstractOkaeriConfigSector<ConfigRecipe> {
 
     ConfigRecipe apple_liquor = ConfigRecipe.builder()
         .name("Sour Apple Liquor/Apple Liquor/Calvados")
-        .ingredients(List.of("Apple/12", "Diamond/300", "Barrel/20", "bedrock/2", "egg/3"))
+        .ingredients(List.of("Apple/12"))
         .cookingTime(16)
         .distillRuns(3)
         .wood(5)

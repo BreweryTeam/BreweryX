@@ -279,6 +279,10 @@ public class Lang extends AbstractOkaeriConfigFile {
     private String cmdIngredient;
     @CustomKey("CMD_Invalid_Ingredient")
     private String cmdInvalidIngredient;
+    @CustomKey("CMD_Missing_Cook_Time")
+    private String cmdMissingCookTime;
+    @CustomKey("CMD_Missing_Ingredients")
+    private String cmdMissingIngredients;
     @CustomKey("CMD_Cannot_Distill")
     private String cmdCannotDistill;
     @CustomKey("CMD_Distill_Ruined")
@@ -379,10 +383,12 @@ public class Lang extends AbstractOkaeriConfigFile {
     private String helpGive;
     @CustomKey("Help_Simulate")
     private String helpSimulate;
-    @CustomKey("Help_Simulate2")
-    private String helpSimulate2;
     @CustomKey("Help_Simulate_Options")
     private String helpSimulateOptions;
+    @CustomKey("Help_Simulate_Recipe")
+    private String helpSimulateRecipe;
+    @CustomKey("Help_Simulate_Cook")
+    private String helpSimulateCook;
     @CustomKey("Help_Simulate_Distill")
     private String helpSimulateDistill;
     @CustomKey("Help_Simulate_Age")

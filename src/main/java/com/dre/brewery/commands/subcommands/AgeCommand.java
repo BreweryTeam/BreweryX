@@ -53,7 +53,7 @@ public class AgeCommand implements SubCommand {
         }
 
         float ageTime = BUtil.parseFloat(args[2]).orElse(0);
-        if (ageTime < 1) {
+        if (ageTime <= 0) {
             lang.sendEntry(sender, "CMD_Invalid_Age_Time", args[2]);
             return;
         }
@@ -66,9 +66,9 @@ public class AgeCommand implements SubCommand {
             return;
         }
 
-        brew.age(item, ageTime, BarrelWoodType.ANY);
-        Logging.debugLog(String.format("age: aged for %s years: %s",
-            args[2], ChatColor.stripColor(brew.toString())));
+        brew.age(item, ageTime, woodType);
+        Logging.debugLog(String.format("age: aged for %s years in %s barrel: %s",
+            args[2], woodType.getFormattedName(), ChatColor.stripColor(brew.toString())));
         lang.sendEntry(sender, "CMD_Aged", args[2]);
     }
 

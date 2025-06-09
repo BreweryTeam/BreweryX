@@ -66,6 +66,10 @@ config:
   requireKeywordOnSigns: "If barrels are only created when the sign placed contains the word \"barrel\" (or a translation when using another language) [true]"
   ageInMCBarrels: "If aging in -Minecraft- Barrels in enabled [true] and how many Brewery drinks can be put into them [6]"
   agingYearDuration: "Duration (in minutes) of a 'year' when aging drinks [20]"
+  newBarrelTypeAlgorithm: |
+    Whether to use the new algorithm for calculating wood type quality and shifting wood type when a brew is aged in different barrels.
+    False is the behavior of the original Brewery plugin.
+    True groups similar barrel types (such as oak and pale oak) together in a more intuitive way. [false]
   commandAliases: |
     Aliases for the '/breweryx' command. Requires a server restart to take effect. (list) [brewery, brew]
   enableEncode: |
@@ -141,8 +145,11 @@ recipesFile:
     ingredients: List of 'material/amount'
       With an item in your hand, use /brew ItemName to get its material for use in a recipe
       A list of materials can be found here: https://hub.spigotmc.org/javadocs/spigot/org/bukkit/Material.html
-      Plugin items with 'plugin:id' (Currently supporting Brewery, Oraxen, ItemsAdder)
-      Or a custom item defined above
+      Plugin items with 'plugin:id' (Currently supporting Brewery, Garden (BreweryX Garden Addon), Oraxen, ItemsAdder, Nexo, Slimefun)
+      Example: '- itemsadder:grape/5'
+      Custom items from 'custom-items.yml' do not require any prefixes ('- example_custom_item/10')
+      You can also use drinks as ingredients for other drinks. Correct format for this would be: 'brewery:ID/amount'
+      Example: '- brewery:wheatbeer/1'
 
     cookingtime: Time in real minutes ingredients have to boil
 
@@ -150,14 +157,22 @@ recipesFile:
 
     distilltime: How long (in seconds) one distill-run takes (0=Default time of 40 sec) MC Default would be 20 sec
 
-    wood: Wood of the barrel 0=any 1=Birch 2=Oak 3=Jungle 4=Spruce 5=Acacia 6=Dark Oak 7=Crimson 8=Warped 9=Mangrove 10=Cherry 11=Bamboo (12=Cut Copper)
-      The Minecraft barrel is made of oak
+    wood: Wood of the barrel:
+      Can be a string, a number (see conversion below), or a list of wood types.
+      0=any 1=Birch 2=Oak 3=Jungle 4=Spruce
+      5=Acacia 6=Dark Oak 7=Crimson 8=Warped
+      9=Mangrove 10=Cherry 11=Bamboo 12=Cut Copper 13=Pale Oak
+        you can also use id or name, instead of number:
+        wood: 13
+        wood: pale_oak
+        wood: Pale Oak
+      Vanilla Minecraft barrel is considered oak
 
-    age: Time in Minecraft-days, the potion has to age in a barrel 0=no aging
+    age: Time, in "years", the potion has to age in a barrel 0=no aging
 
     color: Color of the potion after distilling/aging.
       Usable Colors: DARK_RED, RED, BRIGHT_RED, ORANGE, YELLOW, PINK, PURPLE, BLUE, CYAN, WATER, TEAL, OLIVE, GREEN, LIME, BLACK, GREY, BRIGHT_GREY, WHITE
-      Or RGB colors (hex: for example '99FF33') (with '') (search for "HTML color" on the internet)
+      Or RGB colors (color: 99FF33) (search for "HTML color" on the internet)
 
     difficulty: 1-10 accuracy needed to get good quality (1 = unaccurate/easy, 10 = very precise/hard)
 

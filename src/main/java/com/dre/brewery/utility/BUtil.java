@@ -27,6 +27,7 @@ import com.dre.brewery.BreweryPlugin;
 import com.dre.brewery.api.events.barrel.BarrelDestroyEvent;
 import com.dre.brewery.configuration.ConfigManager;
 import com.dre.brewery.configuration.files.Lang;
+import com.github.Anon8281.universalScheduler.scheduling.schedulers.TaskScheduler;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Color;
@@ -180,22 +181,24 @@ public final class BUtil {
      */
     public static void reapplyPotionEffect(Player player, PotionEffect effect, boolean onlyIfStronger) {
         final PotionEffectType type = effect.getType();
-        if (player.hasPotionEffect(type)) {
+        BreweryPlugin.getScheduler().execute(player, () -> {
+            if (!player.hasPotionEffect(type)) {
+                return;
+            }
+
             PotionEffect plEffect;
             if (VERSION.isOrLater(MinecraftVersion.V1_11)) {
                 plEffect = player.getPotionEffect(type);
             } else {
                 plEffect = player.getActivePotionEffects().stream().filter(e -> e.getType().equals(type)).findAny().get();
             }
+
             if (!onlyIfStronger ||
                 plEffect.getAmplifier() < effect.getAmplifier() ||
                 (plEffect.getAmplifier() == effect.getAmplifier() && plEffect.getDuration() < effect.getDuration())) {
                 player.removePotionEffect(type);
-            } else {
-                return;
             }
-        }
-        effect.apply(player);
+        });
     }
 
     /**
@@ -292,6 +295,16 @@ public final class BUtil {
      * @return List of strings in the input, quoted strings will have their start and end quotes removed
      */
     public static List<String> splitStringKeepingQuotes(String input) {
+        return splitStringKeepingQuotesVerbose(input).strings;
+    }
+    /**
+     * Splits a string by spaces, unless enclosed in double quotes.
+     * Uses backslash as escape character for quotes and other backslashes.
+     * Multiple spaces will be treated as one space.
+     * @param input The input string
+     * @return List of strings in the input, quoted strings will have their start and end quotes removed
+     */
+    public static SplitResult splitStringKeepingQuotesVerbose(String input) {
         List<String> result = new ArrayList<>();
         StringBuilder current = new StringBuilder();
         boolean inQuotes = false;
@@ -319,8 +332,10 @@ public final class BUtil {
             result.add(current.toString());
         }
 
-        return result;
+        return new SplitResult(result, inQuotes);
     }
+
+    public record SplitResult(List<String> strings, boolean inQuotes) {}
 
     /**
      * Replaces the Placeholders %player_name% and %quality% in the given input string
