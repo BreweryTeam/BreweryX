@@ -2,7 +2,7 @@
 # Author: DieReicheEtherons
 # Brew
 Brew_-times: -times
-Brew_BadPotion: Ruined Potion
+Brew_BadPotion: Ruined Brew
 Brew_BarrelRiped: Barrel aged
 Brew_DistillUndefined: Murky Distillate
 Brew_Distilled: Distilled
@@ -53,6 +53,49 @@ CMD_Missing_Ingredients: '&cSimulation must have at least one ingredient'
 CMD_Cannot_Distill: '&cThose ingredients cannot be distilled'
 CMD_Distill_Ruined: '&eThe brew was ruined in the distillation process'
 CMD_Age_Ruined: '&eThe brew was ruined in the aging process'
+
+# Defects
+Defect_WrongIngredient:
+  - 'There''s something in here that shouldn''t be in here...'
+  - 'One of the ingredients doesn''t taste good...'
+Defect_MissingIngredient:
+  - 'Seems like something''s missing...'
+  - 'Needs something more...'
+Defect_LowCount:
+  - 'You can barely taste one of the ingredients...'
+  - 'The flavor of one of the ingredients is too weak...'
+Defect_HighCount:
+  - 'One of the ingredients is overpowering...'
+  - 'The flavor of one of the ingredients is too strong...'
+Defect_NeedsDistill:
+  - 'This needs some distillation...'
+Defect_NeedsDistillAlc:
+  - 'You can''t taste the alcohol...'
+Defect_BadDistill:
+  - 'The brew evaporated...'
+  - 'The flavor disappeared...'
+Defect_Uncooked:
+  - 'It''s still raw...'
+  - 'Not enough time in the oven...'
+Defect_Overcooked:
+  - 'It''s burnt...'
+  - 'Too much time in the oven...'
+Defect_UnderAged:
+  - 'This needs fermentation...'
+  - 'The brew tastes too harsh...'
+Defect_OverAged:
+  - 'This brew smells expired...'
+  - 'This brew is ancient...'
+Defect_OverAgedAlc:
+  - 'This brew smells like vinegar...'
+  - 'This brew is ancient...'
+Defect_BadAged:
+  - 'This brew shouldn''t have been aged...'
+Defect_WrongWood:
+  - 'Tastes too much like &v1...'
+  - 'The &v1 is overpowering...'
+Defect_NoRecipesRegistered:
+  - 'This universe doesn''t support brewing...'
 
 # Error
 Error_ConfigUpdate: 'Unknown Brewery config version: v&v1, config was not updated!'

@@ -35,6 +35,7 @@ import com.dre.brewery.lore.XORScrambleStream;
 import com.dre.brewery.lore.XORUnscrambleStream;
 import com.dre.brewery.recipe.BEffect;
 import com.dre.brewery.recipe.BRecipe;
+import com.dre.brewery.recipe.BestRecipeResult;
 import com.dre.brewery.recipe.PotionColor;
 import com.dre.brewery.utility.BUtil;
 import com.dre.brewery.utility.Logging;
@@ -624,19 +625,25 @@ public class Brew implements Cloneable {
 
         distillRuns += 1;
         BrewLore lore = new BrewLore(this, potionMeta);
-        BRecipe recipe = ingredients.getDistillRecipe(wood, ageTime);
-        if (recipe != null) {
+        BestRecipeResult result = ingredients.getDistillRecipeFull(wood, ageTime);
+        if (result instanceof BestRecipeResult.Found found) {
             // distillRuns will have an effect on the amount of alcohol, not the quality
-            currentRecipe = recipe;
+            currentRecipe = found.recipe();
             quality = calcQuality();
 
             lore.addOrReplaceEffects(getEffects(), quality);
-            potionMeta.setDisplayName(BUtil.color("&f" + recipe.getName(quality)));
-            recipe.getColor().colorBrew(potionMeta, slotItem, canDistill());
+            potionMeta.setDisplayName(BUtil.color("&f" + currentRecipe.getName(quality)));
+            currentRecipe.getColor().colorBrew(potionMeta, slotItem, canDistill());
 
         } else {
             quality = 0;
             lore.removeEffects();
+            Logging.debugLog("Distill brew ruined! " + result);
+            if (config.isShowRuinedBrewHints()) {
+                BrewDefect defect = result.getWorstDefect();
+                assert defect != null; // since no recipe was found, there must be a defect
+                lore.updateDefect(BUtil.choose(defect.getMessages(lang)));
+            }
             potionMeta.setDisplayName(BUtil.color("&f" + lang.getEntry("Brew_DistillUndefined")));
             PotionColor.GREY.colorBrew(potionMeta, slotItem, canDistill());
         }
@@ -694,16 +701,16 @@ public class Brew implements Cloneable {
         // if younger than half a day, it shouldnt get aged form
         if (ageTime > 0.5) {
             woodShift(time, woodType);
-            BRecipe recipe = ingredients.getAgeRecipe(wood, ageTime, distillRuns > 0);
-            if (recipe != null) {
-                currentRecipe = recipe;
+            BestRecipeResult result = ingredients.getAgeRecipeFull(wood, ageTime, distillRuns > 0);
+            if (result instanceof BestRecipeResult.Found found) {
+                currentRecipe = found.recipe();
                 quality = calcQuality();
 
                 lore.addOrReplaceEffects(getEffects(), quality);
-                potionMeta.setDisplayName(BUtil.color("&f" + recipe.getName(quality)));
-                recipe.getColor().colorBrew(potionMeta, item, canDistill());
+                potionMeta.setDisplayName(BUtil.color("&f" + currentRecipe.getName(quality)));
+                currentRecipe.getColor().colorBrew(potionMeta, item, canDistill());
 
-                if (recipe.isGlint()) {
+                if (currentRecipe.isGlint()) {
                     potionMeta.addEnchant(Enchantment.MENDING, 1, true);
                     potionMeta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
                 }
@@ -711,6 +718,12 @@ public class Brew implements Cloneable {
                 quality = 0;
                 lore.convertLore(false);
                 lore.removeEffects();
+                Logging.debugLog("Aging brew ruined! " + result);
+                if (config.isShowRuinedBrewHints()) {
+                    BrewDefect defect = result.getWorstDefect();
+                    assert defect != null; // since no recipe was found, there must be a defect
+                    lore.updateDefect(BUtil.choose(defect.getMessages(lang)));
+                }
                 currentRecipe = null;
                 potionMeta.setDisplayName(BUtil.color("&f" + lang.getEntry("Brew_BadPotion")));
                 PotionColor.GREY.colorBrew(potionMeta, item, canDistill());
