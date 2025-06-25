@@ -34,6 +34,8 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 
 public class BlockLockerBarrel implements ProtectableBlocksSettings {
     private static Block lastBarrelSign;
@@ -69,25 +71,18 @@ public class BlockLockerBarrel implements ProtectableBlocksSettings {
         for (BlockFace face : new BlockFace[]{ BlockFace.NORTH, BlockFace.EAST, BlockFace.SOUTH, BlockFace.WEST }) {
             Block sign = block.getRelative(face);
             if (lastBarrelSign.equals(sign)) {
-                Block spigot = BarrelBody.getSpigotOfSign(sign);
-                byte signoffset = 0;
-                if (!spigot.equals(sign)) {
-                    signoffset = (byte) (sign.getY() - spigot.getY());
-                }
-                Barrel barrel = new Barrel(spigot, signoffset);
-
-                return barrel.getBrokenBlock(true) == null;
+                Set<Block> spigots = BarrelBody.getSpigotOfSign(sign);
+                return spigots.stream()
+                    .map(Barrel::new)
+                    .map(barrel -> barrel.getBrokenBlock(true))
+                    .anyMatch(Objects::isNull);
             }
         }
         return false;
     }
 
     public static boolean checkAccess(BarrelAccessEvent event) {
-        Block sign = event.getBarrel().getSignOfSpigot();
-        if (!BarrelAsset.isBarrelAsset(BarrelAsset.SIGN, sign.getType())) {
-            return true;
-        }
-        return BlockLockerAPIv2.isAllowed(event.getPlayer(), sign, true);
+        return BlockLockerAPIv2.isAllowed(event.getPlayer(), event.getBarrel().getSpigot(), true);
     }
 
     public static void createdBarrelSign(Block sign) {

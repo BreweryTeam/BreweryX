@@ -400,16 +400,12 @@ public final class BUtil {
         } else if (BarrelAsset.isBarrelAsset(BarrelAsset.SIGN, type)) {
             // remove small Barrels
             Barrel barrel2 = Barrel.getBySpigot(block);
-            if (barrel2 != null) {
-                if (!barrel2.isLarge()) {
-                    if (barrel2.hasPermsDestroy(player, block, reason)) {
-                        barrel2.remove(null, player, true);
-                        return true;
-                    } else {
-                        return false;
-                    }
+            if (barrel2 != null && barrel2.isSmall()) {
+                if (barrel2.hasPermsDestroy(player, block, reason)) {
+                    barrel2.remove(null, player, true);
+                    return true;
                 } else {
-                    barrel2.destroySign();
+                    return false;
                 }
             }
             return true;
