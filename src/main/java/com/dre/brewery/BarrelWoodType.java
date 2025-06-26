@@ -84,10 +84,10 @@ public enum BarrelWoodType {
         this.formattedName = formattedName;
         this.index = index;
         if (!exclude) {
-            BarrelAsset.addBarrelAsset(BarrelAsset.PLANKS, getStandardBarrelAssetMaterial(BarrelAsset.PLANKS));
-            BarrelAsset.addBarrelAsset(BarrelAsset.STAIRS, getStandardBarrelAssetMaterial(BarrelAsset.STAIRS));
-            BarrelAsset.addBarrelAsset(BarrelAsset.SIGN, getStandardBarrelAssetMaterial(BarrelAsset.SIGN));
-            BarrelAsset.addBarrelAsset(BarrelAsset.FENCE, getStandardBarrelAssetMaterial(BarrelAsset.FENCE));
+            BarrelAsset.addBarrelAsset(this, BarrelAsset.PLANKS, getStandardBarrelAssetMaterial(BarrelAsset.PLANKS));
+            BarrelAsset.addBarrelAsset(this,BarrelAsset.STAIRS, getStandardBarrelAssetMaterial(BarrelAsset.STAIRS));
+            BarrelAsset.addBarrelAsset(this, BarrelAsset.SIGN, getStandardBarrelAssetMaterial(BarrelAsset.SIGN));
+            BarrelAsset.addBarrelAsset(this, BarrelAsset.FENCE, getStandardBarrelAssetMaterial(BarrelAsset.FENCE));
         }
     }
 
@@ -95,18 +95,18 @@ public enum BarrelWoodType {
         this.formattedName = formattedName;
         this.index = index;
 
-        BarrelAsset.addBarrelAsset(BarrelAsset.PLANKS, planks);
-        BarrelAsset.addBarrelAsset(BarrelAsset.STAIRS, stairs);
-        BarrelAsset.addBarrelAsset(BarrelAsset.SIGN, sign);
-        BarrelAsset.addBarrelAsset(BarrelAsset.FENCE, fence);
+        BarrelAsset.addBarrelAsset(this, BarrelAsset.PLANKS, planks);
+        BarrelAsset.addBarrelAsset(this, BarrelAsset.STAIRS, stairs);
+        BarrelAsset.addBarrelAsset(this, BarrelAsset.SIGN, sign);
+        BarrelAsset.addBarrelAsset(this, BarrelAsset.FENCE, fence);
     }
 
     BarrelWoodType(String formattedName, int index, Material planks, Material stairs) {
         this.formattedName = formattedName;
         this.index = index;
 
-        BarrelAsset.addBarrelAsset(BarrelAsset.PLANKS, planks);
-        BarrelAsset.addBarrelAsset(BarrelAsset.STAIRS, stairs);
+        BarrelAsset.addBarrelAsset(this, BarrelAsset.PLANKS, planks);
+        BarrelAsset.addBarrelAsset(this, BarrelAsset.STAIRS, stairs);
     }
 
     BarrelWoodType(String formattedName, int index, Material... materials) {
@@ -116,7 +116,7 @@ public enum BarrelWoodType {
         if (materials == null) return;
         for (Material material : materials) {
             boolean isStairs = material.name().contains("STAIRS");
-            BarrelAsset.addBarrelAsset(isStairs ? BarrelAsset.STAIRS : BarrelAsset.PLANKS, material);
+            BarrelAsset.addBarrelAsset(this, isStairs ? BarrelAsset.STAIRS : BarrelAsset.PLANKS, material);
         }
     }
 

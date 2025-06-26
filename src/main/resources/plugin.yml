@@ -23,6 +23,7 @@ softdepend:
   - Oraxen
   - ItemsAdder
   - Nexo
+  - Movecraft
 commands:
   breweryx:
     description: Mostly admin commands to create/modify Brews and drunkenness
