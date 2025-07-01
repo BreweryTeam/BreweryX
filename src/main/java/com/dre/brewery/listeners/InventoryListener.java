@@ -212,6 +212,7 @@ public class InventoryListener implements Listener {
                         lore.updateAlc(false);
                         lore.write();
                     }
+                    hoveredItem.setItemMeta(potionMeta);
                 }
             }
         }
