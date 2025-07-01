@@ -52,7 +52,8 @@ public class Hook {
 
 
     private final String name;
-    private boolean enabled; // Don't use this!! Use isEnabled() instead
+    @ApiStatus.Internal
+    private boolean enabled;
     private boolean checked;
 
     public Hook(String name) {
