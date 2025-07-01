@@ -72,6 +72,8 @@ public class InventoryListener implements Listener {
     private static final Set<InventoryAction> CLICKED_INVENTORY_ITEM_MOVE = Set.of(InventoryAction.PLACE_SOME,
         InventoryAction.PLACE_ONE, InventoryAction.PLACE_ALL, InventoryAction.PICKUP_ALL, InventoryAction.PICKUP_HALF,
         InventoryAction.PICKUP_SOME, InventoryAction.PICKUP_ONE);
+    private static final Set<String> BANNED_ACTIONS = Set.of("PICKUP_ALL_INTO_BUNDLE", "PICKUP_FROM_BUNDLE",
+        "PICKUP_SOME_INTO_BUNDLE", "PLACE_ALL_INTO_BUNDLE", "PLACE_SOME_INTO_BUNDLE");
 
     /* === Recreating manually the prior BrewEvent behavior. === */
     private HashSet<UUID> trackedBrewmen = new HashSet<>();
@@ -196,14 +198,6 @@ public class InventoryListener implements Listener {
         if (!upperInventoryIsClicked && CLICKED_INVENTORY_ITEM_MOVE.contains(action)) {
             return;
         }
-        InventoryView view = event.getView();
-        // getHotbarButton also returns -1 for offhand clicks
-        ItemStack hotbarItem = event.getHotbarButton() == -1 ?
-            (event.getClick() == ClickType.SWAP_OFFHAND
-                ? event.getWhoClicked().getInventory().getItemInOffHand()
-                : null)
-            : view.getBottomInventory().getItem(event.getHotbarButton());
-
         ItemStack hoveredItem = event.getCurrentItem();
         Stream<ItemStack> relatedItems;
         if (upperInventoryIsClicked && hoveredItem != null) {
@@ -224,6 +218,17 @@ public class InventoryListener implements Listener {
         if (!config.isOnlyAllowBrewsInBarrels()) {
             return;
         }
+        if (BANNED_ACTIONS.contains(action.name())) {
+            event.setResult(Event.Result.DENY);
+            return;
+        }
+        InventoryView view = event.getView();
+        // getHotbarButton also returns -1 for offhand clicks
+        ItemStack hotbarItem = event.getHotbarButton() == -1 ?
+            (event.getClick() == ClickType.SWAP_OFFHAND
+                ? event.getWhoClicked().getInventory().getItemInOffHand()
+                : null)
+            : view.getBottomInventory().getItem(event.getHotbarButton());
         if (action == InventoryAction.MOVE_TO_OTHER_INVENTORY) {
             // player takes something out
             if (upperInventoryIsClicked && hotbarItem == null) {
