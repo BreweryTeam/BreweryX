@@ -20,12 +20,14 @@
 
 package com.dre.brewery;
 
+import lombok.AllArgsConstructor;
 import org.bukkit.Material;
 import org.bukkit.block.data.Bisected;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.Directional;
 import org.jetbrains.annotations.NotNull;
 
+@AllArgsConstructor
 public enum BarrelPart {
     BOTTOM_RIGHT(BarrelAsset.STAIRS, Bisected.Half.TOP, BarrelFacing.EAST),
     BOTTOM_LEFT(BarrelAsset.STAIRS, Bisected.Half.TOP, BarrelFacing.WEST),
@@ -33,15 +35,9 @@ public enum BarrelPart {
     TOP_LEFT(BarrelAsset.STAIRS, Bisected.Half.BOTTOM, BarrelFacing.WEST),
     BLOCK(BarrelAsset.PLANKS);
 
-    final BarrelAsset barrelAsset;
-    Bisected.Half half = null;
-    BarrelFacing untransformedFacing = null;
-
-    BarrelPart(BarrelAsset barrelAsset, Bisected.Half half, BarrelFacing untransformedFacing) {
-        this.barrelAsset = barrelAsset;
-        this.half = half;
-        this.untransformedFacing = untransformedFacing;
-    }
+    private final BarrelAsset barrelAsset;
+    private Bisected.Half half = null;
+    private BarrelFacing untransformedFacing = null;
 
     BarrelPart(BarrelAsset barrelAsset) {
         this.barrelAsset = barrelAsset;
