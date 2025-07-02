@@ -23,6 +23,7 @@ package com.dre.brewery;
 import com.dre.brewery.utility.BUtil;
 import com.dre.brewery.utility.BoundingBox;
 import com.dre.brewery.utility.MinecraftVersion;
+import com.google.common.collect.ImmutableMap;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Bukkit;
@@ -33,7 +34,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.util.BlockVector;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -46,6 +46,54 @@ public abstract class BarrelBody {
     protected final Block spigot;
     protected final BoundingBox bounds;
     protected byte signoffset;
+
+    private static final Map<BlockVector, BarrelPart> UNTRANSFORMED_SMALL_BARREL_PART_MAP = Map.of(
+        new BlockVector(1, 0, 0), BarrelPart.BOTTOM_RIGHT,
+        new BlockVector(1, 0, 1), BarrelPart.BOTTOM_LEFT,
+        new BlockVector(1, 1, 0), BarrelPart.TOP_RIGHT,
+        new BlockVector(1, 1, 1), BarrelPart.TOP_LEFT,
+        new BlockVector(2, 0, 0), BarrelPart.BOTTOM_RIGHT,
+        new BlockVector(2, 0, 1), BarrelPart.BOTTOM_LEFT,
+        new BlockVector(2, 1, 0), BarrelPart.TOP_RIGHT,
+        new BlockVector(2, 1, 1), BarrelPart.TOP_LEFT
+    );
+
+    private static final Map<BlockVector, BarrelPart> UNTRANSFORMED_LARGE_BARREL_PART_MAP = new ImmutableMap.Builder<BlockVector, BarrelPart>()
+        .put(new BlockVector(1, 0, -1), BarrelPart.BOTTOM_RIGHT)
+        .put(new BlockVector(1, 0, 1), BarrelPart.BOTTOM_LEFT)
+        .put(new BlockVector(1, 0, 0), BarrelPart.BLOCK)
+        .put(new BlockVector(1, 1, 1), BarrelPart.BLOCK)
+        .put(new BlockVector(1, 1, -1), BarrelPart.BLOCK)
+        .put(new BlockVector(1, 2, -1), BarrelPart.TOP_RIGHT)
+        .put(new BlockVector(1, 2, 1), BarrelPart.TOP_LEFT)
+        .put(new BlockVector(1, 2, 0), BarrelPart.BLOCK)
+        .put(new BlockVector(1, 1, 0), BarrelPart.BLOCK)
+        .put(new BlockVector(2, 0, -1), BarrelPart.BOTTOM_RIGHT)
+        .put(new BlockVector(2, 0, 1), BarrelPart.BOTTOM_LEFT)
+        .put(new BlockVector(2, 0, 0), BarrelPart.BLOCK)
+        .put(new BlockVector(2, 1, 1), BarrelPart.BLOCK)
+        .put(new BlockVector(2, 1, -1), BarrelPart.BLOCK)
+        .put(new BlockVector(2, 2, -1), BarrelPart.TOP_RIGHT)
+        .put(new BlockVector(2, 2, 1), BarrelPart.TOP_LEFT)
+        .put(new BlockVector(2, 2, 0), BarrelPart.BLOCK)
+        .put(new BlockVector(3, 0, -1), BarrelPart.BOTTOM_RIGHT)
+        .put(new BlockVector(3, 0, 1), BarrelPart.BOTTOM_LEFT)
+        .put(new BlockVector(3, 0, 0), BarrelPart.BLOCK)
+        .put(new BlockVector(3, 1, 1), BarrelPart.BLOCK)
+        .put(new BlockVector(3, 1, -1), BarrelPart.BLOCK)
+        .put(new BlockVector(3, 2, -1), BarrelPart.TOP_RIGHT)
+        .put(new BlockVector(3, 2, 1), BarrelPart.TOP_LEFT)
+        .put(new BlockVector(3, 2, 0), BarrelPart.BLOCK)
+        .put(new BlockVector(4, 0, -1), BarrelPart.BOTTOM_RIGHT)
+        .put(new BlockVector(4, 0, 1), BarrelPart.BOTTOM_LEFT)
+        .put(new BlockVector(4, 0, 0), BarrelPart.BLOCK)
+        .put(new BlockVector(4, 1, 1), BarrelPart.BLOCK)
+        .put(new BlockVector(4, 1, -1), BarrelPart.BLOCK)
+        .put(new BlockVector(4, 2, -1), BarrelPart.TOP_RIGHT)
+        .put(new BlockVector(4, 2, 1), BarrelPart.TOP_LEFT)
+        .put(new BlockVector(4, 2, 0), BarrelPart.BLOCK)
+        .put(new BlockVector(4, 1, 0), BarrelPart.BLOCK)
+        .build();
 
     public BarrelBody(Block spigot, byte signoffset) {
         this.spigot = spigot;
@@ -238,24 +286,16 @@ public abstract class BarrelBody {
         int dx2 = orthogonal.getDx();
         int dz1 = direction.getDz();
         int dz2 = orthogonal.getDz();
-        Map<BlockVector, BarrelPart> untransformedBarrelPartMap = Map.of(
-            new BlockVector(1, 0, 0), BarrelPart.BOTTOM_RIGHT,
-            new BlockVector(1, 0, 1), BarrelPart.BOTTOM_LEFT,
-            new BlockVector(1, 1, 0), BarrelPart.TOP_RIGHT,
-            new BlockVector(1, 1, 1), BarrelPart.TOP_LEFT,
-            new BlockVector(2, 0, 0), BarrelPart.BOTTOM_RIGHT,
-            new BlockVector(2, 0, 1), BarrelPart.BOTTOM_LEFT,
-            new BlockVector(2, 1, 0), BarrelPart.TOP_RIGHT,
-            new BlockVector(2, 1, 1), BarrelPart.TOP_LEFT
-        );
-        Block brokenBlock = validateStructure(direction, dx1, dx2, dz1, dz2, untransformedBarrelPartMap);
+
+        Block brokenBlock = validateStructure(direction, dx1, dx2, dz1, dz2, UNTRANSFORMED_SMALL_BARREL_PART_MAP);
         if (brokenBlock != null) {
             return brokenBlock;
         }
 
         BlockVector spigotPos = spigot.getLocation().toVector().toBlockVector();
         BlockVector minBarrel = (BlockVector) new BlockVector(dx1, 0, dz1).add(spigotPos);
-        BlockVector maxBarrel = (BlockVector) new BlockVector(2 * dx1 + dx2, 1, 2 * dz1 + dz2).add(spigotPos);this.bounds.resize(minBarrel.getBlockX(), minBarrel.getBlockY(), minBarrel.getBlockZ(), maxBarrel.getBlockX(), maxBarrel.getBlockY(), maxBarrel.getBlockZ());
+        BlockVector maxBarrel = (BlockVector) new BlockVector(2 * dx1 + dx2, 1, 2 * dz1 + dz2).add(spigotPos);
+        this.bounds.resize(minBarrel.getBlockX(), minBarrel.getBlockY(), minBarrel.getBlockZ(), maxBarrel.getBlockX(), maxBarrel.getBlockY(), maxBarrel.getBlockZ());
         return null;
     }
 
@@ -269,42 +309,8 @@ public abstract class BarrelBody {
         int dx2 = orthogonal.getDx();
         int dz1 = direction.getDz();
         int dz2 = orthogonal.getDz();
-        Map<BlockVector, BarrelPart> untransformedBarrelPartMap = new HashMap<>();
-        untransformedBarrelPartMap.put(new BlockVector(1, 0, -1), BarrelPart.BOTTOM_RIGHT);
-        untransformedBarrelPartMap.put(new BlockVector(1, 0, 1), BarrelPart.BOTTOM_LEFT);
-        untransformedBarrelPartMap.put(new BlockVector(1, 0, 0), BarrelPart.BLOCK);
-        untransformedBarrelPartMap.put(new BlockVector(1, 1, 1), BarrelPart.BLOCK);
-        untransformedBarrelPartMap.put(new BlockVector(1, 1, -1), BarrelPart.BLOCK);
-        untransformedBarrelPartMap.put(new BlockVector(1, 2, -1), BarrelPart.TOP_RIGHT);
-        untransformedBarrelPartMap.put(new BlockVector(1, 2, 1), BarrelPart.TOP_LEFT);
-        untransformedBarrelPartMap.put(new BlockVector(1, 2, 0), BarrelPart.BLOCK);
-        untransformedBarrelPartMap.put(new BlockVector(1, 1, 0), BarrelPart.BLOCK);
-        untransformedBarrelPartMap.put(new BlockVector(2, 0, -1), BarrelPart.BOTTOM_RIGHT);
-        untransformedBarrelPartMap.put(new BlockVector(2, 0, 1), BarrelPart.BOTTOM_LEFT);
-        untransformedBarrelPartMap.put(new BlockVector(2, 0, 0), BarrelPart.BLOCK);
-        untransformedBarrelPartMap.put(new BlockVector(2, 1, 1), BarrelPart.BLOCK);
-        untransformedBarrelPartMap.put(new BlockVector(2, 1, -1), BarrelPart.BLOCK);
-        untransformedBarrelPartMap.put(new BlockVector(2, 2, -1), BarrelPart.TOP_RIGHT);
-        untransformedBarrelPartMap.put(new BlockVector(2, 2, 1), BarrelPart.TOP_LEFT);
-        untransformedBarrelPartMap.put(new BlockVector(2, 2, 0), BarrelPart.BLOCK);
-        untransformedBarrelPartMap.put(new BlockVector(3, 0, -1), BarrelPart.BOTTOM_RIGHT);
-        untransformedBarrelPartMap.put(new BlockVector(3, 0, 1), BarrelPart.BOTTOM_LEFT);
-        untransformedBarrelPartMap.put(new BlockVector(3, 0, 0), BarrelPart.BLOCK);
-        untransformedBarrelPartMap.put(new BlockVector(3, 1, 1), BarrelPart.BLOCK);
-        untransformedBarrelPartMap.put(new BlockVector(3, 1, -1), BarrelPart.BLOCK);
-        untransformedBarrelPartMap.put(new BlockVector(3, 2, -1), BarrelPart.TOP_RIGHT);
-        untransformedBarrelPartMap.put(new BlockVector(3, 2, 1), BarrelPart.TOP_LEFT);
-        untransformedBarrelPartMap.put(new BlockVector(3, 2, 0), BarrelPart.BLOCK);
-        untransformedBarrelPartMap.put(new BlockVector(4, 0, -1), BarrelPart.BOTTOM_RIGHT);
-        untransformedBarrelPartMap.put(new BlockVector(4, 0, 1), BarrelPart.BOTTOM_LEFT);
-        untransformedBarrelPartMap.put(new BlockVector(4, 0, 0), BarrelPart.BLOCK);
-        untransformedBarrelPartMap.put(new BlockVector(4, 1, 1), BarrelPart.BLOCK);
-        untransformedBarrelPartMap.put(new BlockVector(4, 1, -1), BarrelPart.BLOCK);
-        untransformedBarrelPartMap.put(new BlockVector(4, 2, -1), BarrelPart.TOP_RIGHT);
-        untransformedBarrelPartMap.put(new BlockVector(4, 2, 1), BarrelPart.TOP_LEFT);
-        untransformedBarrelPartMap.put(new BlockVector(4, 2, 0), BarrelPart.BLOCK);
-        untransformedBarrelPartMap.put(new BlockVector(4, 1, 0), BarrelPart.BLOCK);
-        Block brokenBlock = validateStructure(direction, dx1, dx2, dz1, dz2, untransformedBarrelPartMap);
+
+        Block brokenBlock = validateStructure(direction, dx1, dx2, dz1, dz2, UNTRANSFORMED_LARGE_BARREL_PART_MAP);
         if (brokenBlock != null) {
             return brokenBlock;
         }
