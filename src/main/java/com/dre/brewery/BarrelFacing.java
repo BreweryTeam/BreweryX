@@ -20,10 +20,12 @@
 
 package com.dre.brewery;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.bukkit.block.BlockFace;
 
 @Getter
+@AllArgsConstructor
 public enum BarrelFacing {
     EAST(BlockFace.EAST, 1, 0), WEST(BlockFace.WEST, -1, 0), SOUTH(BlockFace.SOUTH, 0, 1), NORTH(BlockFace.NORTH, 0, -1);
 
@@ -31,12 +33,11 @@ public enum BarrelFacing {
     private final int dx;
     private final int dz;
 
-    BarrelFacing(BlockFace face, int dx, int dz) {
-        this.face = face;
-        this.dx = dx;
-        this.dz = dz;
-    }
-
+    /**
+     * Rotate in against the positive y-axis, counterclockwise according to mathematical definition of rotations
+     *
+     * @return A rotated facing
+     */
     public BarrelFacing rotate90degrees() {
         return switch (this) {
             case EAST -> NORTH;
@@ -46,6 +47,11 @@ public enum BarrelFacing {
         };
     }
 
+    /**
+     * Rotate in against the positive y-axis, counterclockwise according to mathematical definition of rotations
+     *
+     * @return A rotated facing
+     */
     public BarrelFacing rotate180degrees() {
         return switch (this) {
             case EAST -> WEST;
@@ -55,6 +61,11 @@ public enum BarrelFacing {
         };
     }
 
+    /**
+     * Rotate in against the positive y-axis, counterclockwise according to mathematical definition of rotations
+     *
+     * @return A rotated facing
+     */
     public BarrelFacing rotate270degrees() {
         return switch (this) {
             case EAST -> SOUTH;
