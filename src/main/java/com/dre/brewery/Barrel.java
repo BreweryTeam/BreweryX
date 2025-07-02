@@ -34,6 +34,7 @@ import com.dre.brewery.utility.BoundingBox;
 import com.dre.brewery.utility.Logging;
 import com.dre.brewery.utility.MinecraftVersion;
 import com.github.Anon8281.universalScheduler.UniversalRunnable;
+import com.google.common.base.Preconditions;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Bukkit;
@@ -57,7 +58,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * A Multi Block Barrel with Inventory
@@ -71,6 +72,11 @@ public class Barrel extends BarrelBody implements InventoryHolder {
     private static final Config config = ConfigManager.getConfig(Config.class);
     private static final Lang lang = ConfigManager.getConfig(Lang.class);
     private static int check = 0; // Which Barrel was last checked
+    /**
+     * -- GETTER --
+     * Is this a small barrel?
+     */
+    private final boolean small;
 
     private boolean checked; // Checked by the random BarrelCheck routine
     private Inventory inventory;
@@ -78,11 +84,20 @@ public class Barrel extends BarrelBody implements InventoryHolder {
     private final UUID id;
 
     /**
-     * Create a new Barrel
+     * Create a new Barrel, has to be done in the primary thread
      */
     public Barrel(Block spigot, byte signoffset) {
         super(spigot, signoffset);
-        this.inventory = Bukkit.createInventory(this, isLarge() ? config.getBarrelInvSizeLarge() * 9 : config.getBarrelInvSizeSmall() * 9, lang.getEntry("Etc_Barrel"));
+        Preconditions.checkState(Bukkit.isPrimaryThread());
+        this.small = computeSmall();
+        this.inventory = Bukkit.createInventory(this, !small ? config.getBarrelInvSizeLarge() * 9 : config.getBarrelInvSizeSmall() * 9, lang.getEntry("Etc_Barrel"));
+        this.id = UUID.randomUUID();
+    }
+
+    public Barrel(Block spigot, byte signoffset, boolean isSmall) {
+        super(spigot, signoffset);
+        this.small = isSmall;
+        this.inventory = Bukkit.createInventory(this, !isSmall ? config.getBarrelInvSizeLarge() * 9 : config.getBarrelInvSizeSmall() * 9, lang.getEntry("Etc_Barrel"));
         this.id = UUID.randomUUID();
     }
 
@@ -91,8 +106,9 @@ public class Barrel extends BarrelBody implements InventoryHolder {
      * <p>If async: true, The Barrel Bounds will not be recreated when missing/corrupt, getBody().getBounds() will be null if it needs recreating
      * Note from Jsinco, async is now checked using Bukkit.isPrimaryThread().^
      */
-    public Barrel(Block spigot, byte sign, BoundingBox bounds, @Nullable Map<String, Object> items, float time, UUID id) {
+    public Barrel(Block spigot, byte sign, BoundingBox bounds, @Nullable Map<String, Object> items, float time, UUID id, boolean isSmall) {
         super(spigot, sign, bounds);
+        this.small = isSmall;
         this.inventory = Bukkit.createInventory(this, isLarge() ? config.getBarrelInvSizeLarge() * 9 : config.getBarrelInvSizeSmall() * 9, lang.getEntry("Etc_Barrel"));
         if (items != null) {
             for (String slot : items.keySet()) {
@@ -105,8 +121,9 @@ public class Barrel extends BarrelBody implements InventoryHolder {
         this.id = id;
     }
 
-    public Barrel(Block spigot, byte sign, BoundingBox bounds, ItemStack[] items, float time, UUID id) {
+    public Barrel(Block spigot, byte sign, BoundingBox bounds, ItemStack[] items, float time, UUID id, boolean isSmall) {
         super(spigot, sign, bounds);
+        this.small = isSmall;
         this.inventory = Bukkit.createInventory(this, isLarge() ? config.getBarrelInvSizeLarge() * 9 : config.getBarrelInvSizeSmall() * 9, lang.getEntry("Etc_Barrel"));
         if (items != null) {
             for (int slot = 0; slot < items.length; slot++) {
@@ -466,20 +483,27 @@ public class Barrel extends BarrelBody implements InventoryHolder {
     }
 
     /**
-     * is this a Small barrel?
+     * @return true if this is a small barrel
      */
-    public boolean isSmall() {
-        if (!MinecraftVersion.isFolia()) {
-            return BarrelAsset.isBarrelAsset(BarrelAsset.SIGN, spigot.getType());
-        }
-
-
-        AtomicBoolean type = new AtomicBoolean(false);
-        BreweryPlugin.getScheduler().runTask(spigot.getLocation(),
-            () -> type.set(BarrelAsset.isBarrelAsset(BarrelAsset.SIGN, spigot.getType())));
-        return type.get();
+    private boolean computeSmall() {
+        Preconditions.checkState(Bukkit.isPrimaryThread());
+        return BarrelAsset.isBarrelAsset(BarrelAsset.SIGN, spigot.getType());
     }
 
+    /**
+     * @param spigotPosition Position of spigot
+     * @return Future on whether this barrel is a small barrel, the future will be in an appropriate thread for modifying the world in that position
+     */
+    public static CompletableFuture<Boolean> computeSmall(Location spigotPosition) {
+        if (!MinecraftVersion.isFolia()) {
+            return CompletableFuture.completedFuture(BarrelAsset.isBarrelAsset(BarrelAsset.SIGN, spigotPosition.getBlock().getType()));
+        }
+
+        CompletableFuture<Boolean> output = new CompletableFuture<>();
+        BreweryPlugin.getScheduler().runTask(spigotPosition,
+            () -> output.complete(BarrelAsset.isBarrelAsset(BarrelAsset.SIGN, spigotPosition.getBlock().getType())));
+        return output;
+    }
 
     /**
      * returns the fence above/below a block, itself if there is none

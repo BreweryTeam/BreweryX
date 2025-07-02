@@ -74,7 +74,7 @@ public class BlockLockerBarrel implements ProtectableBlocksSettings {
                 if (!spigot.equals(sign)) {
                     signoffset = (byte) (sign.getY() - spigot.getY());
                 }
-                Barrel barrel = new Barrel(spigot, signoffset);
+                Barrel barrel = new Barrel(spigot, signoffset, true); // Barrel is temporary, size does not matter
 
                 return barrel.getBrokenBlock(true) == null;
             }

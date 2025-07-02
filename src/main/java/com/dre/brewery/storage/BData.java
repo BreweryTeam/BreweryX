@@ -34,6 +34,7 @@ import com.dre.brewery.recipe.Ingredient;
 import com.dre.brewery.recipe.SimpleItem;
 import com.dre.brewery.utility.BUtil;
 import com.dre.brewery.utility.BoundingBox;
+import com.dre.brewery.utility.FutureUtil;
 import com.dre.brewery.utility.Logging;
 import com.dre.brewery.utility.MinecraftVersion;
 import org.bukkit.Location;
@@ -56,6 +57,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -372,7 +374,7 @@ public class BData {
         }
 
         // loading Barrel
-        final List<Barrel> initBarrels = new ArrayList<>();
+        final List<CompletableFuture<Barrel>> initBarrelFutures = new ArrayList<>();
         if (BData.worldData.contains("Barrel." + uuid)) {
             ConfigurationSection section = BData.worldData.getConfigurationSection("Barrel." + uuid);
             for (String barrel : section.getKeys(false)) {
@@ -384,7 +386,7 @@ public class BData {
 
                         // load itemStacks from invSection
                         ConfigurationSection invSection = section.getConfigurationSection(barrel + ".inv");
-                        Block block = world.getBlockAt(Integer.parseInt(splitted[0]), Integer.parseInt(splitted[1]), Integer.parseInt(splitted[2]));
+                        Location spigotLocation = new Location(world, Integer.parseInt(splitted[0]), Integer.parseInt(splitted[1]), Integer.parseInt(splitted[2]));
                         float time = (float) section.getDouble(barrel + ".time", 0.0);
                         byte sign = (byte) section.getInt(barrel + ".sign", 0);
 
@@ -418,16 +420,16 @@ public class BData {
                         }
 
                         final BoundingBox bbox = box;
-
-                        Barrel b;
-                        if (invSection != null) {
-                            b = new Barrel(block, sign, bbox, invSection.getValues(true), time, UUID.randomUUID());
-                        } else {
-                            // Barrel has no inventory
-                            b = new Barrel(block, sign, bbox, Collections.emptyMap(), time, UUID.randomUUID());
-                        }
-
-                        initBarrels.add(b);
+                        CompletableFuture<Barrel> barrelFuture = Barrel.computeSmall(spigotLocation)
+                            .thenApply(small -> {
+                                if (invSection != null) {
+                                    return new Barrel(spigotLocation.getBlock(), sign, bbox, invSection.getValues(true), time, UUID.randomUUID(), small);
+                                } else {
+                                    // Barrel has no inventory
+                                    return new Barrel(spigotLocation.getBlock(), sign, bbox, Collections.emptyMap(), time, UUID.randomUUID(), small);
+                                }
+                            });
+                        initBarrelFutures.add(barrelFuture);
 
                     } else {
                         Logging.errorLog("Incomplete Block-Data in data.yml: " + section.getCurrentPath() + "." + barrel);
@@ -473,10 +475,10 @@ public class BData {
         if (!initCauldrons.isEmpty()) {
             BCauldron.bcauldrons.putAll(initCauldrons);
         }
-        if (!initBarrels.isEmpty()) {
-            Barrel.barrels.addAll(initBarrels);
+        if (!initBarrelFutures.isEmpty()) {
+            FutureUtil.mergeFutures(initBarrelFutures)
+                .thenAcceptAsync(Barrel.barrels::addAll);
         }
-
         if (!initWakeups.isEmpty()) {
             Wakeup.wakeups.addAll(initWakeups);
         }

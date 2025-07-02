@@ -199,7 +199,7 @@ public class FlatFileStorage extends DataManager {
         ItemStack[] items = BukkitSerialization.itemStackArrayFromBase64(dataFile.getString(path + ".items", null));
 
 
-        return new Barrel(spigotLoc.getBlock(), sign, boundingBox, items, time, id);
+        return new Barrel(spigotLoc sign, boundingBox, items, time, id);
     }
 
     @Override
