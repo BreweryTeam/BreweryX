@@ -43,7 +43,7 @@ import java.util.Map;
 @Setter
 public abstract class BarrelBody {
 
-    protected final Block spigot;
+    protected Block spigot;
     protected final BoundingBox bounds;
     protected byte signoffset;
 
