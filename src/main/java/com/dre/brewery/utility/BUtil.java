@@ -27,7 +27,6 @@ import com.dre.brewery.BreweryPlugin;
 import com.dre.brewery.api.events.barrel.BarrelDestroyEvent;
 import com.dre.brewery.configuration.ConfigManager;
 import com.dre.brewery.configuration.files.Lang;
-import com.github.Anon8281.universalScheduler.scheduling.schedulers.TaskScheduler;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Color;
@@ -59,8 +58,8 @@ import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Stream;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 public final class BUtil {
 
@@ -186,25 +185,26 @@ public final class BUtil {
      * @param onlyIfStronger Optionally only overwrite if the new one is stronger, i.e. has higher level or longer duration
      */
     public static void reapplyPotionEffect(Player player, PotionEffect effect, boolean onlyIfStronger) {
-        final PotionEffectType type = effect.getType();
-        if (player.hasPotionEffect(type)) {
-            PotionEffect plEffect;
-            if (VERSION.isOrLater(MinecraftVersion.V1_11)) {
-                plEffect = player.getPotionEffect(type);
-            } else {
-                plEffect = player.getActivePotionEffects().stream().filter(e -> e.getType().equals(type)).findAny().get();
-            }
+        BreweryPlugin.getScheduler().execute(player, () -> {
+            final PotionEffectType type = effect.getType();
+            if (player.hasPotionEffect(type)) {
+                PotionEffect plEffect;
+                if (VERSION.isOrLater(MinecraftVersion.V1_11)) {
+                    plEffect = player.getPotionEffect(type);
+                } else {
+                    plEffect = player.getActivePotionEffects().stream().filter(e -> e.getType().equals(type)).findAny().get();
+                }
 
-            if (!onlyIfStronger ||
-                plEffect.getAmplifier() < effect.getAmplifier() ||
-                (plEffect.getAmplifier() == effect.getAmplifier() && plEffect.getDuration() < effect.getDuration())) {
-                player.removePotionEffect(type);
-            } else {
-                return;
+                if (!onlyIfStronger ||
+                    plEffect.getAmplifier() < effect.getAmplifier() ||
+                    (plEffect.getAmplifier() == effect.getAmplifier() && plEffect.getDuration() < effect.getDuration())) {
+                    player.removePotionEffect(type);
+                } else {
+                    return;
+                }
             }
-        }
-
-        BreweryPlugin.getScheduler().execute(player, () -> effect.apply(player));
+            effect.apply(player);
+        });
     }
 
     /**
@@ -282,6 +282,7 @@ public final class BUtil {
 
     /**
      * Escapes any backslashes or double quotes, and surrounds the string in double quotes if it contains spaces.
+     *
      * @param input The input string
      * @return The quoted string
      */
@@ -297,16 +298,19 @@ public final class BUtil {
      * Splits a string by spaces, unless enclosed in double quotes.
      * Uses backslash as escape character for quotes and other backslashes.
      * Multiple spaces will be treated as one space.
+     *
      * @param input The input string
      * @return List of strings in the input, quoted strings will have their start and end quotes removed
      */
     public static List<String> splitStringKeepingQuotes(String input) {
         return splitStringKeepingQuotesVerbose(input).strings;
     }
+
     /**
      * Splits a string by spaces, unless enclosed in double quotes.
      * Uses backslash as escape character for quotes and other backslashes.
      * Multiple spaces will be treated as one space.
+     *
      * @param input The input string
      * @return List of strings in the input, quoted strings will have their start and end quotes removed
      */
@@ -341,7 +345,8 @@ public final class BUtil {
         return new SplitResult(result, inQuotes);
     }
 
-    public record SplitResult(List<String> strings, boolean inQuotes) {}
+    public record SplitResult(List<String> strings, boolean inQuotes) {
+    }
 
     /**
      * Replaces the Placeholders %player_name% and %quality% in the given input string
@@ -570,9 +575,10 @@ public final class BUtil {
 
     /**
      * Chooses a random element from a list.
+     *
      * @param list the list to choose from
+     * @param <T>  type of element in list
      * @return a random element, or null if the list is empty
-     * @param <T> type of element in list
      */
     public static <T> @Nullable T choose(List<T> list) {
         if (list.isEmpty()) {
@@ -584,7 +590,8 @@ public final class BUtil {
     /**
      * Finds the minimum element in a collection.
      * If multiple elements have the same minimum value, they will all be returned.
-     * @param <T> the type of elements in the collection
+     *
+     * @param <T>        the type of elements in the collection
      * @param collection the collection to search for minimum elements
      * @return a list of all minimum elements in the collection, will be empty if the collection is empty
      */
@@ -611,6 +618,7 @@ public final class BUtil {
 
     /**
      * Determines if two floats are close enough to be considered "equal" (difference < 1e-6)
+     *
      * @param a first float
      * @param b second float
      * @return true if the floats are close
@@ -641,6 +649,7 @@ public final class BUtil {
 
     /**
      * Parses a non-infinite, non-NaN floating-point double.
+     *
      * @param string the input string
      * @return the optional
      */
@@ -661,6 +670,7 @@ public final class BUtil {
 
     /**
      * Parses a non-infinite, non-NaN floating-point float.
+     *
      * @param string the input string
      * @return the optional
      */
