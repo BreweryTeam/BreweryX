@@ -28,7 +28,6 @@ import com.dre.brewery.configuration.files.Config;
 import com.dre.brewery.configuration.files.Lang;
 import com.dre.brewery.integration.BlockLockerHook;
 import com.dre.brewery.integration.Hook;
-import com.dre.brewery.integration.LandsHook;
 import com.dre.brewery.integration.PlaceholderAPIHook;
 import com.dre.brewery.integration.barrel.BlockLockerBarrel;
 import com.dre.brewery.integration.bstats.BreweryStats;
@@ -154,10 +153,10 @@ public final class BreweryPlugin extends JavaPlugin {
 
         // Load objects
         DataManager.loadMiscData(dataManager.getBreweryMiscData());
-        Barrel.getBarrels().addAll(dataManager.getAllBarrels()
-            .stream()
+        dataManager.getAllBarrels().thenApplyAsync(barrels -> Barrel.getBarrels().addAll(barrels.stream()
             .filter(Objects::nonNull)
-            .toList());
+            .toList()
+        ));
         BCauldron.getBcauldrons().putAll(dataManager.getAllCauldrons().stream()
             .filter(Objects::nonNull)
             .collect(Collectors.toMap(

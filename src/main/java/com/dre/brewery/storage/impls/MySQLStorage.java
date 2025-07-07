@@ -34,6 +34,7 @@ import com.dre.brewery.storage.records.SerializableBarrel;
 import com.dre.brewery.storage.records.SerializableCauldron;
 import com.dre.brewery.storage.records.SerializableWakeup;
 import com.dre.brewery.storage.serialization.SQLDataSerializer;
+import com.dre.brewery.utility.FutureUtil;
 import com.dre.brewery.utility.Logging;
 import org.jetbrains.annotations.Nullable;
 
@@ -46,6 +47,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 // I don't write the greatest SQL, but I did my best ¯\_(ツ)_/¯ - Jsinco
 @SuppressWarnings({ "SqlSourceToSinkFlow", "Duplicates" }) // Dupe code from SQLiteStorage
@@ -160,6 +162,7 @@ public class MySQLStorage extends DataManager {
     public <T extends SerializableThing> void saveAllGeneric(List<T> serializableThings, String table) {
         saveAllGeneric(serializableThings, table, null);
     }
+
     // Batch saving/deleting
     @Override
     public <T extends SerializableThing> void saveAllGeneric(List<T> serializableThings, String table, @Nullable Class<T> type) {
@@ -231,7 +234,7 @@ public class MySQLStorage extends DataManager {
     }
 
     @Override
-    public Barrel getBarrel(UUID id) {
+    public CompletableFuture<Barrel> getBarrel(UUID id) {
         SerializableBarrel serializableBarrel = getGeneric(id.toString(), "barrels", SerializableBarrel.class);
         if (serializableBarrel != null) {
             return serializableBarrel.toBarrel();
@@ -240,10 +243,12 @@ public class MySQLStorage extends DataManager {
     }
 
     @Override
-    public Collection<Barrel> getAllBarrels() {
-        return getAllGeneric("barrels", SerializableBarrel.class).stream()
-            .map(SerializableBarrel::toBarrel)
-            .toList();
+    public CompletableFuture<List<Barrel>> getAllBarrels() {
+        return FutureUtil.mergeFutures(
+            getAllGeneric("barrels", SerializableBarrel.class).stream()
+                .map(SerializableBarrel::toBarrel)
+                .toList()
+        );
     }
 
     @Override

@@ -34,6 +34,7 @@ import com.dre.brewery.storage.serialization.BukkitSerialization;
 import com.dre.brewery.storage.serialization.SQLDataSerializer;
 import com.dre.brewery.utility.BUtil;
 import com.dre.brewery.utility.BoundingBox;
+import com.dre.brewery.utility.FutureUtil;
 import com.dre.brewery.utility.Logging;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
@@ -54,6 +55,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 // TODO: Simplify methods
 public class FlatFileStorage extends DataManager {
@@ -180,7 +182,7 @@ public class FlatFileStorage extends DataManager {
     }
 
     @Override
-    public Barrel getBarrel(UUID id) {
+    public CompletableFuture<Barrel> getBarrel(UUID id) {
         String path = "barrels." + id;
 
         Location spigotLoc = deserializeLocation(dataFile.getString(path + ".spigot"));
@@ -199,25 +201,27 @@ public class FlatFileStorage extends DataManager {
         ItemStack[] items = BukkitSerialization.itemStackArrayFromBase64(dataFile.getString(path + ".items", null));
 
 
-        return new Barrel(spigotLoc sign, boundingBox, items, time, id);
+        return Barrel.computeSmall(spigotLoc).thenApplyAsync(small ->
+            new Barrel(spigotLoc.getBlock(), sign, boundingBox, items, time, id, small)
+        );
     }
 
     @Override
-    public Collection<Barrel> getAllBarrels() {
+    public CompletableFuture<List<Barrel>> getAllBarrels() {
         ConfigurationSection section = dataFile.getConfigurationSection("barrels");
         if (section == null) {
-            return Collections.emptyList();
+            return CompletableFuture.completedFuture(Collections.emptyList());
         }
 
-        List<Barrel> barrels = new ArrayList<>();
+        List<CompletableFuture<Barrel>> barrels = new ArrayList<>();
 
         for (String key : section.getKeys(false)) {
-            Barrel barrel = getBarrel(BUtil.uuidFromString(key));
+            CompletableFuture<Barrel> barrel = getBarrel(BUtil.uuidFromString(key));
             if (barrel != null) {
                 barrels.add(barrel);
             }
         }
-        return barrels;
+        return FutureUtil.mergeFutures(barrels);
     }
 
     @Override

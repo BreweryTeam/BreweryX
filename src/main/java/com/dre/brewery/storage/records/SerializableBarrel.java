@@ -29,6 +29,7 @@ import com.dre.brewery.utility.BoundingBox;
 import org.bukkit.Location;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Represents a barrel that can be serialized.
@@ -46,12 +47,14 @@ public record SerializableBarrel(String id, String serializedLocation, List<Inte
         this(barrel.getId().toString(), DataManager.serializeLocation(barrel.getSpigot().getLocation()), barrel.getBounds().serializeToIntList(), barrel.getTime(), barrel.getSignoffset(), BukkitSerialization.itemStackArrayToBase64(barrel.getInventory().getContents()));
     }
 
-    public Barrel toBarrel() {
+    public CompletableFuture<Barrel> toBarrel() {
         Location loc = DataManager.deserializeLocation(serializedLocation);
         if (loc == null) {
             return null;
         }
-        return new Barrel(loc.getBlock(), sign, BoundingBox.fromPoints(bounds), BukkitSerialization.itemStackArrayFromBase64(serializedItems), time, BUtil.uuidFromString(id));
+        return Barrel.computeSmall(loc).thenApplyAsync(small ->
+            new Barrel(loc.getBlock(), sign, BoundingBox.fromPoints(bounds), BukkitSerialization.itemStackArrayFromBase64(serializedItems), time, BUtil.uuidFromString(id), small)
+        );
     }
 
     @Override

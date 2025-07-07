@@ -33,6 +33,7 @@ import com.dre.brewery.storage.records.SerializableBPlayer;
 import com.dre.brewery.storage.records.SerializableBarrel;
 import com.dre.brewery.storage.records.SerializableCauldron;
 import com.dre.brewery.storage.records.SerializableWakeup;
+import com.dre.brewery.utility.FutureUtil;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
@@ -49,6 +50,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 public class MongoDBStorage extends DataManager {
@@ -156,7 +158,7 @@ public class MongoDBStorage extends DataManager {
 
 
     @Override
-    public Barrel getBarrel(UUID id) {
+    public CompletableFuture<Barrel> getBarrel(UUID id) {
         SerializableBarrel serializableBarrel = getGeneric(id, "barrels", SerializableBarrel.class);
         if (serializableBarrel != null) {
             return serializableBarrel.toBarrel();
@@ -165,10 +167,12 @@ public class MongoDBStorage extends DataManager {
     }
 
     @Override
-    public Collection<Barrel> getAllBarrels() {
-        return getAllGeneric("barrels", SerializableBarrel.class).stream()
-            .map(SerializableBarrel::toBarrel)
-            .toList();
+    public CompletableFuture<List<Barrel>> getAllBarrels() {
+        return FutureUtil.mergeFutures(
+            getAllGeneric("barrels", SerializableBarrel.class).stream()
+                .map(SerializableBarrel::toBarrel)
+                .toList()
+        );
     }
 
     @Override

@@ -51,6 +51,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 @Getter
 public abstract class DataManager {
@@ -81,9 +82,9 @@ public abstract class DataManager {
 
     public abstract void deleteGeneric(String id, String table);
 
-    public abstract Barrel getBarrel(UUID id);
+    public abstract CompletableFuture<Barrel> getBarrel(UUID id);
 
-    public abstract Collection<Barrel> getAllBarrels();
+    public abstract CompletableFuture<List<Barrel>> getAllBarrels();
 
     public abstract void saveAllBarrels(Collection<Barrel> barrels);
 
