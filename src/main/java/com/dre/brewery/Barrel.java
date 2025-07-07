@@ -449,7 +449,7 @@ public class Barrel extends BarrelBody implements InventoryHolder {
 
     @Override
     public boolean regenerateBounds() {
-        Logging.debugLog("Regenerating Barrel BoundingBox: " + (bounds == null ? "was null" : "area=" + bounds.area()));
+        Logging.debugLog("Regenerating Barrel BoundingBox: " + (bounds == null ? "was null" : "area=" + bounds.volume()));
         Block broken = getBrokenBlock(true);
         if (broken != null) {
             this.remove(broken, null, true);
