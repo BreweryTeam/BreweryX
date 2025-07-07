@@ -26,7 +26,6 @@ import com.dre.brewery.utility.MinecraftVersion;
 import com.google.common.collect.ImmutableMap;
 import lombok.Getter;
 import lombok.Setter;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.BlockData;
@@ -118,15 +117,8 @@ public abstract class BarrelBody {
         this.signoffset = signoffset;
         this.bounds = bounds;
         if (this.bounds == null || this.bounds.isBad()) {
-            // If loading from old data, or block locations are missing, or other error, regenerate BoundingBox
-            // This will only be done in those extreme cases.
-
-            // Barrels can be loaded async!
-            if (Bukkit.isPrimaryThread()) {
-                this.regenerateBounds();
-            } else {
-                BreweryPlugin.getScheduler().runTask(spigot.getLocation(), this::regenerateBounds);
-            }
+            // Never load chunks on startup, therefore always scheduled
+            BreweryPlugin.getScheduler().runTask(spigot.getLocation(), this::regenerateBounds);
         }
     }
 
