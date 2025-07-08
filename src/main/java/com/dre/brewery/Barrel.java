@@ -88,7 +88,6 @@ public class Barrel extends BarrelBody implements InventoryHolder {
      */
     public Barrel(Block spigot, byte signoffset) {
         super(spigot, signoffset);
-        Preconditions.checkState(Bukkit.isPrimaryThread());
         this.small = computeSmall();
         this.inventory = Bukkit.createInventory(this, !small ? config.getBarrelInvSizeLarge() * 9 : config.getBarrelInvSizeSmall() * 9, lang.getEntry("Etc_Barrel"));
         this.id = UUID.randomUUID();
@@ -492,7 +491,7 @@ public class Barrel extends BarrelBody implements InventoryHolder {
      * @return true if this is a small barrel
      */
     private boolean computeSmall() {
-        Preconditions.checkState(Bukkit.isPrimaryThread());
+        Preconditions.checkState(BreweryPlugin.getScheduler().isRegionThread(spigot.getLocation()));
         return BarrelAsset.isBarrelAsset(BarrelAsset.SIGN, spigot.getType());
     }
 
