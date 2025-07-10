@@ -181,7 +181,9 @@ tasks {
     }
 
     runServer {
-        minecraftVersion("1.21.4")
+        minecraftVersion("1.16.5")
+
+        systemProperty("Paper.IgnoreJavaVersion", true)
     }
 
     register("publishToDiscord") {

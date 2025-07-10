@@ -48,16 +48,7 @@ public enum BarrelWoodType {
     MANGROVE("Mangrove", 9),
     CHERRY("Cherry", 10),
     BAMBOO("Bamboo", 11),
-    CUT_COPPER("Cut Copper", 12,
-        Material.CUT_COPPER, Material.CUT_COPPER_STAIRS,
-        Material.WAXED_CUT_COPPER, Material.WAXED_CUT_COPPER_STAIRS,
-        Material.EXPOSED_CUT_COPPER, Material.EXPOSED_CUT_COPPER_STAIRS,
-        Material.WAXED_EXPOSED_CUT_COPPER, Material.WAXED_EXPOSED_CUT_COPPER_STAIRS,
-        Material.WEATHERED_CUT_COPPER, Material.WEATHERED_CUT_COPPER_STAIRS,
-        Material.WAXED_WEATHERED_CUT_COPPER, Material.WAXED_WEATHERED_CUT_COPPER_STAIRS,
-        Material.OXIDIZED_CUT_COPPER, Material.OXIDIZED_CUT_COPPER_STAIRS,
-        Material.WAXED_OXIDIZED_CUT_COPPER, Material.WAXED_OXIDIZED_CUT_COPPER_STAIRS
-    ),
+    CUT_COPPER("Cut Copper", 12),
     PALE_OAK("Pale Oak", 13),
     // If you're adding more wood types, add them above 'NONE'
     // Remember to also add the wood type to the Group enum
