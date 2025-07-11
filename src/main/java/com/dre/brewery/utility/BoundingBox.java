@@ -20,26 +20,41 @@
 
 package com.dre.brewery.utility;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 
 import java.util.List;
 
+@Getter
+@Setter
 public class BoundingBox {
 
-    private int x1, y1, z1, x2, y2, z2;
+    public record BlockPos(int x, int y, int z) { }
+
+    private BlockPos min, max;
+
+    public BoundingBox(BlockPos a, BlockPos b) {
+        this(a.x, a.y, a.z, b.x, b.y, b.z);
+    }
 
     public BoundingBox(int x1, int y1, int z1, int x2, int y2, int z2) {
-        this.x1 = Math.min(x1, x2);
-        this.y1 = Math.min(y1, y2);
-        this.z1 = Math.min(z1, z2);
-        this.x2 = Math.max(x2, x1);
-        this.y2 = Math.max(y2, y1);
-        this.z2 = Math.max(z2, z1);
+        int minX, minY, minZ, maxX, maxY, maxZ;
+        minX = Math.min(x1, x2);
+        minY = Math.min(y1, y2);
+        minZ = Math.min(z1, z2);
+        min = new BlockPos(minX, minY, minZ);
+        maxX = Math.max(x2, x1);
+        maxY = Math.max(y2, y1);
+        maxZ = Math.max(z2, z1);
+        max = new BlockPos(maxX, maxY, maxZ);
     }
 
     public boolean contains(int x, int y, int z) {
-        return (x >= x1 && x <= x2) && (y >= y1 && y <= y2) && (z >= z1 && z <= z2);
+        return (x >= min.x && x <= max.x) && (y >= min.y && y <= max.y) && (z >= min.z && z <= max.z);
     }
 
     public boolean contains(Location loc) {
@@ -51,7 +66,7 @@ public class BoundingBox {
     }
 
     public long volume() {
-        return ((long) (x2 - x1 + 1)) * ((long) (y2 - y1 + 1)) * ((long) (z2 - z1 + 1));
+        return ((long) (max.z - min.z + 1)) * ((long) (max.y - min.y + 1)) * ((long) (max.z - min.z + 1));
     }
 
     // Quick check if the bounds are valid or seem corrupt
@@ -61,20 +76,17 @@ public class BoundingBox {
     }
 
     public void resize(int x1, int y1, int z1, int x2, int y2, int z2) {
-        this.x1 = Math.min(x1, x2);
-        this.y1 = Math.min(y1, y2);
-        this.z1 = Math.min(z1, z2);
-        this.x2 = Math.max(x2, x1);
-        this.y2 = Math.max(y2, y1);
-        this.z2 = Math.max(z2, z1);
+        BoundingBox box = new BoundingBox(x1, y1, z1, x2, y2, z2);
+        this.min = box.min;
+        this.max = box.max;
     }
 
     public String serialize() {
-        return x1 + "," + y1 + "," + z1 + "," + x2 + "," + y2 + "," + z2;
+        return min.x + "," + min.y + "," + min.z + "," + max.x + "," + max.y + "," + max.z;
     }
 
     public List<Integer> serializeToIntList() {
-        return List.of(x1, y1, z1, x2, y2, z2);
+        return List.of(min.x, min.y, min.z, max.x, max.y, max.z);
     }
 
     public static BoundingBox fromPoints(int[] locations) {

@@ -36,6 +36,11 @@ import com.dre.brewery.integration.listeners.ChestShopListener;
 import com.dre.brewery.integration.listeners.IntegrationListener;
 import com.dre.brewery.integration.listeners.ShopKeepersListener;
 import com.dre.brewery.integration.listeners.SlimefunListener;
+import com.dre.brewery.integration.listeners.movecraft.CraftDetectListener;
+import com.dre.brewery.integration.listeners.movecraft.RotationListener;
+import com.dre.brewery.integration.listeners.movecraft.SinkListener;
+import com.dre.brewery.integration.listeners.movecraft.TranslationListener;
+import com.dre.brewery.integration.listeners.movecraft.properties.BreweryProperties;
 import com.dre.brewery.listeners.BlockListener;
 import com.dre.brewery.listeners.CauldronListener;
 import com.dre.brewery.listeners.EntityListener;
@@ -61,6 +66,7 @@ import org.bukkit.Material;
 import org.bukkit.command.CommandMap;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.event.HandlerList;
+import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
@@ -99,6 +105,13 @@ public final class BreweryPlugin extends JavaPlugin {
 
     @Override
     public void onLoad() {
+        // movecraft properties must be registered in the onLoad
+        try {
+            Class.forName("net.countercraft.movecraft.craft.type.property.Property");
+            BreweryProperties.register();
+        } catch (Exception ignored) {
+        }
+
         if (getMCVersion().isOrLater(MinecraftVersion.V1_14)) {
             // Campfires are weird. Initialize once now, so it doesn't lag later when we check for campfires under Cauldrons
             getServer().createBlockData(Material.CAMPFIRE);
@@ -198,19 +211,26 @@ public final class BreweryPlugin extends JavaPlugin {
         }
 
         // Register Listeners
-        getServer().getPluginManager().registerEvents(new BlockListener(), this);
-        getServer().getPluginManager().registerEvents(new PlayerListener(), this);
-        getServer().getPluginManager().registerEvents(new EntityListener(), this);
-        getServer().getPluginManager().registerEvents(new InventoryListener(), this);
-        getServer().getPluginManager().registerEvents(new IntegrationListener(), this);
+        PluginManager pluginManager = getServer().getPluginManager();
+        pluginManager.registerEvents(new BlockListener(), this);
+        pluginManager.registerEvents(new PlayerListener(), this);
+        pluginManager.registerEvents(new EntityListener(), this);
+        pluginManager.registerEvents(new InventoryListener(), this);
+        pluginManager.registerEvents(new IntegrationListener(), this);
         if (getMCVersion().isOrLater(MinecraftVersion.V1_9))
-            getServer().getPluginManager().registerEvents(new CauldronListener(), this);
+            pluginManager.registerEvents(new CauldronListener(), this);
         if (Hook.CHESTSHOP.isEnabled() && getMCVersion().isOrLater(MinecraftVersion.V1_13))
-            getServer().getPluginManager().registerEvents(new ChestShopListener(), this);
+            pluginManager.registerEvents(new ChestShopListener(), this);
         if (Hook.SHOPKEEPERS.isEnabled())
-            getServer().getPluginManager().registerEvents(new ShopKeepersListener(), this);
+            pluginManager.registerEvents(new ShopKeepersListener(), this);
         if (Hook.SLIMEFUN.isEnabled() && getMCVersion().isOrLater(MinecraftVersion.V1_14))
-            getServer().getPluginManager().registerEvents(new SlimefunListener(), this);
+            pluginManager.registerEvents(new SlimefunListener(), this);
+        if (Hook.MOVECRAFT.isEnabled()) {
+            pluginManager.registerEvents(new CraftDetectListener(), this);
+            pluginManager.registerEvents(new TranslationListener(), this);
+            pluginManager.registerEvents(new RotationListener(), this);
+            pluginManager.registerEvents(new SinkListener(), this);
+        }
 
         // Heartbeat
         BreweryPlugin.getScheduler().runTaskTimer(new BreweryRunnable(), 650, 1200);
