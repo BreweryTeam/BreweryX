@@ -363,7 +363,7 @@ public class Barrel extends BarrelBody implements InventoryHolder {
     // Move Barrel that was recently used more towards the front of the List
     // Optimizes retrieve by Block over time
     private static void moveMRU(UUID worldUuid, int index) {
-        if (index < 0) {
+        if (index <= 0) {
             return;
         }
         List<Barrel> worldBarrels = barrels.get(worldUuid);
