@@ -166,10 +166,10 @@ public final class BreweryPlugin extends JavaPlugin {
 
         // Load objects
         DataManager.loadMiscData(dataManager.getBreweryMiscData());
-        dataManager.getAllBarrels().thenApplyAsync(barrels -> Barrel.getBarrels().addAll(barrels.stream()
+        dataManager.getAllBarrels().thenAcceptAsync(barrels -> barrels.stream()
             .filter(Objects::nonNull)
-            .toList()
-        ));
+            .forEach(Barrel::registerBarrel)
+        );
         BCauldron.getBcauldrons().putAll(dataManager.getAllCauldrons().stream()
             .filter(Objects::nonNull)
             .collect(Collectors.toMap(

@@ -187,7 +187,7 @@ public class FlatFileStorage extends DataManager {
 
         Location spigotLoc = deserializeLocation(dataFile.getString(path + ".spigot"));
         if (spigotLoc == null) {
-            return null;
+            return CompletableFuture.completedFuture(null);
         }
 
         int[] bounds = Arrays.stream(

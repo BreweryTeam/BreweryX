@@ -39,7 +39,7 @@ public class MovecraftUtil {
     public static Set<Barrel> barrelsOnCraft(HitBox hitBox, World craftWorld) {
         Set<Barrel> output = new HashSet<>();
 
-        for (Barrel barrel : Barrel.barrels) {
+        for (Barrel barrel : Barrel.getBarrels(craftWorld.getUID())) {
             Location location = barrel.getSpigot().getLocation();
 
             if (!Objects.equals(location.getWorld(), craftWorld)) {

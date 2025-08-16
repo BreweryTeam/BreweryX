@@ -24,8 +24,9 @@ import org.bukkit.Material;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.EnumMap;
 import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -37,25 +38,17 @@ public enum BarrelAsset {
     FENCE; // Optional: Alt 3 Block
 
 
-    private static final Map<BarrelWoodType, Map<BarrelAsset, Set<Material>>> BARREL_ASSET_LIST_MAP = new EnumMap<>(BarrelWoodType.class);
-
-    static {
-        for (BarrelWoodType type : BarrelWoodType.values()) {
-            Map<BarrelAsset, Set<Material>> newMap = new EnumMap<>(BarrelAsset.class);
-            for (BarrelAsset asset : values()) {
-                newMap.put(asset, EnumSet.noneOf(Material.class));
-            }
-
-            BARREL_ASSET_LIST_MAP.put(type, newMap);
-        }
-    }
+    private static final Map<BarrelWoodType, Map<BarrelAsset, Set<Material>>> barrelAssetListMap = new HashMap<>();
 
     public static void addBarrelAsset(BarrelWoodType type, BarrelAsset asset, Material... materials) {
-        if (materials == null || materials.length == 0) {
+        if (materials == null) {
             return;
         }
-
-        Collections.addAll(BARREL_ASSET_LIST_MAP.get(type).get(asset), Arrays.stream(materials).filter(Objects::nonNull).toArray(Material[]::new));
+        Collections.addAll(barrelAssetListMap
+                .computeIfAbsent(type, ignored -> new HashMap<>())
+                .computeIfAbsent(asset, ignored -> new HashSet<>()),
+            Arrays.stream(materials).filter(Objects::nonNull).toArray(Material[]::new)
+        );
     }
 
     public static boolean isBarrelAsset(BarrelAsset assetType, Material material) {
@@ -63,14 +56,14 @@ public enum BarrelAsset {
             return false;
         }
 
-        return BARREL_ASSET_LIST_MAP.values().stream()
-            .map((b) -> b.get(assetType))
+        return barrelAssetListMap.values().stream()
+            .map((b) -> b.getOrDefault(assetType, Set.of()))
             .anyMatch((materialSet) -> materialSet.contains(material));
     }
 
     public static Set<Material> getMaterialsOf(BarrelWoodType type) {
         var output = EnumSet.noneOf(Material.class);
-        BARREL_ASSET_LIST_MAP.get(type).values().forEach(output::addAll);
+        barrelAssetListMap.get(type).values().forEach(output::addAll);
         return output;
     }
 }

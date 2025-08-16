@@ -35,7 +35,7 @@ public class SinkListener implements Listener {
     @EventHandler
     public void onSink(CraftSinkEvent event) {
         HitBox hitBox = event.getCraft().getHitBox();
-        ArrayList<Barrel> list = new ArrayList<>(Barrel.barrels);
+        ArrayList<Barrel> list = new ArrayList<>(Barrel.getBarrels(event.getCraft().getWorld().getUID()));
 
         for (Barrel barrel : list) {
             Location location = barrel.getSpigot().getLocation().clone();
