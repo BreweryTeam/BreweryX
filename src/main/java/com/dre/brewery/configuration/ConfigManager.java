@@ -27,6 +27,7 @@ import com.dre.brewery.configuration.files.CauldronFile;
 import com.dre.brewery.configuration.files.Config;
 import com.dre.brewery.configuration.files.RecipesFile;
 import com.dre.brewery.configuration.sector.capsule.ConfigDistortWord;
+import com.dre.brewery.integration.Hook;
 import com.dre.brewery.integration.item.BreweryPluginItem;
 import com.dre.brewery.integration.item.ItemsAdderPluginItem;
 import com.dre.brewery.integration.item.MMOItemsPluginItem;
@@ -197,11 +198,21 @@ public class ConfigManager {
 
     public static void registerDefaultPluginItems() {
         PluginItem.registerForConfig("brewery", BreweryPluginItem::new);
-        PluginItem.registerForConfig("mmoitems", MMOItemsPluginItem::new);
-        PluginItem.registerForConfig("slimefun", SlimefunPluginItem::new);
-        PluginItem.registerForConfig("exoticgarden", SlimefunPluginItem::new);
-        PluginItem.registerForConfig("oraxen", OraxenPluginItem::new);
-        PluginItem.registerForConfig("itemsadder", ItemsAdderPluginItem::new);
-        PluginItem.registerForConfig("nexo", NexoPluginItem::new);
+        if (Hook.MMOITEMS.isEnabled()) {
+            PluginItem.registerForConfig("mmoitems", MMOItemsPluginItem::new);
+        }
+        if (Hook.SLIMEFUN.isEnabled()) {
+            PluginItem.registerForConfig("slimefun", SlimefunPluginItem::new);
+            PluginItem.registerForConfig("exoticgarden", SlimefunPluginItem::new);
+        }
+        if (Hook.ORAXEN.isEnabled()) {
+            PluginItem.registerForConfig("oraxen", OraxenPluginItem::new);
+        }
+        if (Hook.ITEMSADDER.isEnabled()) {
+            PluginItem.registerForConfig("itemsadder", ItemsAdderPluginItem::new);
+        }
+        if (Hook.NEXO.isEnabled()) {
+            PluginItem.registerForConfig("nexo", NexoPluginItem::new);
+        }
     }
 }
