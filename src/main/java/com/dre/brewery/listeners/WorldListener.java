@@ -35,16 +35,12 @@ public record WorldListener(DataManager dataManager) implements Listener {
         dataManager.getAllBarrels()
             .thenAcceptAsync(barrels -> barrels.stream()
                 .filter(barrel -> barrel.getSpigot().getWorld().equals(event.getWorld()))
-                .forEach(Barrel.getBarrels()::add)
+                .forEach(Barrel::registerBarrel)
             );
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onWorldLoad(WorldUnloadEvent event) {
-        dataManager.getAllBarrels()
-            .thenAcceptAsync(barrels -> barrels.stream()
-                .filter(barrel -> barrel.getSpigot().getWorld().equals(event.getWorld()))
-                .forEach(Barrel.getBarrels()::remove)
-            );
+        Barrel.onUnload(event.getWorld());
     }
 }

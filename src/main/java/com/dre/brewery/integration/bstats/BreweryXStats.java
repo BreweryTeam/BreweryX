@@ -108,7 +108,7 @@ public class BreweryXStats {
             metrics.addCustomChart(new SimplePie("branch", this::getBranch));
 
             metrics.addCustomChart(new SingleLineChart("drunk_players", BPlayer::numDrunkPlayers));
-            metrics.addCustomChart(new SingleLineChart("barrels_built", Barrel.barrels::size));
+            metrics.addCustomChart(new SingleLineChart("barrels_built", Barrel.getAllBarrels()::size));
             metrics.addCustomChart(new SingleLineChart("cauldrons_boiling", BCauldron.bcauldrons::size));
 
         } catch (Exception | LinkageError e) {

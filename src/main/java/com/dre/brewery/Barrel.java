@@ -164,6 +164,11 @@ public class Barrel extends BarrelBody implements InventoryHolder {
         }
     }
 
+    public static @NotNull List<Barrel> getBarrels(UUID worldUuid) {
+        List<Barrel> worldBarrels = barrels.get(worldUuid);
+        return worldBarrels == null ? List.of() : worldBarrels;
+    }
+
     public boolean hasPermsOpen(Player player, PlayerInteractEvent event) {
         if (isLarge()) {
             if (!player.hasPermission("brewery.openbarrel.big")) {

@@ -477,7 +477,7 @@ public class BData {
         }
         if (!initBarrelFutures.isEmpty()) {
             FutureUtil.mergeFutures(initBarrelFutures)
-                .thenAcceptAsync(Barrel.barrels::addAll);
+                .thenAcceptAsync(barrels -> barrels.forEach(Barrel::registerBarrel));
         }
         if (!initWakeups.isEmpty()) {
             Wakeup.wakeups.addAll(initWakeups);
