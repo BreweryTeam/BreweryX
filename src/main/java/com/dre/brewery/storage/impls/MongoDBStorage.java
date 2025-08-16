@@ -163,7 +163,7 @@ public class MongoDBStorage extends DataManager {
         if (serializableBarrel != null) {
             return serializableBarrel.toBarrel();
         }
-        return null;
+        return CompletableFuture.completedFuture(null);
     }
 
     @Override

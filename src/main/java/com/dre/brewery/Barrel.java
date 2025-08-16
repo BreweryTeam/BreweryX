@@ -57,8 +57,10 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * A Multi Block Barrel with Inventory
@@ -67,11 +69,10 @@ import java.util.concurrent.CompletableFuture;
 @Setter
 public class Barrel extends BarrelBody implements InventoryHolder {
 
-    @Getter
-    public static final List<Barrel> barrels = new ArrayList<>();
+    private static final Map<UUID, List<Barrel>> barrels = new ConcurrentHashMap<>();
     private static final Config config = ConfigManager.getConfig(Config.class);
     private static final Lang lang = ConfigManager.getConfig(Lang.class);
-    private static int check = 0; // Which Barrel was last checked
+    private static Map<UUID, Integer> checkCounters = new ConcurrentHashMap<>(); // Which Barrel was last checked
     /**
      * -- GETTER --
      * Is this a small barrel?
@@ -136,28 +137,30 @@ public class Barrel extends BarrelBody implements InventoryHolder {
     }
 
     public static void onUpdate() {
-        for (Barrel barrel : barrels) {
-            // A Minecraft day is 20 min, so add 1/20 to the time every minute
-            if (barrel != null) {
-                barrel.time += (float) (1.0 / config.getAgingYearDuration());
-            }
-        }
-        int numBarrels = barrels.size();
-        if (check == 0 && numBarrels > 0) {
-            Barrel random = barrels.get((int) Math.floor(Math.random() * numBarrels));
-            if (random != null) {
-                // You have been selected for a random search
-                // We want to check at least one barrel every time
-                random.checked = false;
-            }
-            if (numBarrels > 50) {
-                Barrel randomInTheBack = barrels.get(numBarrels - 1 - (int) (Math.random() * (numBarrels >>> 2)));
-                if (randomInTheBack != null) {
-                    // Prioritize checking one of the less recently used barrels as well
-                    randomInTheBack.checked = false;
+        barrels.values()
+            .stream()
+            .flatMap(List::stream)
+            .filter(Objects::nonNull)
+            .forEach(barrel -> barrel.time += (float) (1.0 / config.getAgingYearDuration()));
+        for (UUID worldUuid : barrels.keySet()) {
+            List<Barrel> worldBarrels = barrels.get(worldUuid);
+            int numBarrels = worldBarrels.size();
+            if (checkCounters.getOrDefault(worldUuid, 0) == 0 && numBarrels > 0) {
+                Barrel random = worldBarrels.get((int) Math.floor(Math.random() * numBarrels));
+                if (random != null) {
+                    // You have been selected for a random search
+                    // We want to check at least one barrel every time
+                    random.checked = false;
                 }
+                if (numBarrels > 50) {
+                    Barrel randomInTheBack = worldBarrels.get(numBarrels - 1 - (int) (Math.random() * (numBarrels >>> 2)));
+                    if (randomInTheBack != null) {
+                        // Prioritize checking one of the less recently used barrels as well
+                        randomInTheBack.checked = false;
+                    }
+                }
+                new BarrelCheck().runTaskTimer(BreweryPlugin.getInstance(), 1, 1);
             }
-            new BarrelCheck().runTaskTimer(BreweryPlugin.getInstance(), 1, 1);
         }
     }
 
@@ -309,16 +312,19 @@ public class Barrel extends BarrelBody implements InventoryHolder {
         if (!spigot.equals(sign)) {
             signoffset = (byte) (sign.getY() - spigot.getY());
         }
-
+        List<Barrel> worldBarrels = barrels.get(sign.getWorld().getUID());
+        if (worldBarrels == null) {
+            return null;
+        }
         int i = 0;
-        for (Barrel barrel : barrels) {
+        for (Barrel barrel : worldBarrels) {
             if (barrel != null && barrel.isSignOfBarrel(signoffset)) {
                 if (barrel.spigot.equals(spigot)) {
                     if (barrel.getSignoffset() == 0 && signoffset != 0) {
                         // Barrel has no signOffset even though we clicked a sign, may be old
                         barrel.setSignoffset(signoffset);
                     }
-                    moveMRU(i);
+                    moveMRU(sign.getWorld().getUID(), i);
                     return barrel;
                 }
             }
@@ -332,14 +338,18 @@ public class Barrel extends BarrelBody implements InventoryHolder {
      */
     @Nullable
     public static Barrel getByWood(Block wood) {
-        if (BarrelAsset.isBarrelAsset(BarrelAsset.PLANKS, wood.getType()) || BarrelAsset.isBarrelAsset(BarrelAsset.STAIRS, wood.getType())) {
-            int i = 0;
-            for (Barrel barrel : barrels) {
-                if (barrel.getSpigot().getWorld().equals(wood.getWorld()) && barrel.getBounds().contains(wood)) {
-                    moveMRU(i);
-                    return barrel;
-                }
-                i++;
+        if (!BarrelAsset.isBarrelAsset(BarrelAsset.PLANKS, wood.getType()) && !BarrelAsset.isBarrelAsset(BarrelAsset.STAIRS, wood.getType())) {
+            return null;
+        }
+        List<Barrel> worldBarrels = barrels.get(wood.getWorld().getUID());
+        if (worldBarrels == null) {
+            return null;
+        }
+        for (int i = 0; i < worldBarrels.size(); i++) {
+            Barrel barrel = worldBarrels.get(i);
+            if (barrel.getSpigot().getWorld().equals(wood.getWorld()) && barrel.getBounds().contains(wood)) {
+                moveMRU(wood.getWorld().getUID(), i);
+                return barrel;
             }
         }
         return null;
@@ -347,11 +357,15 @@ public class Barrel extends BarrelBody implements InventoryHolder {
 
     // Move Barrel that was recently used more towards the front of the List
     // Optimizes retrieve by Block over time
-    private static void moveMRU(int index) {
-        if (index > 0) {
-            // Swap entry at the index with the one next to it
-            barrels.set(index - 1, barrels.set(index, barrels.get(index - 1)));
+    private static void moveMRU(UUID worldUuid, int index) {
+        if (index < 0) {
+            return;
         }
+        List<Barrel> worldBarrels = barrels.get(worldUuid);
+        if (index >= worldBarrels.size()) {
+            return;
+        }
+        worldBarrels.set(index - 1, worldBarrels.set(index, worldBarrels.get(index - 1)));
     }
 
     /**
@@ -386,7 +400,7 @@ public class Barrel extends BarrelBody implements InventoryHolder {
                 BarrelCreateEvent createEvent = new BarrelCreateEvent(barrel, player);
                 BreweryPlugin.getInstance().getServer().getPluginManager().callEvent(createEvent);
                 if (!createEvent.isCancelled()) {
-                    barrels.add(0, barrel);
+                    barrels.computeIfAbsent(sign.getWorld().getUID(), ignored -> new ArrayList<>()).addFirst(barrel);
                     return true;
                 }
             }
@@ -430,7 +444,7 @@ public class Barrel extends BarrelBody implements InventoryHolder {
             if (event.willDropItems()) {
                 if (getBounds() == null) {
                     Logging.debugLog("Barrel Body is null, can't drop items: " + this.id);
-                    barrels.remove(this);
+                    barrels.getOrDefault(spigot.getWorld().getUID(), new ArrayList<>()).remove(this);
                     return;
                 }
 
@@ -466,7 +480,7 @@ public class Barrel extends BarrelBody implements InventoryHolder {
             }
         }
 
-        barrels.remove(this);
+        barrels.getOrDefault(spigot.getWorld().getUID(), new ArrayList<>()).remove(this);
     }
 
     @Override
@@ -521,32 +535,41 @@ public class Barrel extends BarrelBody implements InventoryHolder {
      * Are any Barrels in that World
      */
     public static boolean hasDataInWorld(World world) {
-        return barrels.stream().anyMatch(barrel -> barrel.spigot.getWorld().equals(world));
+        return barrels.containsKey(world.getUID()) && !barrels.get(world.getUID()).isEmpty();
     }
 
     /**
      * unloads barrels that are in a unloading world
      */
     public static void onUnload(World world) {
-        barrels.removeIf(barrel -> barrel.spigot.getWorld().equals(world));
+        barrels.remove(world.getUID());
     }
 
-    /**
-     * Unload all Barrels that have a Block in a unloaded World
-     */
-    public static void unloadWorlds() {
-        List<World> worlds = BreweryPlugin.getInstance().getServer().getWorlds();
-        barrels.removeIf(barrel -> !worlds.contains(barrel.spigot.getWorld()));
+    public static void registerBarrel(Barrel barrel) {
+        barrels.computeIfAbsent(barrel.spigot.getWorld().getUID(), ignored -> new ArrayList<>())
+            .add(barrel);
+    }
+
+    public static List<Barrel> getAllBarrels() {
+        return barrels.values().stream()
+            .flatMap(List::stream)
+            .filter(Objects::nonNull)
+            .toList();
     }
 
     public static class BarrelCheck extends UniversalRunnable {
         @Override
         public void run() {
-            boolean repeat = true;
-            while (repeat) {
-                if (check < barrels.size()) {
-                    Barrel barrel = barrels.get(check);
-                    if (!barrel.checked) {
+            barrels.keySet()
+                .forEach(worldUuid -> {
+                    int counter = checkCounters.computeIfAbsent(worldUuid, ignored -> -1);
+                    List<Barrel> worldBarrels = barrels.get(worldUuid);
+                    counter = counter + 1 % worldBarrels.size();
+                    while (counter < worldBarrels.size()) {
+                        Barrel barrel = worldBarrels.get(counter++);
+                        if (barrel.checked) {
+                            continue;
+                        }
                         BreweryPlugin.getScheduler().runTask(barrel.getSpigot().getLocation(), () -> {
                             Block broken = barrel.getBrokenBlock(false);
                             if (broken != null) {
@@ -562,15 +585,10 @@ public class Barrel extends BarrelBody implements InventoryHolder {
                                 barrel.checked = true;
                             }
                         });
-                        repeat = false;
+                        return;
                     }
-                    check++;
-                } else {
-                    check = 0;
-                    repeat = false;
                     cancel();
-                }
-            }
+                });
         }
 
     }

@@ -172,7 +172,7 @@ public abstract class DataManager {
     }
 
     public void saveAll(boolean async, Runnable callback) {
-        Collection<Barrel> barrels = Barrel.getBarrels();
+        Collection<Barrel> barrels = Barrel.getAllBarrels();
         Collection<BCauldron> cauldrons = BCauldron.getBcauldrons().values();
         Collection<BPlayer> bPlayers = BPlayer.getPlayers().values();
         Collection<Wakeup> wakeups = Wakeup.getWakeups();
