@@ -568,8 +568,14 @@ public class Barrel extends BarrelBody implements InventoryHolder {
             barrels.keySet()
                 .forEach(worldUuid -> {
                     int counter = checkCounters.computeIfAbsent(worldUuid, ignored -> -1);
+
                     List<Barrel> worldBarrels = barrels.get(worldUuid);
-                    counter = counter + 1 % worldBarrels.size();
+                    if (worldBarrels == null || worldBarrels.isEmpty()) {
+                        cancel();
+                        return;
+                    }
+
+                    counter = (counter + 1) % worldBarrels.size();
                     while (counter < worldBarrels.size()) {
                         Barrel barrel = worldBarrels.get(counter++);
                         if (barrel.checked) {
