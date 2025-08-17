@@ -122,6 +122,8 @@ Etc_Page: Page
 Etc_Usage: 'Usage:'
 Etc_SealingTable: Brew Sealing Table
 Etc_NewRelease: '&rA new release of BreweryX is available! &2&v1 &r-> &2&v2&r Download&7: &2&v3'
+Etc_LandsFlag_Title: 'Barrel Access'
+Etc_LandsFlag_Description: '&r&7Allows opening\n&r&7BreweryX barrels.'
 
 # Help
 Help_Copy: '&6/brew copy [Quantity]&9 Copies the potion in your hand'

@@ -372,6 +372,10 @@ public class Lang extends AbstractOkaeriConfigFile {
     private String etcSealingTable;
     @CustomKey("Etc_NewRelease")
     private String etcNewRelease;
+    @CustomKey("Etc_LandsFlag_Title")
+    private String etcLandsFlagTitle;
+    @CustomKey("Etc_LandsFlag_Description")
+    private String etcLandsFlagDescription;
 
 
     @Comment("Help")

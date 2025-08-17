@@ -60,6 +60,8 @@ Etc_Page: 'Страница'
 Etc_Usage: 'Использование:'
 Etc_SealingTable: 'Стол закупорки напитков.'
 Etc_NewRelease: '&rДоступно новое обновление BreweryX! &2&v1 &r-> &2&v2&r Ссылка&7: &2&v3'
+Etc_LandsFlag_Title: 'Доступ к бочкам'
+Etc_LandsFlag_Description: '&r&7Позволяет открывать\n&r&7бочки BreweryX.'
 
 # Help
 Help_Copy: '&6/brew copy [Quantity]&9 Копирует зелье в твоей руке'

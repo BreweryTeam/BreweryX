@@ -62,6 +62,8 @@ Etc_Usage: 'Використання:'
 Etc_SealingTable: Стол закупорки напитков.
 Etc_NewRelease: '&rДоступне нове оновлення BreweryX! &2&v1 &r-> &2&v2&r Посилання&7:
   &2&v3'
+Etc_LandsFlag_Title: 'Доступ до бочок'
+Etc_LandsFlag_Description: '&r&7Дозволяє відкривати\n&r&7бочки BreweryX.'
 
 # Help
 Help_Copy: '&6/brew copy [Quantity]&9 Копіює зілля у твоїй руці'

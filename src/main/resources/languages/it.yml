@@ -59,6 +59,8 @@ Etc_Page: Pagina
 Etc_Usage: 'Utilizzo:'
 Etc_SealingTable: Brew Sealing Table
 Etc_NewRelease: '&rA new release of BreweryX is available! &2&v1 &r-> &2&v2&r Download&7: &2&v3'
+Etc_LandsFlag_Title: 'Accesso alle botti'
+Etc_LandsFlag_Description: '&r&7Consente di aprire\n&r&7le botti di BreweryX.'
 
 # Aiuto
 Help_Copy: '&6/brew copy [Quantità]&9 Copia la pozione che tieni in mano'

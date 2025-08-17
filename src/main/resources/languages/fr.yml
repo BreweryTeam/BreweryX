@@ -64,6 +64,8 @@ Etc_Page: 'Page'
 Etc_Usage: 'Utilise :'
 Etc_SealingTable: 'Table de scellage des boissons'
 Etc_NewRelease: '&rMise à jour disponible ! &2&v1 &r-> &2&v2&r Téléchargez&7 : &2&v3'
+Etc_LandsFlag_Title: 'Accès aux tonneaux'
+Etc_LandsFlag_Description: '&r&7Permet d’ouvrir\n&r&7les tonneaux de BreweryX.'
 
 # Aide
 Help_Copy: '&6/brew copy [Quantity]&9 Copie la potion qui est dans votre main'

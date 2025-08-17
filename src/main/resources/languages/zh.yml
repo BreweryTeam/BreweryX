@@ -57,6 +57,8 @@ Etc_Page: 页
 Etc_Usage: '用途:'
 Etc_SealingTable: 沖泡密封台
 Etc_NewRelease: '&rA new release of BreweryX is available! &2&v1 &r-> &2&v2&r Download&7: &2&v3'
+Etc_LandsFlag_Title: '桶访问'
+Etc_LandsFlag_Description: '&r&7允许打开\n&r&7BreweryX 的木桶。'
 
 # Help
 Help_Copy: '&6/brew copy [数量] &9复制当前手中的饮品.'

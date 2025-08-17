@@ -28,6 +28,7 @@ import com.dre.brewery.configuration.files.Config;
 import com.dre.brewery.configuration.files.Lang;
 import com.dre.brewery.integration.BlockLockerHook;
 import com.dre.brewery.integration.Hook;
+import com.dre.brewery.integration.LandsHook;
 import com.dre.brewery.integration.PlaceholderAPIHook;
 import com.dre.brewery.integration.barrel.BlockLockerBarrel;
 import com.dre.brewery.integration.bstats.BreweryStats;
@@ -105,12 +106,16 @@ public final class BreweryPlugin extends JavaPlugin {
 
     @Override
     public void onLoad() {
+
         // movecraft properties must be registered in the onLoad
         try {
             Class.forName("net.countercraft.movecraft.craft.type.property.Property");
             BreweryProperties.register();
         } catch (Exception ignored) {
         }
+
+        // Lands flags must be registered onLoad
+        if (getServer().getPluginManager().getPlugin("Lands") != null) LandsHook.load();
 
         if (getMCVersion().isOrLater(MinecraftVersion.V1_14)) {
             // Campfires are weird. Initialize once now, so it doesn't lag later when we check for campfires under Cauldrons
@@ -120,6 +125,7 @@ public final class BreweryPlugin extends JavaPlugin {
 
     @Override
     public void onEnable() {
+
         // Register Item Loaders
         CustomItem.registerItemLoader(this);
         SimpleItem.registerItemLoader(this);

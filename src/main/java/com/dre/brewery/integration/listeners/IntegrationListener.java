@@ -31,7 +31,6 @@ import com.dre.brewery.configuration.files.Config;
 import com.dre.brewery.configuration.files.Lang;
 import com.dre.brewery.integration.BlockLockerHook;
 import com.dre.brewery.integration.Hook;
-import com.dre.brewery.integration.LandsHook;
 import com.dre.brewery.integration.WorldGuarkHook;
 import com.dre.brewery.integration.barrel.BlockLockerBarrel;
 import com.dre.brewery.integration.barrel.GriefPreventionBarrel;
