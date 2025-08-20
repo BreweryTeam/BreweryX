@@ -171,7 +171,7 @@ public class BrewLore {
         }
         if (!brew.isUnlabeled()) {
             if (distillRuns > 1) {
-                prefix = prefix + distillRuns + lang.getEntry("Brew_-times") + " ";
+                prefix = prefix + distillRuns + " " + lang.getEntry("Brew_times") + " ";
             }
         }
         if (brew.isUnlabeled() && brew.hasRecipe() && distillRuns < brew.getCurrentRecipe().getDistillruns()) {

@@ -283,7 +283,7 @@ public class BPlayer {
         b.append(lang.getEntry(hangover ? "Player_Hangover" : "Player_Drunkeness"));
 
         // Drunkenness or Hangover Strength Bars
-        b.append(": §7[");
+        b.append("§7[");
         b.append(generateBars(strength, hangover));
         b.append("§7] ");
 

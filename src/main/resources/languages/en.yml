@@ -1,7 +1,7 @@
 # English lang translation for BreweryX
 # Author: DieReicheEtherons
 # Brew
-Brew_-times: -times
+Brew_times: -times
 Brew_BadPotion: Ruined Brew
 Brew_BarrelRiped: Barrel aged
 Brew_DistillUndefined: Murky Distillate
@@ -115,6 +115,7 @@ Error_NoPlayer: '&cPlayer not found: &v1'
 Error_InvalidAmount: '&cInvalid amount: &v1'
 Error_InvalidPluginItem: '&cCould not find plugin item: &v1'
 Error_InvalidMaterial: '&cCould not find material: &v1'
+Error_MissingBarrelType: '&cInvalid BarrelType'
 
 # Etc
 Etc_Barrel: Barrel
@@ -189,5 +190,5 @@ Player_WakeNoPoints: '&cThere are no Wakeup Points!'
 Player_WakeNotExist: '&cThe Wakeup Point with the id: &6&v1 &cdoesn''t exist!'
 Player_WakeTeleport: 'Teleport to Wakeup Point with the id: &6&v1&f At position: &6&v2 &v3, &v4, &v5'
 Player_ShopSealBrew: '&eIt''s recommended to trade/sell &6sealed &eBrews'
-Player_Drunkeness: 'Drunkenness'
+Player_Drunkeness: 'Drunkenness: '
 Player_Hangover: 'Your Hangover'

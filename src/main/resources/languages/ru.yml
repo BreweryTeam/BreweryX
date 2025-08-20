@@ -1,7 +1,7 @@
 # Russian translation for BreweryX
 # Author: Szarkan
 # Brew
-Brew_-times: "-раз"
+Brew_times: "-раз"
 Brew_BadPotion: "Испорченное зелье"
 Brew_BarrelRiped: "Настоявшееся в бочке"
 Brew_DistillUndefined: "Мутнодистиллированный"
@@ -115,6 +115,7 @@ Error_NoPlayer: '&cИгрок не найден: &v1'
 Error_InvalidAmount: '&cНеверное количество: &v1'
 Error_InvalidPluginItem: '&cНе удалось найти предмет из плагина: &v1'
 Error_InvalidMaterial: '&cНе удалось найти материал: &v1'
+Error_MissingBarrelType: '&cInvalid BarrelType'
 
 # Etc
 Etc_Barrel: 'Бочка'
@@ -189,5 +190,5 @@ Player_WakeNoPoints: '&cТочки Пробуждения отсутствуют
 Player_WakeNotExist: '&cТочка Пробуждения под номером: &6&v1 &cне существует!'
 Player_WakeTeleport: 'Телепорт на Точку Пробуждения под номером: &6&v1&f по координатам: &6&v2 &v3, &v4, &v5'
 Player_ShopSealBrew: '&eНапиток должен быть запечатан перед продажей'
-Player_Drunkeness: 'Опьянение'
+Player_Drunkeness: 'Опьянение: '
 Player_Hangover: 'Твое похмелье'

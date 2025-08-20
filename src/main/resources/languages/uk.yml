@@ -2,7 +2,7 @@
 # Translations for BreweryX
 
 # Brew
-Brew_-times: -раз
+Brew_times: -раз
 Brew_BadPotion: Зіпсоване зілля
 Brew_BarrelRiped: Витримане в бочці
 Brew_DistillUndefined: Каламутнодистильований
@@ -54,6 +54,7 @@ Error_ShowHelp: Використовуйте &6/brew help &fдля відобр�
 Error_UnknownCommand: Невідома команда
 Error_YmlRead: Не можу прочитати config.yml, будь ласка, перевір, що там усе правильно
 Error_NoPlayer: '&cГравець не знайдений: &v1'
+Error_MissingBarrelType: '&cInvalid BarrelType'
 
 # Etc
 Etc_Barrel: Бочка
@@ -128,5 +129,5 @@ Player_WakeNotExist: '&cТочка Пробудження під номером:
 Player_WakeTeleport: 'Телепорт на точку пробудження під номером: &6&v1&f за координатами:
   &6&v2 &v3, &v4, &v5'
 Player_ShopSealBrew: '&eНапій має бути запечатаний перед продажем'
-Player_Drunkeness: П’янство
+Player_Drunkeness: 'П’янство: '
 Player_Hangover: Твоє похмілля

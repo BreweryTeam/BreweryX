@@ -1,7 +1,7 @@
 # Traducción al español for BreweryX
 # Author: KoCitrusMaker
 # Brew
-Brew_-times: -veces
+Brew_times: -veces
 Brew_BadPotion: Bebida arruinada
 Brew_BarrelRiped: Añejado en tonel
 Brew_DistillUndefined: Destilado turbio
@@ -52,6 +52,7 @@ Error_ShowHelp: Usa &6/brew help &fpara mostrar la ayuda
 Error_UnknownCommand: Comando desconocido
 Error_YmlRead: 'No se pudo leer el archivo config.yml, por favor asegurate de que el archivo esta en un formato yml válido (espacios correctos, usando '' '' etc.)'
 Error_NoPlayer: '&cJugador no encontrado(a): &v1'
+Error_MissingBarrelType: '&cInvalid BarrelType'
 
 # Etc
 Etc_Barrel: Tonel
@@ -116,5 +117,5 @@ Player_WakeNoPoints: '&c¡No hay puntos de despertar!'
 Player_WakeNotExist: '&c¡El punto de despertar con id: &6&v1 &cno existe!'
 Player_WakeTeleport: 'Teleportación hacia el punto de despertar con id: &6&v1&f en las coordenadas: &6&v2 &v3, &v4, &v5'
 Player_ShopSealBrew: '&eSe recomienda intercambiar/vender &ebebidas &6selladas'
-Player_Drunkeness: 'Borrachera'
+Player_Drunkeness: 'Borrachera: '
 Player_Hangover: 'Resaca'

@@ -3,102 +3,102 @@
 
 config:
   language: |
-    语言文件 [en]
-    Available types: en (English), de (German), es (Spanish), fr (French), it (Italian), ru (Russian), zh (Chinese), uk (Ukrainian)
+    语言文件 [默认配置: en]
+    可用选项: en (English), de (German), es (Spanish), fr (French), it (Italian), ru (Russian), zh (Chinese), uk (Ukrainian)
   updateCheck: |
-    Should BreweryX check for updates? Specify which service you'd like to use for update checking or disable it.
-    Options available: GitHub, Snapshots, Spigot, None [GitHub]
+    BreweryX应该检查更新吗? 指定要用于更新检查的服务或将其禁用.
+    可用选项: GitHub, Snapshots, Spigot, None [默认配置: GitHub]
   autosave: "自动保存时间间隔, 单位:分钟 [10]"
   pluginPrefix: "用于此插件的消息前缀[Brewery]"
   debug: "是否在日志中显示调试信息 [false]"
   storage:
-    header: "-- Storage Settings --"
+    header: "-- 存储设置 --"
     type: |
-      What type of storage to use [FLATFILE]
-      Available types: FlatFile, MySQL, SQLite, MongoDB
-    database: "The name of the database. When the database is a file, this will be the name of the file. [brewery-data]"
-  enableHome: "喝高了的下线玩家会在家里醒来(需要/home等功能支持)[true]"
+      使用哪种类型的存储方式 [默认配置: SQLite]
+      可用选项: FlatFile, MySQL, SQLite, MongoDB
+    database: "数据库的名称. 当存储方式是FlatFile时, 这将是文件的名称 [默认配置: brewery-data]"
+  enableHome: "喝高了的下线玩家会在家里醒来(需要/home等功能支持) [默认配置: true]"
   homeType: |
-    上述功能的回家方式: ['cmd: home']
+    上述功能的回家方式: [默认配置: cmd: home]
     bed = 会在床边醒来
     'cmd: home' = 强制让玩家执行/home. 需要设置好玩家权限, 以避免传送出现延迟.
     'cmd: spawn' = 强制让玩家执行/spawn.
     'cmd: 指定命令' = 强制让玩家执行该命令, 例如'cmd: warp xxx'等.
   enableWake: |
     玩家醉酒以后下线一段时间醒来是否会在某些苏醒处醒来(苏醒处需要管理员通过'/brew Wakeup add'进行设定).
-    玩家将会在最近的两个苏醒处之一醒来.[true]
-  enableLoginDisallow: "醉酒的玩家是否需要反复尝试登录才能进入服务器.[true]"
-  enableKickOnOverdrink: "饮酒过量的玩家是否会晕倒一小段时间(即被暂时踢出服务器).[false]"
+    玩家将会在最近的两个苏醒处之一醒来.[默认配置: true]
+  enableLoginDisallow: "醉酒的玩家是否需要反复尝试登录才能进入服务器.[默认配置: true]"
+  enableKickOnOverdrink: "饮酒过量的玩家是否会晕倒一小段时间(即被暂时踢出服务器).[默认配置: false]"
   enablePuke: |
-    醉酒程度过高的玩家是否会呕吐(呕吐物在下面定义).[true]
+    醉酒程度过高的玩家是否会呕吐(呕吐物在下面定义).[默认配置: true]
     物品无法被捡起, 直至消失.
   pukeItem: |
-    呕吐物[Soul_Sand]
-    Can be list of items such as [Soul_sand, Slime_block, Dirt]
+    呕吐物 [默认配置: Soul_Sand]
+    可以是 [Soul_sand, Slime_block, Dirt] 之类的物品
   pukeDespawntime: |
-    呕吐物消失的时间, 单位为秒(MC默认为300 = 5分钟) [60]
+    呕吐物消失的时间, 单位为秒(MC默认为300 = 5分钟) [默认配置: 60]
     如果spigot.yml中的物品消失时间被变更, 此处也会变更
-  stumblePercent: "玩家跌倒程度取决于饮酒量，设置范围可以是0或超过100 [100]"
-  showStatusOnDrink: "玩家饮用饮品或吃掉解酒物时，显示其醉酒程度 [true]"
+  stumblePercent: "玩家跌倒程度取决于饮酒量，设置范围可以是0或超过100 [默认配置: 100]"
+  showStatusOnDrink: "玩家饮用饮品或吃掉解酒物时，显示其醉酒程度 [默认配置: true]"
   drainItems: |
     解酒物/解酒强度
     降低玩家一定程度的醉酒程度, 解酒强度为百分数
   enableCauldronParticles: |
-    当炼药锅中有配料和热源时，显示炼药埚上方的颗粒效果[true]
+    当炼药锅中有配料和热源时，显示炼药埚上方的颗粒效果[默认配置: true]
     颗粒颜色的变化有助于掌握某些配方的时机
-  minimalParticles: "是否将炼药埚颗粒效果减少到最低挡位 [false]"
+  minimalParticles: "是否将炼药埚颗粒效果减少到最低挡位 [默认配置: false]"
   craft-enableSealingTable: |
     是否允许制造密封台         ------>  玻璃瓶 玻璃瓶
     (2个玻璃瓶在4块木板上方)   ------>   木板   木板
-    [true, true]             ------>   木板   木板
+    [默认配置: true, true]             ------>   木板   木板
   sealingTableBlock: |
-    By default, Brewery uses Smoker as a Sealing Table, this option allows you to change it
-    IMPORTANT: It needs to be a container - meaning a block that can store items (e.g., SMOKER, CHEST, BLAST_FURNACE).
-  alwaysShowQuality: "是否始终根据物品质量显示1-5颗星，如果设置为否，则仅在酿造过程中显示星星 [true]"
-  alwaysShowAlc: "是否始终在物品上显示酒精含量，如果设置为否，则只在酿造台上显示 [false]"
-  showBrewer: "如果我们应该显示谁制作了这杯饮料 [false]"
-  requireKeywordOnSigns: "只有在放置的标志包含“酒桶”一词（或其它语言的翻译）时才创建酒桶 [true]"
-  ageInMCBarrels: "MC自带的桶内可以存放多少饮品 [6]"
-  agingYearDuration: "陈酿饮品时“年份”的持续时间（分钟）[20]"
+    默认情况下, Brewery 使用 Smoker 作为密封台, 此选项允许您更改它
+    重要提示: 它需要是一个容器, 即一个可以存储物品的方块 (例如: SMOKER、CHEST、BLAST_FURNACE).
+  alwaysShowQuality: "是否始终根据物品质量显示1-5颗星，如果设置为否，则仅在酿造过程中显示星星 [默认配置: true]"
+  alwaysShowAlc: "是否始终在物品上显示酒精含量，如果设置为否，则只在酿造台上显示 [默认配置: false]"
+  showBrewer: "如果我们应该显示谁制作了这杯饮料 [默认配置: false]"
+  requireKeywordOnSigns: "只有在放置的标志包含“酒桶”一词（或其它语言的翻译）时才创建酒桶 [默认配置: true]"
+  ageInMCBarrels: "MC自带的桶内可以存放多少饮品 [默认配置: 6]"
+  agingYearDuration: "陈酿饮品时“年份”的持续时间（分钟）[默认配置: 20]"
   commandAliases: |
-    Aliases for the '/breweryx' command. Requires a server restart to take effect. (list) [brewery, brew]
+    默认使用 '/breweryx' 别名. 如需更改需重启服务器生效. 其他别名 [brewery, brew]
   enableEncode: |
     使用的原料和其他酿造数据会被保存在所有酿酒物品中
     为了防止被修改后的客户端读取饮品的确切原料，数据可以被编码/搅乱
     这是一个快速过程，可以阻止玩家在获得酿造品后破解配方
     唯一的缺点是：饮品只能在具有相同encodeKey的另一服务器上使用
     当在多个（BungeeCord）服务器上使用酿造品时，请在’storage’下方定义一个共享数据库
-    如果你想要让配方作弊更困难，但不想通过世界下载、蓝图或其他方式共享任何酿造品，请启用此选项 [false]
+    如果你想要让配方作弊更困难，但不想通过世界下载、蓝图或其他方式共享任何酿造品，请启用此选项 [默认配置: false]
   useOtherPlugins: |
     -- 插件兼容性 --
 
-    启用检查其他插件（如果已安装）的木桶权限 [true]
+    启用检查其他插件（如果已安装）的木桶权限 [默认配置: true]
     插件 'Landlord' 和 'Protection Stones' 使用 WorldGuard 标志
     'ClaimChunk' 是原生支持的
   useVirtualChestPerms: |
     在打开木桶时，使用虚拟箱子来与所有其他保护插件进行交互检查
     这可能会使反作弊插件产生混淆，但在其他方面是一个很好的使用方法
     请将此方法用于 'Residence' 插件，以及任何其他未在 PlayerInteractEvent 中涵盖所有情况的插件
-  useLogBlock: "启用将木桶库存信息记录到 LogBlock [true]"
-  useOffhandForCauldron: "是否也应该将副手中的物品添加到炼药锅中 [false]"
+  useLogBlock: "启用将木桶库存信息记录到 LogBlock [默认配置: true]"
+  useOffhandForCauldron: "是否也应该将副手中的物品添加到炼药锅中 [默认配置: false]"
   loadDataAsync: |
-    This option no longer does anything anymore, and will be removed in future releases of BreweryX.
-    BreweryX will load data asynchronously always, with the exception of server startup and shutdown.
-  hangoverDays: "玩家下线后，醉酒数据在内存中保留的天数，以施加宿醉等后续效果 [7]"
-  onlyAllowBrewsInBarrels: "If only Brewery drinks can be put into barrels [false]"
+    此选项不再执行任何操作, 并将在 BreweryX 的未来版本中删除
+    BreweryX 将始终异步加载数据, 服务器启动和关闭除外
+  hangoverDays: "玩家下线后，醉酒数据在内存中保留的天数，以施加宿醉等后续效果 [默认配置: 7]"
+  onlyAllowBrewsInBarrels: "只有 Brewery 的饮料可以装进桶里 [默认配置: false]"
   colorInBarrels-Brewer: |
     饮品上是否显示带颜色的提示, 颜色由执行步骤的正误决定
-    是否在陈酿酒桶内显示颜色 [true]
+    是否在陈酿酒桶内显示颜色 [默认配置: true]
 
-    是否在酿造台内显示颜色 [true]
+    是否在酿造台内显示颜色 [默认配置: true]
   openLargeBarrelEverywhere: |
     大型木桶是否可通过点击其任一方块来开启，不仅仅限于龙头或标志
-    对于小型木桶，这一功能始终有效 [true]
+    对于小型木桶，这一功能始终有效 [默认配置: true]
   barrelInvSizes: |
-    每种类型的桶的库存应有多少行 [3,1]
+    每种类型的桶的库存应有多少行 [默认配置: 3,1]
     必须是 1 到 6 之间的整数（Minecraft / GUI 限制）
     (需要重启服务器才能使更改生效)
-  brewHopperDump: "允许通过将饮品倒入漏斗来丢弃，同时保留玻璃瓶 [true]"
+  brewHopperDump: "允许通过将饮品倒入漏斗来丢弃，同时保留玻璃瓶 [默认配置: true]"
   enableChatDistortion: |
     -- 聊天口胡设置 --
 
@@ -106,12 +106,12 @@ config:
     聊天内容的口胡程度与玩家的醉酒程度成正比
     以下是关于聊天内容变化的具体设置
 
-    打开聊天口胡功能[true]
-  logRealChat: "在聊天内容被口胡前，记录玩家实际输入的聊天内容到服务器日志 [false]"
-  distortCommands: "醉酒时，特定命令后的文本将出现口胡（命令列表） [- /gl]"
-  distortSignText: "醉酒时，是否扭曲告示牌上的文本 [false]"
+    打开聊天口胡功能[默认配置: true]
+  logRealChat: "在聊天内容被口胡前，记录玩家实际输入的聊天内容到服务器日志 [默认配置: false]"
+  distortCommands: "醉酒时，特定命令后的文本将出现口胡（命令列表）"
+  distortSignText: "醉酒时，是否扭曲告示牌上的文本 [默认配置: false]"
   distortBypass: |
-    使用特定字母包围聊天内容，以避免聊天口胡效果（以逗号作为分隔符）（字母列表） [- '[,]']
+    使用特定字母包围聊天内容，以避免聊天口胡效果（以逗号作为分隔符）（字母列表）
     聊天示例：我~喝~醉了 *但是这里面的话不会变哦!*
   words: |
     words[单词]: 当玩家醉酒时聊天中将被改变的单词和字母
@@ -147,9 +147,9 @@ recipesFile:
   header: |
     -- 饮品配方列表 --
 
-    Proper guide for this section can be found in our wiki here - https://brewery.lumamc.net/guide/recipies/
+    本节的指南可以在我们的Wiki中找到 - https://brewery.lumamc.net/guide/recipies/
 
-    enabled: true if the recipe should be enabled, false if it should be disabled
+    enabled: 如果应该启用配方, 则为true. 如果应该禁用配方, 则设置为false
 
     name[名称]：
     可以为 劣质/普通/优质 这三种质量的饮品命名

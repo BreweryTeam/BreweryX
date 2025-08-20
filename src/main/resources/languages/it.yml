@@ -1,7 +1,7 @@
 # Italian translation for BreweryX
 # Author:
 # Miscele
-Brew_-times: -times
+Brew_times: -times
 Brew_BadPotion: Pozione rovinata
 Brew_BarrelRiped: Invecchiata in barile
 Brew_DistillUndefined: Distillato indefinito
@@ -52,6 +52,7 @@ Error_ShowHelp: Usa &6/brew help &fper visualizzare l''aiuto
 Error_UnknownCommand: Comando sconosciuto
 Error_YmlRead: 'Could not read file config.yml, please make sure the file is in valid yml format (correct spaces, using '' '' etc.)'
 Error_NoPlayer: '&cPlayer not found: &v1'
+Error_MissingBarrelType: '&cInvalid BarrelType'
 
 # Varie
 Etc_Barrel: Barile
@@ -116,5 +117,5 @@ Player_WakeNoPoints: '&cNon ci sono punti di risveglio!'
 Player_WakeNotExist: '&cIl punto di risveglio con id &6&v1 &cnon esiste!'
 Player_WakeTeleport: 'Teletrasportato al punto di risveglio di id &6&v1&f alla posizione &6&v2 &v3, &v4, &v5'
 Player_ShopSealBrew: '&eIt''s recommended to trade/sell &6sealed &eBrews'
-Player_Drunkeness: 'Ubriacatura'
+Player_Drunkeness: 'Ubriacatura: '
 Player_Hangover: 'Hangover'

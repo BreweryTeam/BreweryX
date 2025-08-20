@@ -6,7 +6,7 @@
 # J'essayerai d'ajouter ou d'améliorer des traductions à chaque mis-à-jour du plug-in.
 
 # Fermentation
-Brew_-times: -fois
+Brew_times: -fois
 Brew_BadPotion: Potion ruinée
 Brew_BarrelRiped: Vieilli en baril
 Brew_DistillUndefined: Distillation indéfinie
@@ -57,6 +57,7 @@ Error_ShowHelp: 'Utilisez &6/brew help &fpour trouver de l’aide'
 Error_UnknownCommand: 'Commande inconnue'
 Error_YmlRead: 'Ne peux pas lire le fichier config.yml, assurez-vous que le fichier est à la bonne format (bonnes espaces, utilisant '' '' etc.)'
 Error_NoPlayer: '&cLe joueur n’a pas été trouvé : &v1'
+Error_MissingBarrelType: '&cInvalid BarrelType'
 
 # Etc.
 Etc_Barrel: 'Baril'
@@ -121,5 +122,5 @@ Player_WakeNoPoints: '&cIl n’y a pas de point de réveil !'
 Player_WakeNotExist: '&cLe point de réveil avec l’ID: &6&v1 &cdn’existe pas !'
 Player_WakeTeleport: 'Téléportation vers le point de réveil avec l’ID : &6&v1&f A la position: &6&v2 &v3, &v4, &v5'
 Player_ShopSealBrew: '&eLes boissons doivent être scellées avant d´être vendues'
-Player_Drunkeness: 'Ivresse'
+Player_Drunkeness: 'Ivresse: '
 Player_Hangover: 'Gueule de bois'

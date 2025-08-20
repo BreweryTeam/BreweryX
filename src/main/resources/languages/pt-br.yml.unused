@@ -1,5 +1,5 @@
 # Brew
-Brew_-times: -vezes
+Brew_times: -vezes
 Brew_BadPotion: Poção Arruinada
 Brew_BarrelRiped: Envelhecida em Barril
 Brew_DistillUndefined: Destilado Turvo
@@ -111,5 +111,5 @@ Player_WakeNoPoints: '&cNão há Pontos de Despertar!'
 Player_WakeNotExist: '&cO Ponto de Despertar com o id: &6&v1 &cnão existe!'
 Player_WakeTeleport: 'Teleporte para o Ponto de Despertar com o id: &6&v1&f na posição: &6&v2 &v3, &v4, &v5'
 Player_ShopSealBrew: '&eÉ recomendado trocar/vender &6poções seladas'
-Player_Drunkeness: 'Embriaguez'
+Player_Drunkeness: 'Embriaguez: '
 Player_Hangover: 'Sua Ressaca'

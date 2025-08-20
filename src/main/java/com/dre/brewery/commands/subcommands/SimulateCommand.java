@@ -129,6 +129,11 @@ public class SimulateCommand implements SubCommand {
 
         Age age = simulation.age();
         if (age != null) {
+            BarrelWoodType barrelType = age.barrelType();
+            if (barrelType == null) {
+                lang.sendEntry(sender, "Error_MissingBarrelType");
+                return;
+            }
             brew.age(item, age.ageTime(), age.barrelType());
             Logging.debugLog(String.format("simulate: aged for %.3f years in %s barrel: %s",
                 age.ageTime(), age.barrelType().getFormattedName(), ChatColor.stripColor(brew.toString())));

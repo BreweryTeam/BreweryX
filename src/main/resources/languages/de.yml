@@ -1,7 +1,7 @@
 # German translation for BreweryX
 # Author: DieReicheEtherons
 # Brew
-Brew_-times: -fach
+Brew_times: -fach
 Brew_BadPotion: Verdorbenes Gebräu
 Brew_BarrelRiped: Fassgereift
 Brew_DistillUndefined: Graues Destillat
@@ -52,6 +52,7 @@ Error_ShowHelp: 'Benutze &6/brew help &fum die Hilfe anzuzeigen'
 Error_UnknownCommand: Unbekannter Befehl
 Error_YmlRead: 'config.yml konnte nicht gelesen werden, ist die Datei im korrekten yml-Format (korrekte Leerzeichen, Strings mit '' '' usw.)?'
 Error_NoPlayer: '&cSpieler &v1 nicht gefunden'
+Error_MissingBarrelType: '&cInvalid BarrelType'
 
 # Etc
 Etc_Page: Seite
@@ -116,5 +117,5 @@ Player_WakeNoPoints: '&cEs wurden noch keine Aufwachpunkte erstellt!'
 Player_WakeNotExist: '&cDer Aufwachpunkt mit der id: &6&v1 &cexistiert nicht!'
 Player_WakeTeleport: 'Teleport zu Aufwachpunkt mit der id: &6&v1&f An Position: &6&v2 &v3, &v4, &v5'
 Player_ShopSealBrew: '&eBrewery Tränke sollten vor dem verkaufen versiegelt werden'
-Player_Drunkeness: 'Betrunkenheit'
+Player_Drunkeness: 'Betrunkenheit: '
 Player_Hangover: 'Dein Kater'
