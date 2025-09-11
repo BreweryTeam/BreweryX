@@ -360,7 +360,7 @@ public class SimulateCommand implements SubCommand {
             if (options.contains(Option.DISTILL)) {
                 distill = OptionalInt.of(distillRuns);
             } else if (recipe != null && recipe.needsDistilling()) {
-                distill = OptionalInt.of(recipe.getDistillruns());
+                distill = OptionalInt.of(recipe.getDistillRuns());
             } else {
                 distill = OptionalInt.empty();
             }

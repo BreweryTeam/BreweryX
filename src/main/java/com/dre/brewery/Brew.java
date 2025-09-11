@@ -415,7 +415,7 @@ public class Brew implements Cloneable {
                 alc *= 1 - ((float) (10 - quality) * 0.04f);
                 // distillable Potions should have half alc after one and full alc after all needed distills
                 alc /= 2;
-                alc *= 1.0F + ((float) distillRuns / currentRecipe.getDistillruns());
+                alc *= 1.0F + ((float) distillRuns / currentRecipe.getDistillRuns());
             } else {
                 // quality decides 10% - 100%
                 alc *= ((float) quality / 10.0f);
@@ -445,7 +445,7 @@ public class Brew implements Cloneable {
     public boolean canDistill() {
         if (immutable) return false;
         if (currentRecipe != null) {
-            return currentRecipe.getDistillruns() > distillRuns;
+            return currentRecipe.getDistillRuns() > distillRuns;
         } else {
             return distillRuns < 6;
         }

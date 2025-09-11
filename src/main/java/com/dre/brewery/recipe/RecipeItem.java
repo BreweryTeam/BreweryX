@@ -21,6 +21,7 @@
 package com.dre.brewery.recipe;
 
 import com.dre.brewery.BreweryPlugin;
+import com.dre.brewery.api.recipe.RecipeIngredient;
 import com.dre.brewery.configuration.sector.capsule.ConfigCustomItem;
 import com.dre.brewery.integration.Hook;
 import com.dre.brewery.utility.BUtil;
@@ -44,7 +45,7 @@ import java.util.Objects;
  * it can be used as mutable copy directly in a
  * BIngredients. Otherwise, it needs to be converted to an Ingredient
  */
-public abstract class RecipeItem implements Cloneable, DebuggableItem {
+public abstract class RecipeItem implements Cloneable, DebuggableItem, RecipeIngredient {
 
     private static final MinecraftVersion VERSION = BreweryPlugin.getMCVersion();
 
@@ -60,6 +61,7 @@ public abstract class RecipeItem implements Cloneable, DebuggableItem {
      * @param item The ItemStack for comparison
      * @return True if the given item matches this recipeItem
      */
+    @Override
     public abstract boolean matches(ItemStack item);
 
     /**
@@ -311,6 +313,7 @@ public abstract class RecipeItem implements Cloneable, DebuggableItem {
     public String toConfigString() {
         return toConfigStringNoAmount() + "/" + getAmount();
     }
+
     /**
      * Converts this RecipeItem to a String that can be used in a config
      *

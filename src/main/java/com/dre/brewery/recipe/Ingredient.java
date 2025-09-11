@@ -20,7 +20,7 @@
 
 package com.dre.brewery.recipe;
 
-import org.bukkit.inventory.ItemStack;
+import com.dre.brewery.api.recipe.RecipeIngredient;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -32,7 +32,8 @@ import java.io.IOException;
  * <p>Will be saved and loaded with a DataStream
  * <p>Each implementing class needs to register a static function as Item Loader
  */
-public interface Ingredient extends DebuggableItem {
+public interface Ingredient extends RecipeIngredient, DebuggableItem {
+
 
     /**
      * Saves this Ingredient to the DataOutputStream.
@@ -46,17 +47,7 @@ public interface Ingredient extends DebuggableItem {
      */
     void saveTo(DataOutputStream out) throws IOException;
 
-    int getAmount();
 
-    void setAmount(int amount);
-
-    /**
-     * Does this Ingredient match the given ItemStack
-     *
-     * @param item The given ItemStack to match
-     * @return true if all required data is contained on the item
-     */
-    boolean matches(ItemStack item);
 
     /*
      * Does this Item match the given RecipeItem.
@@ -74,7 +65,5 @@ public interface Ingredient extends DebuggableItem {
      * @param item The item to check similarity with
      * @return True if this is equal to item except for amount
      */
-    boolean isSimilar(Ingredient item);
-
-
+    boolean isSimilar(com.dre.brewery.recipe.Ingredient item);
 }

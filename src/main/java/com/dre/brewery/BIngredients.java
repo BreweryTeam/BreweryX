@@ -504,7 +504,7 @@ public class BIngredients {
         if (recipe.needsDistilling() != distillRuns > 0) {
             return 0;
         }
-        return 10 - Math.abs(recipe.getDistillruns() - distillRuns);
+        return 10 - Math.abs(recipe.getDistillRuns() - distillRuns);
     }
 
     /**

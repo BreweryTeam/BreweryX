@@ -25,6 +25,9 @@ import com.dre.brewery.BarrelWoodType;
 import com.dre.brewery.Brew;
 import com.dre.brewery.BreweryPlugin;
 import com.dre.brewery.Translatable;
+import com.dre.brewery.api.recipe.Recipe;
+import com.dre.brewery.api.recipe.RecipeEffect;
+import com.dre.brewery.api.recipe.RecipeIngredient;
 import com.dre.brewery.configuration.ConfigManager;
 import com.dre.brewery.configuration.files.CustomItemsFile;
 import com.dre.brewery.configuration.files.Lang;
@@ -60,7 +63,7 @@ import java.util.Objects;
  */
 @Getter
 @Setter
-public class BRecipe implements Cloneable {
+public class BRecipe implements Cloneable, Recipe {
 
     @Getter
     private static final List<BRecipe> recipes = new ArrayList<>();
@@ -76,7 +79,7 @@ public class BRecipe implements Cloneable {
     private List<RecipeItem> ingredients = new ArrayList<>(); // Items and amounts
     private int difficulty; // difficulty to brew the potion, how exact the instruction has to be followed
     private int cookingTime; // time to cook in cauldron
-    private byte distillruns; // runs through the brewer
+    private byte distillRuns; // runs through the brewer
     private int distillTime; // time for one distill run in seconds
     private List<BarrelWoodType> barrelTypes = new ArrayList<>(); // barrel types the brew should be aged in
     private int age; // time in minecraft days for the potions to age in barrels
@@ -152,9 +155,9 @@ public class BRecipe implements Cloneable {
         recipe.cookingTime = configRecipe.getCookingTime() != null ? configRecipe.getCookingTime() : 0;
         int dis = configRecipe.getDistillRuns() != null ? configRecipe.getDistillRuns() : 0;
         if (dis > Byte.MAX_VALUE) {
-            recipe.distillruns = Byte.MAX_VALUE;
+            recipe.distillRuns = Byte.MAX_VALUE;
         } else {
-            recipe.distillruns = (byte) dis;
+            recipe.distillRuns = (byte) dis;
         }
         recipe.distillTime = (configRecipe.getDistillTime() != null ? configRecipe.getDistillTime() : 0) * 20;
         recipe.setBarrelTypes(BarrelWoodType.listFromAny(configRecipe.getWood()));
@@ -330,8 +333,11 @@ public class BRecipe implements Cloneable {
     }
 
     public sealed interface IngredientResult {
-        record Success(RecipeItem ingredient) implements IngredientResult {}
-        record Error(IngredientError error, String invalidPart) implements IngredientResult {}
+        record Success(RecipeItem ingredient) implements IngredientResult {
+        }
+
+        record Error(IngredientError error, String invalidPart) implements IngredientResult {
+        }
     }
 
     @AllArgsConstructor
@@ -383,8 +389,8 @@ public class BRecipe implements Cloneable {
             Logging.errorLog("Invalid cooking time '" + cookingTime + "' in Recipe: " + getRecipeName());
             return false;
         }
-        if (distillruns < 0) {
-            Logging.errorLog("Invalid distillruns '" + distillruns + "' in Recipe: " + getRecipeName());
+        if (distillRuns < 0) {
+            Logging.errorLog("Invalid distillruns '" + distillRuns + "' in Recipe: " + getRecipeName());
             return false;
         }
         if (distillTime < 0) {
@@ -438,6 +444,7 @@ public class BRecipe implements Cloneable {
 
     /**
      * Gets the <strong>primary</strong> barrel type out of all supported.
+     *
      * @return the barrel type
      * @see #getBarrelTypes() for the full list
      */
@@ -453,7 +460,7 @@ public class BRecipe implements Cloneable {
         barrelTypes = Collections.singletonList(wood);
     }
 
-    public void setBarrelTypes(List<BarrelWoodType> barrelTypes) {
+    public void setBarrelTypes(@NotNull List<BarrelWoodType> barrelTypes) {
         if (barrelTypes.stream().anyMatch(b -> b == BarrelWoodType.ANY)) {
             setWood(BarrelWoodType.ANY);
         } else {
@@ -472,11 +479,11 @@ public class BRecipe implements Cloneable {
     }
 
     public boolean isCookingOnly() {
-        return age == 0 && distillruns == 0;
+        return age == 0 && distillRuns == 0;
     }
 
     public boolean needsDistilling() {
-        return distillruns != 0;
+        return distillRuns != 0;
     }
 
     public boolean needsToAge() {
@@ -504,6 +511,7 @@ public class BRecipe implements Cloneable {
         }
         return false;
     }
+
     public List<RecipeItem> getMissingIngredients(List<Ingredient> list) {
         List<RecipeItem> missing = new ArrayList<>();
         for (RecipeItem rItem : ingredients) {
@@ -620,7 +628,7 @@ public class BRecipe implements Cloneable {
 
         BIngredients bIngredients = new BIngredients(list, cookingTime);
 
-        return new Brew(bIngredients, quality, 0, distillruns, getAge(), getWood(), getRecipeName(), false, true, 0);
+        return new Brew(bIngredients, quality, 0, distillRuns, getAge(), getWood(), getRecipeName(), false, true, 0);
     }
 
     public void updateAcceptedLists() {
@@ -711,9 +719,38 @@ public class BRecipe implements Cloneable {
         return lore != null && !lore.isEmpty();
     }
 
-    @Nullable
-    public List<Tuple<Integer, String>> getLore() {
+    public @NotNull List<Tuple<Integer, String>> getLore() {
         return lore;
+    }
+
+    @Override
+    public int[] getCustomModelData() {
+        return cmData;
+    }
+
+    @Override
+    public void setCustomModelData(int[] customModelData) {
+
+    }
+
+    @Override
+    public @Nullable List<Tuple<Integer, String>> getPlayerCommands() {
+        return playercmds;
+    }
+
+    @Override
+    public void setPlayerCommands(List<Tuple<Integer, String>> playerCommands) {
+
+    }
+
+    @Override
+    public @Nullable List<Tuple<Integer, String>> getServerCommands() {
+        return servercmds;
+    }
+
+    @Override
+    public void setServerCommands(List<Tuple<Integer, String>> serverCommands) {
+
     }
 
     @Nullable
@@ -767,7 +804,7 @@ public class BRecipe implements Cloneable {
             ", ingredients=" + ingredients +
             ", difficulty=" + difficulty +
             ", cookingTime=" + cookingTime +
-            ", distillruns=" + distillruns +
+            ", distillruns=" + distillRuns +
             ", distillTime=" + distillTime +
             ", barrelTypes=" + barrelTypes +
             ", age=" + age +
@@ -884,7 +921,7 @@ public class BRecipe implements Cloneable {
             clone.id = this.id;
             clone.difficulty = this.difficulty;
             clone.cookingTime = this.cookingTime;
-            clone.distillruns = this.distillruns;
+            clone.distillRuns = this.distillRuns;
             clone.distillTime = this.distillTime;
             clone.barrelTypes = this.barrelTypes;
             clone.age = this.age;
@@ -894,6 +931,35 @@ public class BRecipe implements Cloneable {
         } catch (CloneNotSupportedException e) {
             throw new AssertionError();
         }
+    }
+
+    @Override
+    public byte getDistillRuns() {
+        return distillRuns;
+    }
+
+    @Override
+    public void setDistillRuns(byte distillRuns) {
+        this.distillRuns = distillRuns;
+    }
+
+    public byte getDistillruns() {
+        return distillRuns;
+    }
+
+    @Override
+    public @NotNull List<RecipeEffect> getRecipeEffects() {
+        return this.effects.stream().map(RecipeEffect.class::cast).toList();
+    }
+
+    @Override
+    public void setRecipeEffects(@NotNull List<RecipeEffect> recipeEffects) {
+
+    }
+
+    @Override
+    public @NotNull List<RecipeIngredient> getRecipeIngredients() {
+        return this.ingredients.stream().map(RecipeIngredient.class::cast).toList();
     }
 
 	/*public static void saveAddedRecipes(ConfigurationSection cfg) {
@@ -961,7 +1027,7 @@ public class BRecipe implements Cloneable {
         }
 
         public Builder distill(byte distillRuns, int distillTime) {
-            recipe.distillruns = distillRuns;
+            recipe.distillRuns = distillRuns;
             recipe.distillTime = distillTime;
             return this;
         }

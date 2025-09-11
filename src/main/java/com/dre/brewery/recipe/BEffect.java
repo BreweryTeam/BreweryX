@@ -21,6 +21,7 @@
 package com.dre.brewery.recipe;
 
 import com.dre.brewery.BreweryPlugin;
+import com.dre.brewery.api.recipe.RecipeEffect;
 import com.dre.brewery.utility.BUtil;
 import com.dre.brewery.utility.Logging;
 import com.dre.brewery.utility.MinecraftVersion;
@@ -29,7 +30,7 @@ import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
-public class BEffect implements Cloneable {
+public class BEffect implements Cloneable, RecipeEffect {
 
     private final PotionEffectType type;
     private short minlvl;
@@ -115,6 +116,7 @@ public class BEffect implements Cloneable {
         }
     }
 
+    @Override
     public PotionEffect generateEffect(int quality) {
         int duration = calcDuration(quality);
         int lvl = calcLvl(quality);
@@ -132,6 +134,7 @@ public class BEffect implements Cloneable {
         return type.createEffect(duration, lvl - 1);
     }
 
+    @Override
     public void apply(int quality, Player player) {
         PotionEffect effect = generateEffect(quality);
         if (effect != null) {
