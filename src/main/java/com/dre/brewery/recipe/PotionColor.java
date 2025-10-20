@@ -85,7 +85,7 @@ public class PotionColor {
     public void colorBrew(PotionMeta meta, ItemStack potion, boolean destillable) {
         if (VERSION.isOrLater(MinecraftVersion.V1_9)) {
             // We need to Hide Potion Effects even in 1.12, as it would otherwise show "No Effects"
-            meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_ADDITIONAL_TOOLTIP);
+            meta.addItemFlags(ItemFlag.values());
             if (VERSION.isOrLater(MinecraftVersion.V1_11)) {
                 // BasePotionData was only used for the Color, so starting with 1.12 we can use setColor instead
                 meta.setColor(getColor());
