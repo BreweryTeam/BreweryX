@@ -65,7 +65,7 @@ repositories {
 
 dependencies {
     // Spigot
-    compileOnly("org.spigotmc:spigot-api:1.20.2-R0.1-SNAPSHOT") {
+    compileOnly("org.spigotmc:spigot-api:1.21.10-R0.1-SNAPSHOT") {
         exclude("com.google.code.gson", "gson") // Implemented manually
     }
     // Paper Lib, performance improvements on Paper-based servers and async teleporting on Folia
@@ -185,7 +185,7 @@ tasks {
     }
 
     runServer {
-        minecraftVersion("1.21.4")
+        minecraftVersion("1.21.10")
     }
 
     register("publishToDiscord") {
