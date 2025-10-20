@@ -80,7 +80,7 @@ public final class MaterialUtil {
             // TODO:
             //  I want to make some interface for including renamed PotionEffectTypes, Enchants, and Materials
             if (name.equalsIgnoreCase("GRASS")) { // 1.20.6 -> renamed to short_grass
-                return Material.GRASS;
+                return Material.SHORT_GRASS;
             }
             return Material.matchMaterial(name);
         } catch (IllegalArgumentException e) {
