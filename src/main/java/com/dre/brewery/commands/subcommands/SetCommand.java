@@ -24,6 +24,7 @@ import com.dre.brewery.BPlayer;
 import com.dre.brewery.BreweryPlugin;
 import com.dre.brewery.commands.SubCommand;
 import com.dre.brewery.configuration.files.Lang;
+import com.dre.brewery.utility.BukkitConstants;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -76,7 +77,7 @@ public class SetCommand implements SubCommand {
             lang.sendEntry(sender, "CMD_Set", args[1], String.valueOf(drunkenness), String.valueOf(quality));
 
             // Stop long nausea effects when drunkenness is 0
-            if (drunkenness == 0) target.removePotionEffect(PotionEffectType.CONFUSION);
+            if (drunkenness == 0) target.removePotionEffect(BukkitConstants.NAUSEA);
 
         }
 
