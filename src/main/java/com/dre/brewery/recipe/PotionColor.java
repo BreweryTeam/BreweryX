@@ -21,6 +21,7 @@
 package com.dre.brewery.recipe;
 
 import com.dre.brewery.BreweryPlugin;
+import com.dre.brewery.utility.BukkitConstants;
 import com.dre.brewery.utility.MinecraftVersion;
 import lombok.Getter;
 import org.bukkit.Color;
@@ -85,6 +86,9 @@ public class PotionColor {
     public void colorBrew(PotionMeta meta, ItemStack potion, boolean destillable) {
         if (VERSION.isOrLater(MinecraftVersion.V1_9)) {
             // We need to Hide Potion Effects even in 1.12, as it would otherwise show "No Effects"
+
+            // Using `ItemFlag.values()` to ensure compatibility between Paper and Spigot servers.
+            //  This behavior might not work in future versions especially with Paper's DataComponent API.
             meta.addItemFlags(ItemFlag.values());
             if (VERSION.isOrLater(MinecraftVersion.V1_11)) {
                 // BasePotionData was only used for the Color, so starting with 1.12 we can use setColor instead
@@ -95,7 +99,7 @@ public class PotionColor {
         } else {
             potion.setDurability(getColorId(destillable));
             // To stop 1.8 from showing the potioneffect for the color id, add a dummy Effect
-            meta.addCustomEffect(PotionEffectType.REGENERATION.createEffect(0, 0), true);
+            meta.addCustomEffect(BukkitConstants.REGENERATION.createEffect(0, 0), true);
         }
     }
 

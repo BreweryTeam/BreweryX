@@ -384,7 +384,7 @@ class DiscordWebhook(
         var description = embedDescription
         while (description.isNotEmpty()) {
             val chunkLength = minOf(MAX_EMBED_DESCRIPTION_LENGTH, description.length)
-            val chunk = description.substring(0, chunkLength)
+            val chunk = description.take(chunkLength)
             description = description.substring(chunkLength)
             embeds.add(JsonObject().apply {
                 addProperty("title", embedTitle)
@@ -416,7 +416,7 @@ class DiscordWebhook(
 
             val responseCode = connection.responseCode
             println("POST Response Code :: $responseCode")
-            if (responseCode == HttpURLConnection.HTTP_OK) {
+            if (responseCode in 200 until 300) {
                 println("Message sent successfully.")
             } else {
                 println("Failed to send message.")
