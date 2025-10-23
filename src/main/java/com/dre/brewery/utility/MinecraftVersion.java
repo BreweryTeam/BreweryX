@@ -20,8 +20,10 @@
 
 package com.dre.brewery.utility;
 
+import com.google.common.base.Preconditions;
 import lombok.Getter;
 import org.bukkit.Bukkit;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Enum for major Minecraft versions where Brewery needs
@@ -40,27 +42,44 @@ public enum MinecraftVersion {
     V1_14("1.14"),
     V1_15("1.15"),
     V1_16("1.16"),
-    V1_17("1.17"), // If we're being honest, probably no versions below this one will be used since we're compiling to Java 17. So they'll need to get some server software for Java 17 *if* they want to use BreweryX.
+    // If we're being honest, probably no versions below this one will be used since we're compiling to Java 17.
+    //  So they'll need to get some server software for Java 17 *if* they want to use BreweryX.
+    V1_17("1.17"),
     V1_18("1.18"),
     V1_19("1.19"),
     V1_20("1.20"),
-    V1_21("1.21"),
+    V1_21("1.21", "1.20.5", "1.20.6"), // 1.20.5, 1.20.6, & 1.21 are being used the same way in BreweryX.
+    V1_21_10("1.21.10", "1.21.9"), // 1.21.10 & 1.21.9 are one and the same
     UNKNOWN("Unknown");
 
 
     private @Getter static final boolean isFolia = MinecraftVersion.checkFolia();
     private @Getter static final boolean useNBT = NBTUtil.initNbt();
 
-    private final String version;
+    private final String[] versions;
 
-    MinecraftVersion(String version) {
-        this.version = version;
+    MinecraftVersion(String... version) {
+        this.versions = version;
     }
 
-    public static MinecraftVersion get(String version) {
-        for (MinecraftVersion v : values()) {
-            if (v.version.equals(version)) {
-                return v;
+    public static MinecraftVersion get(String major, String minor, @Nullable String patch) {
+        String withPatch = major + "." + minor + "." + patch;
+        String withoutPatch = major + "." + minor;
+
+        // We do two passes to prefer exact matches with a patch version.
+        for (MinecraftVersion minecraftVersion : values()) {
+            for (String versionString : minecraftVersion.versions) {
+                if (versionString.equals(withPatch)) {
+                    return minecraftVersion;
+                }
+            }
+        }
+
+        for (MinecraftVersion minecraftVersion : values()) {
+            for (String versionString : minecraftVersion.versions) {
+                if (versionString.equals(withoutPatch)) {
+                    return minecraftVersion;
+                }
             }
         }
         return UNKNOWN;
@@ -69,14 +88,12 @@ public enum MinecraftVersion {
     public static MinecraftVersion getIt() {
         String rawVersion = Bukkit.getVersion();
         String rawVersionParsed = rawVersion.substring(rawVersion.indexOf("(MC: ") + 5, rawVersion.indexOf(")"));
-
-        // 1.20.5/6 is the same as 1.21 API
-        if (rawVersionParsed.equals("1.20.5") || rawVersionParsed.equals("1.20.6")) {
-            return V1_21;
-        }
-
         String[] versionSplit = rawVersionParsed.split("\\.");
-        return get(versionSplit[0] + "." + versionSplit[1]);
+
+        Preconditions.checkState(versionSplit.length == 3 || versionSplit.length == 2, "Unexpected Minecraft version format: " + rawVersionParsed);
+
+
+        return get(versionSplit[0], versionSplit[1], versionSplit[2]);
     }
 
     public boolean isOrLater(MinecraftVersion version) {
@@ -85,6 +102,10 @@ public enum MinecraftVersion {
 
     public boolean isOrEarlier(MinecraftVersion version) {
         return this.ordinal() <= version.ordinal();
+    }
+
+    public String getVersion() {
+        return versions[0];
     }
 
     private static boolean checkFolia() {
