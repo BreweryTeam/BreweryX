@@ -24,10 +24,12 @@ import com.dre.brewery.BreweryPlugin;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.bukkit.Color;
+import org.bukkit.Keyed;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Particle;
 import org.bukkit.Registry;
 import org.bukkit.potion.PotionEffectType;
+import org.bukkit.potion.PotionType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -50,20 +52,63 @@ public final class BukkitConstants {
     public static Particle LARGE_SMOKE = particle("large_smoke");
     public static Particle DUST = particle("dust");
 
+    public static PotionType POTION_REGENERATION = potionType("regeneration");
+    public static PotionType POTION_SWIFTNESS = potionType("swiftness");
+    public static PotionType POTION_FIRE_RESISTANCE = potionType("fire_resistance");
+    public static PotionType POTION_POISON = potionType("poison");
+    public static PotionType POTION_HEALING = potionType("healing");
+    public static PotionType POTION_NIGHT_VISION = potionType("night_vision");
+    public static PotionType POTION_WEAKNESS = potionType("weakness");
+    public static PotionType POTION_STRENGTH = potionType("strength");
+    public static PotionType POTION_SLOWNESS = potionType("slowness");
+    public static PotionType POTION_WATER_BREATHING = potionType("water_breathing");
+    public static PotionType POTION_HARMING = potionType("harming");
+    public static PotionType POTION_INVISIBILITY = potionType("invisibility");
+
 
     public static Particle particle(String key) {
-        return Registry.PARTICLE_TYPE.getOrThrow(NamespacedKey.minecraft(key));
+        return Registry.PARTICLE_TYPE.get(NamespacedKey.minecraft(key));
     }
 
     public static PotionEffectType potionEffectType(String key) {
-        return Registry.EFFECT.getOrThrow(NamespacedKey.minecraft(key));
+        if (BreweryPlugin.getMCVersion().isOrLater(MinecraftVersion.V1_21)) {
+            return getOrThrow(Registry.EFFECT, key);
+        }
+        return throwIfNull(key, k -> PotionEffectType.getByKey(NamespacedKey.minecraft(k)));
+    }
+
+    public static PotionType potionType(String key) {
+        return getOrThrow(Registry.POTION, key);
     }
 
     @Nullable
     public static PotionEffectType nullablePotionEffectType(String key) {
-        return Registry.EFFECT.get(NamespacedKey.minecraft(key));
+        if (BreweryPlugin.getMCVersion().isOrLater(MinecraftVersion.V1_21)) {
+            return Registry.EFFECT.get(NamespacedKey.minecraft(key));
+        }
+        return PotionEffectType.getByKey(NamespacedKey.minecraft(key));
     }
 
+
+    private static <T extends Keyed> T getOrThrow(Registry<T> registry, String key) {
+        T value = registry.get(NamespacedKey.minecraft(key));
+        if (value == null) {
+            throw new IllegalArgumentException("No value found in registry for key: " + key);
+        }
+        return value;
+    }
+
+    private static <T> T throwIfNull(String key, KeyLookup<T> function) {
+        T value = function.throwIfNull(key);
+        if (value == null) {
+            throw new IllegalArgumentException("No value found for key: " + key);
+        }
+        return value;
+    }
+
+    private interface KeyLookup<T> {
+        T throwIfNull(String key);
+    }
 
     @Getter
     @AllArgsConstructor

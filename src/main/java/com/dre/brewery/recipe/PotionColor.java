@@ -28,8 +28,8 @@ import org.bukkit.Color;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.PotionMeta;
-import org.bukkit.potion.PotionEffectType;
 import org.bukkit.potion.PotionType;
+
 
 @Getter
 public class PotionColor {
@@ -37,18 +37,18 @@ public class PotionColor {
     private static final String HEX_STRING = "#%02x%02x%02x";
     private static final MinecraftVersion VERSION = BreweryPlugin.getMCVersion();
 
-    public static final PotionColor PINK = new PotionColor(1, PotionType.REGENERATION, Color.FUCHSIA);
-    public static final PotionColor CYAN = new PotionColor(2, PotionType.SWIFTNESS, Color.AQUA);
-    public static final PotionColor ORANGE = new PotionColor(3, PotionType.FIRE_RESISTANCE, Color.ORANGE);
-    public static final PotionColor GREEN = new PotionColor(4, PotionType.POISON, Color.GREEN);
-    public static final PotionColor BRIGHT_RED = new PotionColor(5, PotionType.HEALING, Color.fromRGB(255, 0, 0));
-    public static final PotionColor BLUE = new PotionColor(6, PotionType.NIGHT_VISION, Color.NAVY);
-    public static final PotionColor BLACK = new PotionColor(8, PotionType.WEAKNESS, Color.BLACK);
-    public static final PotionColor RED = new PotionColor(9, PotionType.STRENGTH, Color.fromRGB(196, 0, 0));
-    public static final PotionColor GREY = new PotionColor(10, PotionType.SLOWNESS, Color.GRAY);
-    public static final PotionColor WATER = new PotionColor(11, VERSION.isOrLater(MinecraftVersion.V1_9) ? PotionType.WATER_BREATHING : null, Color.BLUE);
-    public static final PotionColor DARK_RED = new PotionColor(12, PotionType.HARMING, Color.fromRGB(128, 0, 0));
-    public static final PotionColor BRIGHT_GREY = new PotionColor(14, PotionType.INVISIBILITY, Color.SILVER);
+    public static final PotionColor PINK = new PotionColor(1, BukkitConstants.POTION_REGENERATION, Color.FUCHSIA);
+    public static final PotionColor CYAN = new PotionColor(2, BukkitConstants.POTION_SWIFTNESS, Color.AQUA);
+    public static final PotionColor ORANGE = new PotionColor(3, BukkitConstants.POTION_FIRE_RESISTANCE, Color.ORANGE);
+    public static final PotionColor GREEN = new PotionColor(4, BukkitConstants.POTION_POISON, Color.GREEN);
+    public static final PotionColor BRIGHT_RED = new PotionColor(5, BukkitConstants.POTION_HEALING, Color.fromRGB(255, 0, 0));
+    public static final PotionColor BLUE = new PotionColor(6, BukkitConstants.POTION_NIGHT_VISION, Color.NAVY);
+    public static final PotionColor BLACK = new PotionColor(8, BukkitConstants.POTION_WEAKNESS, Color.BLACK);
+    public static final PotionColor RED = new PotionColor(9, BukkitConstants.POTION_STRENGTH, Color.fromRGB(196, 0, 0));
+    public static final PotionColor GREY = new PotionColor(10, BukkitConstants.POTION_SLOWNESS, Color.GRAY);
+    public static final PotionColor WATER = new PotionColor(11, VERSION.isOrLater(MinecraftVersion.V1_9) ? BukkitConstants.POTION_WATER_BREATHING : null, Color.BLUE);
+    public static final PotionColor DARK_RED = new PotionColor(12, BukkitConstants.POTION_HARMING, Color.fromRGB(128, 0, 0));
+    public static final PotionColor BRIGHT_GREY = new PotionColor(14, BukkitConstants.POTION_INVISIBILITY, Color.SILVER);
     public static final PotionColor WHITE = new PotionColor(Color.WHITE);
     public static final PotionColor LIME = new PotionColor(Color.LIME);
     public static final PotionColor OLIVE = new PotionColor(Color.OLIVE);
