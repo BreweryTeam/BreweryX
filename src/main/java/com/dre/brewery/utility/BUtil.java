@@ -87,7 +87,11 @@ public final class BUtil {
      * @return The colored message, or null if msg was null
      */
     public static String color(String msg) {
-        if (msg == null || msg.isEmpty()) return null;
+        if (msg == null) {
+            return null;
+        } else if (msg.isEmpty()) {
+            return msg;
+        }
         String[] texts = msg.split(String.format(WITH_DELIMITER, "&"));
 
         StringBuilder finalText = new StringBuilder();
