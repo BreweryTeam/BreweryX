@@ -31,6 +31,7 @@ import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.Levelled;
 import org.bukkit.material.Cauldron;
 import org.bukkit.material.MaterialData;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -75,12 +76,13 @@ public final class MaterialUtil {
     }
 
 
+    @Nullable
     public static Material getMaterialSafely(String name) {
         try {
-            // TODO:
-            //  I want to make some interface for including renamed PotionEffectTypes, Enchants, and Materials
-            if (name.equalsIgnoreCase("GRASS")) { // 1.20.6 -> renamed to short_grass
-                return Material.SHORT_GRASS;
+            for (Material material : BukkitConstants.getMappedValues(Material.class)) {
+                if (material.name().equalsIgnoreCase(name)) {
+                    return material;
+                }
             }
             return Material.matchMaterial(name);
         } catch (IllegalArgumentException e) {
