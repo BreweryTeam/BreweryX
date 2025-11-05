@@ -25,6 +25,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.bukkit.Color;
 import org.bukkit.Keyed;
+import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Particle;
 import org.bukkit.Registry;
@@ -33,6 +34,15 @@ import org.bukkit.potion.PotionType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+@SuppressWarnings("unchecked")
 public final class BukkitConstants {
 
     private BukkitConstants() {}
@@ -65,6 +75,8 @@ public final class BukkitConstants {
     public static PotionType POTION_HARMING = potionType("harming");
     public static PotionType POTION_INVISIBILITY = potionType("invisibility");
 
+    public static Material SHORT_GRASS = renamedMaterial("grass", new Tuple<>(MinecraftVersion.V1_20_4, "short_grass"));
+
 
     public static Particle particle(String key) {
         return Registry.PARTICLE_TYPE.get(NamespacedKey.minecraft(key));
@@ -89,6 +101,18 @@ public final class BukkitConstants {
         return PotionEffectType.getByKey(NamespacedKey.minecraft(key));
     }
 
+
+    public static Material renamedMaterial(String defaultValue, Tuple<MinecraftVersion, String>... names) {
+        MinecraftVersion activeVersion = BreweryPlugin.getMCVersion();
+        for (Tuple<MinecraftVersion, String> pair : names) {
+            MinecraftVersion version = pair.a();
+            String name = pair.b();
+            if (activeVersion.isOrLater(version)) {
+                return Material.getMaterial(name.toUpperCase());
+            }
+        }
+        return Material.getMaterial(defaultValue.toUpperCase());
+    }
 
     private static <T extends Keyed> T getOrThrow(Registry<T> registry, String key) {
         T value = registry.get(NamespacedKey.minecraft(key));
@@ -132,5 +156,55 @@ public final class BukkitConstants {
 
             return new Particle.Spell(color, size);
         }
+    }
+
+    // I don't really like this but whatever
+
+    private static final Map<String, Keyed> MAPPED_VALUES = new HashMap<>();
+
+    static {
+        try {
+            for (Field field : BukkitConstants.class.getDeclaredFields()) {
+                if (!Modifier.isStatic(field.getModifiers()) || !Keyed.class.isAssignableFrom(field.getType())) {
+                    continue;
+                }
+                Keyed obj = (Keyed) field.get(null);
+                MAPPED_VALUES.put(obj.getKey().getKey(), obj);
+            }
+        } catch (IllegalAccessException e) {
+            Logging.errorLog("BukkitConstants failed to initialize mapped values", e);
+        }
+    }
+
+    @Nullable
+    public static <T extends Keyed> T getMappedValue(String key, Class<T> type) {
+        Keyed keyed = MAPPED_VALUES.get(key);
+        if (keyed == null) {
+            return null;
+        }
+        if (!type.isAssignableFrom(keyed.getClass())) {
+            return null;
+        }
+        return type.cast(keyed);
+    }
+
+
+    public static <T extends Keyed> Collection<T> getMappedValues(Class<T> type) {
+        List<T> list = new ArrayList<>();
+        for (Keyed keyed : MAPPED_VALUES.values()) {
+            if (type.isAssignableFrom(keyed.getClass())) {
+                list.add(type.cast(keyed));
+            }
+        }
+        return list;
+    }
+
+    @Nullable
+    public static Keyed getMappedValue(String key) {
+        return MAPPED_VALUES.get(key);
+    }
+
+    public static Collection<Keyed> getMappedValues() {
+        return MAPPED_VALUES.values();
     }
 }
