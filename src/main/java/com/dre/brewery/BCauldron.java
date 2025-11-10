@@ -605,10 +605,18 @@ public class BCauldron {
         }
     }
 
-    // bukkit bug not updating the inventory while executing event, have to
-    // schedule the give
+    /**
+     * Safely gives an item to a player's inventory.
+     * This method ensures thread-safety for ShreddedPaper by ensuring inventory modifications
+     * are always executed on the correct owning thread/region.
+     * 
+     * @param player The player to give the item to
+     * @param item The item to give
+     */
     public static void giveItem(final Player player, final ItemStack item) {
-        BreweryPlugin.getScheduler().runTaskLater(() -> player.getInventory().addItem(item), 1L);
+        // Use UniversalScheduler's execute method to run on the correct thread/region
+        // This prevents IllegalStateException when modifying inventory from wrong thread
+        BreweryPlugin.getScheduler().execute(player, () -> player.getInventory().addItem(item));
     }
 
 }
