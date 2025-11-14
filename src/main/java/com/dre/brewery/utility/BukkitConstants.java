@@ -60,11 +60,9 @@ public final class BukkitConstants {
     public static PotionEffectType INSTANT_HEALTH = potionEffectType("instant_health");
     public static PotionEffectType INSTANT_DAMAGE = potionEffectType("instant_damage");
     public static PotionEffectType WATER_BREATHING = potionEffectType("water_breathing");
-    public static PotionEffectType CONFUSION = potionEffectType("nausea");
     public static PotionEffectType NIGHT_VISION = potionEffectType("night_vision");
     public static PotionEffectType SPEED = potionEffectType("speed");
     public static PotionEffectType HASTE = potionEffectType("haste");
-    public static PotionEffectType FAST_DIGGING = potionEffectType("haste");
 
     public static Particle INSTANT_EFFECT = particle("instant_effect");
     public static Particle SPLASH = particle("splash");
