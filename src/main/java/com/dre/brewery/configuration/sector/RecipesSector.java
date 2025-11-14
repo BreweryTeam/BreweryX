@@ -212,7 +212,7 @@ public class RecipesSector extends AbstractOkaeriConfigSector<ConfigRecipe> {
         .difficulty(7)
         .alcohol(18)
         .lore(List.of("+++&aGlows in the dark"))
-        .effects(List.of(BukkitConstants.WEAKNESS.getKey().getKey().toUpperCase() + "/80", BukkitConstants.CONFUSION.getKey().getKey().toUpperCase() + "/27", BukkitConstants.NIGHT_VISION.getKey().getKey().toUpperCase() + "/50-80", BukkitConstants.BLINDNESS.getKey().getKey().toUpperCase() + "/12-2", BukkitConstants.SLOWNESS.getKey().getKey().toUpperCase() + "/10-3"))
+        .effects(List.of(BukkitConstants.WEAKNESS.getKey().getKey().toUpperCase() + "/80", BukkitConstants.NAUSEA.getKey().getKey().toUpperCase() + "/27", BukkitConstants.NIGHT_VISION.getKey().getKey().toUpperCase() + "/50-80", BukkitConstants.BLINDNESS.getKey().getKey().toUpperCase() + "/12-2", BukkitConstants.SLOWNESS.getKey().getKey().toUpperCase() + "/10-3"))
         .build();
 
     ConfigRecipe gin = ConfigRecipe.builder()
