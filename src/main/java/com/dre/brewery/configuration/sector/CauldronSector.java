@@ -24,6 +24,7 @@ import com.dre.brewery.configuration.sector.capsule.ConfigCauldronIngredient;
 import eu.okaeri.configs.annotation.Comment;
 import lombok.Getter;
 import lombok.Setter;
+import org.bukkit.Material;
 
 import java.util.List;
 
@@ -35,7 +36,7 @@ public class CauldronSector extends AbstractOkaeriConfigSector<ConfigCauldronIng
     @Comment("Example Cauldron Ingredient with every possible entry first:") // Comments not supported here anyway :(
     ConfigCauldronIngredient ex = ConfigCauldronIngredient.builder()
         .name("Example")
-        .ingredients(List.of("Bedrock/2", "Diamond"))
+        .ingredients(List.of(Material.BEDROCK.name() + "/2", Material.DIAMOND.name()))
         .color("BLACK")
         .cookParticles(List.of("RED/5", "WHITE/10", "800000/25"))
         .lore(List.of("An example for a Base Potion", "This is how it comes out of a Cauldron"))
@@ -45,71 +46,71 @@ public class CauldronSector extends AbstractOkaeriConfigSector<ConfigCauldronIng
     @Comment("One Ingredient:")
     ConfigCauldronIngredient wheat = ConfigCauldronIngredient.builder()
         .name("Fermented wheat")
-        .ingredients(List.of("Wheat"))
+        .ingredients(List.of(Material.WHEAT.name()))
         .cookParticles(List.of("2d8686/8"))
         .build();
 
     ConfigCauldronIngredient sugarcane = ConfigCauldronIngredient.builder()
         .name("Sugar brew")
-        .ingredients(List.of("Sugar_Cane"))
+        .ingredients(List.of(Material.SUGAR_CANE.name()))
         .color("f1ffad")
         .cookParticles(List.of("f1ffad/4", "858547/10"))
         .build();
 
     ConfigCauldronIngredient sugar = ConfigCauldronIngredient.builder()
         .name("Sugarwater")
-        .ingredients(List.of("Sugar"))
+        .ingredients(List.of(Material.SUGAR.name()))
         .cookParticles(List.of("WHITE/4", "BRIGHT_GREY/25"))
         .build();
 
     ConfigCauldronIngredient apple = ConfigCauldronIngredient.builder()
         .name("Apple must")
-        .ingredients(List.of("Apple"))
+        .ingredients(List.of(Material.APPLE.name()))
         .build();
 
     ConfigCauldronIngredient berries = ConfigCauldronIngredient.builder()
         .name("Grape must")
-        .ingredients(List.of("Sweet_Berries"))
+        .ingredients(List.of(Material.SWEET_BERRIES.name()))
         .color("RED")
         .cookParticles(List.of("ff6666/2", "RED/7", "ac6553/13"))
         .build();
 
     ConfigCauldronIngredient potato = ConfigCauldronIngredient.builder()
         .name("Potatomash")
-        .ingredients(List.of("Potato"))
+        .ingredients(List.of(Material.POTATO.name()))
         .build();
 
     ConfigCauldronIngredient grass = ConfigCauldronIngredient.builder()
         .name("Boiled herbs")
-        .ingredients(List.of("Grass"))
+        .ingredients(List.of(Material.SHORT_GRASS.name()))
         .color("99ff66")
         .cookParticles(List.of("GREEN/2", "99ff99/20"))
         .build();
 
     ConfigCauldronIngredient rmushroom = ConfigCauldronIngredient.builder()
         .name("Mushroom brew")
-        .ingredients(List.of("Red_Mushroom"))
+        .ingredients(List.of(Material.RED_MUSHROOM.name()))
         .color("ff5c33")
         .cookParticles(List.of("fab09e/15"))
         .build();
 
     ConfigCauldronIngredient bmushroom = ConfigCauldronIngredient.builder()
         .name("Mushroom brew")
-        .ingredients(List.of("Brown_Mushroom"))
+        .ingredients(List.of(Material.BROWN_MUSHROOM.name()))
         .color("c68c53")
         .cookParticles(List.of("c68c53/15"))
         .build();
 
     ConfigCauldronIngredient cocoa = ConfigCauldronIngredient.builder()
         .name("Chocolately brew")
-        .ingredients(List.of("Cocoa_Beans"))
+        .ingredients(List.of(Material.COCOA_BEANS.name()))
         .color("804600")
         .cookParticles(List.of("a26011/1", "5c370a/3", "4d4133/8"))
         .build();
 
     ConfigCauldronIngredient milk = ConfigCauldronIngredient.builder()
         .name("Milky water")
-        .ingredients(List.of("Milk_Bucket"))
+        .ingredients(List.of(Material.MILK_BUCKET.name()))
         .color("BRIGHT_GREY")
         .cookParticles(List.of("fbfbd0/1", "WHITE/6"))
         .build();
@@ -123,133 +124,133 @@ public class CauldronSector extends AbstractOkaeriConfigSector<ConfigCauldronIng
 
     ConfigCauldronIngredient cactus = ConfigCauldronIngredient.builder()
         .name("Agave brew")
-        .ingredients(List.of("cactus"))
+        .ingredients(List.of(Material.CACTUS.name()))
         .color("00b300")
         .cookParticles(List.of("00b300/16"))
         .build();
 
     ConfigCauldronIngredient poi_potato = ConfigCauldronIngredient.builder()
         .name("Poisonous Broth")
-        .ingredients(List.of("Poisonous_Potato"))
+        .ingredients(List.of(Material.POISONOUS_POTATO.name()))
         .build();
 
     ConfigCauldronIngredient egg = ConfigCauldronIngredient.builder()
         .name("Sticky brew")
-        .ingredients(List.of("Egg"))
+        .ingredients(List.of(Material.EGG.name()))
         .build();
 
     ConfigCauldronIngredient oak_sapling = ConfigCauldronIngredient.builder()
         .name("Stringy herb broth")
-        .ingredients(List.of("Oak_Sapling"))
+        .ingredients(List.of(Material.OAK_SAPLING.name()))
         .build();
 
     ConfigCauldronIngredient vine = ConfigCauldronIngredient.builder()
         .name("Boiled herbs")
-        .ingredients(List.of("vine"))
+        .ingredients(List.of(Material.VINE.name()))
         .color("99ff66")
         .cookParticles(List.of("GREEN/2", "99ff99/20"))
         .build();
 
     ConfigCauldronIngredient rot_flesh = ConfigCauldronIngredient.builder()
         .name("Foul pest")
-        .ingredients(List.of("Rotten_Flesh"))
+        .ingredients(List.of(Material.ROTTEN_FLESH.name()))
         .color("263300")
         .cookParticles(List.of("263300/8", "BLACK/20"))
         .build();
 
     ConfigCauldronIngredient melon = ConfigCauldronIngredient.builder()
         .name("Melon juice")
-        .ingredients(List.of("melon_slice"))
+        .ingredients(List.of(Material.MELON_SLICE.name()))
         .build();
 
     ConfigCauldronIngredient wheat_seeds = ConfigCauldronIngredient.builder()
         .name("Bitter brew")
-        .ingredients(List.of("Wheat_Seeds"))
+        .ingredients(List.of(Material.WHEAT_SEEDS.name()))
         .build();
 
     ConfigCauldronIngredient melon_seeds = ConfigCauldronIngredient.builder()
         .name("Bitter brew")
-        .ingredients(List.of("Melon_Seeds"))
+        .ingredients(List.of(Material.MELON_SEEDS.name()))
         .build();
 
     ConfigCauldronIngredient pumpkin_seeds = ConfigCauldronIngredient.builder()
         .name("Bitter brew")
-        .ingredients(List.of("Pumpkin_Seeds"))
+        .ingredients(List.of(Material.PUMPKIN_SEEDS.name()))
         .build();
 
     ConfigCauldronIngredient bone_meal = ConfigCauldronIngredient.builder()
         .name("Bony Brew")
-        .ingredients(List.of("bone_meal"))
+        .ingredients(List.of(Material.BONE_MEAL.name()))
         .color("BRIGHT_GREY")
         .build();
 
     ConfigCauldronIngredient cookie = ConfigCauldronIngredient.builder()
         .name("Chocolately sap")
-        .ingredients(List.of("Cookie"))
+        .ingredients(List.of(Material.COOKIE.name()))
         .color("804600")
         .cookParticles(List.of("a26011/1", "5c370a/3", "4d4133/8"))
         .build();
 
     ConfigCauldronIngredient fer_spid_eye = ConfigCauldronIngredient.builder()
         .name("Fermented Eye")
-        .ingredients(List.of("Fermented_Spider_Eye"))
+        .ingredients(List.of(Material.FERMENTED_SPIDER_EYE.name()))
         .build();
 
     ConfigCauldronIngredient ghast_tear = ConfigCauldronIngredient.builder()
         .name("Sad brew")
-        .ingredients(List.of("ghast_tear"))
+        .ingredients(List.of(Material.GHAST_TEAR.name()))
         .build();
 
     ConfigCauldronIngredient snowball = ConfigCauldronIngredient.builder()
         .name("Icewater")
-        .ingredients(List.of("Snowball"))
+        .ingredients(List.of(Material.SNOWBALL.name()))
         .build();
 
     ConfigCauldronIngredient Gold_Nugget = ConfigCauldronIngredient.builder()
         .name("Glistering brew")
-        .ingredients(List.of("Gold_Nugget"))
+        .ingredients(List.of(Material.GOLD_NUGGET.name()))
         .color("ffd11a")
         .cookParticles(List.of("ffd11a"))
         .build();
 
     ConfigCauldronIngredient glowstone_dust = ConfigCauldronIngredient.builder()
         .name("Glowing brew")
-        .ingredients(List.of("Glowstone_Dust"))
+        .ingredients(List.of(Material.GLOWSTONE_DUST.name()))
         .color("ffff33")
         .cookParticles(List.of("ffff99/3", "d9d926/15"))
         .build();
 
     ConfigCauldronIngredient applemead_base = ConfigCauldronIngredient.builder()
         .name("Apple-Sugar brew")
-        .ingredients(List.of("Sugar_Cane/3", "Apple"))
+        .ingredients(List.of(Material.SUGAR_CANE.name() + "/3", Material.APPLE.name()))
         .color("e1ff4d")
         .cookParticles(List.of("e1ff4d/4"))
         .build();
 
     ConfigCauldronIngredient poi_grass = ConfigCauldronIngredient.builder()
         .name("Boiled acidy herbs")
-        .ingredients(List.of("Grass", "Poisonous_Potato"))
+        .ingredients(List.of(Material.SHORT_GRASS.name(), Material.POISONOUS_POTATO.name()))
         .color("99ff66")
         .cookParticles(List.of("GREEN/2", "99ff99/20"))
         .build();
 
     ConfigCauldronIngredient juniper = ConfigCauldronIngredient.builder()
         .name("Juniper brew")
-        .ingredients(List.of("blue-flowers", "wheat"))
+        .ingredients(List.of("blue-flowers", Material.WHEAT.name()))
         .color("00ccff")
         .cookParticles(List.of("00ccff/8"))
         .build();
 
     ConfigCauldronIngredient gin_base = ConfigCauldronIngredient.builder()
         .name("Fruity juniper brew")
-        .ingredients(List.of("blue-flowers", "wheat", "apple"))
+        .ingredients(List.of("blue-flowers", Material.WHEAT.name(), Material.APPLE.name()))
         .color("66e0ff")
         .cookParticles(List.of("00ccff/5"))
         .build();
 
     ConfigCauldronIngredient eggnog_base = ConfigCauldronIngredient.builder()
         .name("Smooth egg mixture")
-        .ingredients(List.of("egg", "sugar", "milk_bucket"))
+        .ingredients(List.of(Material.EGG.name(), Material.SUGAR.name(), Material.MILK_BUCKET.name()))
         .color("ffecb3")
         .cookParticles(List.of("ffecb3/2"))
         .build();
