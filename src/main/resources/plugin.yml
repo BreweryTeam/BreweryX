@@ -24,6 +24,7 @@ softdepend:
   - ItemsAdder
   - Nexo
   - Movecraft
+  - MMOItems
 commands:
   breweryx:
     description: Mostly admin commands to create/modify Brews and drunkenness
