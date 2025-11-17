@@ -43,7 +43,6 @@ public class Hook {
     public static final Hook LOGBLOCK = new Hook("LogBlock", config.isUseLogBlock());
     public static final Hook GAMEMODEINVENTORIES = new Hook("GameModeInventories", config.isUseGMInventories());
     public static final Hook MMOITEMS = new Hook("MMOItems");
-    public static final Hook VAULT = new Hook("Vault");
     public static final Hook CHESTSHOP = new Hook("ChestShop");
     public static final Hook SHOPKEEPERS = new Hook("ShopKeepers");
     public static final Hook SLIMEFUN = new Hook("Slimefun");

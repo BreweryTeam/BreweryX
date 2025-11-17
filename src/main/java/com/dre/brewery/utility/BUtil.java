@@ -481,17 +481,6 @@ public final class BUtil {
             if (drainSplit.length > 1) {
                 Material mat = MaterialUtil.getMaterialSafely(drainSplit[0]);
                 int strength = BUtil.parseIntOrZero(drainSplit[1]);
-//                if (mat == null && hasVault && strength > 0) {
-//                    try {
-//                        net.milkbowl.vault.item.ItemInfo vaultItem = net.milkbowl.vault.item.Items.itemByString(drainSplit[0]);
-//                        if (vaultItem != null) {
-//                            mat = vaultItem.getType();
-//                        }
-//                    } catch (Exception e) {
-//                        Logging.errorLog("Could not check vault for Item Name");
-//                        e.printStackTrace();
-//                    }
-//                }
                 if (mat != null && strength > 0) {
                     map.put(mat, strength);
                 }
