@@ -294,24 +294,7 @@ public class BRecipe implements Cloneable {
         if (matParts.length == 2) {
             durability = (short) BUtil.getRandomIntInRange(matParts[1]);
         }
-        if (mat == null && Hook.VAULT.isEnabled()) {
-            try {
-                net.milkbowl.vault.item.ItemInfo vaultItem = net.milkbowl.vault.item.Items.itemByString(matParts[0]);
-                if (vaultItem != null) {
-                    mat = vaultItem.getType();
-                    if (durability == -1 && vaultItem.getSubTypeId() != 0) {
-                        durability = vaultItem.getSubTypeId();
-                    }
-                    if (mat.name().contains("LEAVES")) {
-                        if (durability > 3) {
-                            durability -= 4; // Vault has leaves with higher durability
-                        }
-                    }
-                }
-            } catch (Throwable e) {
-                Logging.errorLog("Could not check vault for Item Name", e);
-            }
-        }
+
         if (mat != null) {
             RecipeItem rItem;
             if (durability > -1) {

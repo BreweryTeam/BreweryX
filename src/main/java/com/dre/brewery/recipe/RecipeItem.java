@@ -256,16 +256,6 @@ public abstract class RecipeItem implements Cloneable, DebuggableItem {
                 continue;
             }
 
-            if (mat == null && Hook.VAULT.isEnabled()) {
-                try {
-                    net.milkbowl.vault.item.ItemInfo vaultItem = net.milkbowl.vault.item.Items.itemByString(ingredParts[0]);
-                    if (vaultItem != null) {
-                        mat = vaultItem.getType();
-                    }
-                } catch (Exception e) {
-                    Logging.errorLog("Could not check vault for Item Name", e);
-                }
-            }
             if (mat != null) {
                 materials.add(mat);
             } else {

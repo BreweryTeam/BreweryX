@@ -48,7 +48,6 @@ repositories {
     maven("https://jitpack.io") // GriefPrevention, SlimeFun, PlaceholderAPI
     maven("https://repo.md-5.net/content/groups/public/") // Bungee
     maven("https://hub.spigotmc.org/nexus/content/repositories/snapshots/") // Spigot
-    maven("https://nexus.hc.to/content/repositories/pub_releases") // Vault
     maven("https://maven.enginehub.org/repo/") // WorldEdit, WorldGuard
     maven("https://ci.ender.zone/plugin/repository/everything/") // LWC Extended
     maven("https://repo.minebench.de/") // ChestShop
@@ -98,7 +97,6 @@ dependencies {
     }
 
     // Plugin Compatability
-    compileOnly("net.milkbowl.vault:VaultAPI:1.6")
     compileOnly("com.sk89q:worldguard:6.1") // https://dev.bukkit.org/projects/worldedit/files
     compileOnly("com.sk89q.worldguard:worldguard-bukkit:7.0.7")
     compileOnly("com.sk89q.worldedit:worldedit-bukkit:7.3.0-SNAPSHOT") // https://dev.bukkit.org/projects/worldedit/files
