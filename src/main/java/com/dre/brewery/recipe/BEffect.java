@@ -22,6 +22,7 @@ package com.dre.brewery.recipe;
 
 import com.dre.brewery.BreweryPlugin;
 import com.dre.brewery.utility.BUtil;
+import com.dre.brewery.utility.BukkitConstants;
 import com.dre.brewery.utility.Logging;
 import com.dre.brewery.utility.MinecraftVersion;
 import org.bukkit.entity.Player;
@@ -63,7 +64,7 @@ public class BEffect implements Cloneable {
             hidden = true;
             effect = effect.substring(0, effect.length() - 1);
         }
-        type = PotionEffectType.getByName(effect);
+        type = BukkitConstants.nullablePotionEffectType(effect.toLowerCase());
         if (type == null) {
             Logging.errorLog("Effect: " + effect + " does not exist!");
             return;

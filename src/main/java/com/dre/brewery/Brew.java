@@ -38,6 +38,7 @@ import com.dre.brewery.recipe.BRecipe;
 import com.dre.brewery.recipe.BestRecipeResult;
 import com.dre.brewery.recipe.PotionColor;
 import com.dre.brewery.utility.BUtil;
+import com.dre.brewery.utility.BukkitConstants;
 import com.dre.brewery.utility.Logging;
 import com.dre.brewery.utility.MinecraftVersion;
 import lombok.Getter;
@@ -152,7 +153,7 @@ public class Brew implements Cloneable {
 
         Brew brew = load(meta);
 
-        if (brew == null && meta instanceof PotionMeta && ((PotionMeta) meta).hasCustomEffect(PotionEffectType.REGENERATION)) {
+        if (brew == null && meta instanceof PotionMeta && ((PotionMeta) meta).hasCustomEffect(BukkitConstants.REGENERATION)) {
             // Load Legacy
             return getFromPotionEffect(((PotionMeta) meta), false);
         }
@@ -176,7 +177,7 @@ public class Brew implements Cloneable {
 
         Brew brew = load(meta);
 
-        if (brew == null && meta instanceof PotionMeta && ((PotionMeta) meta).hasCustomEffect(PotionEffectType.REGENERATION)) {
+        if (brew == null && meta instanceof PotionMeta && ((PotionMeta) meta).hasCustomEffect(BukkitConstants.REGENERATION)) {
             // Load Legacy and convert
             brew = getFromPotionEffect(((PotionMeta) meta), true);
             if (brew == null) return null;
@@ -198,12 +199,12 @@ public class Brew implements Cloneable {
     // Legacy Brew Loading
     private static Brew getFromPotionEffect(PotionMeta potionMeta, boolean remove) {
         for (PotionEffect effect : potionMeta.getCustomEffects()) {
-            if (effect.getType().equals(PotionEffectType.REGENERATION)) {
+            if (effect.getType().equals(BukkitConstants.REGENERATION)) {
                 if (effect.getDuration() < -1) {
                     if (remove) {
                         Brew b = legacyPotions.get(effect.getDuration());
                         if (b != null) {
-                            potionMeta.removeCustomEffect(PotionEffectType.REGENERATION);
+                            potionMeta.removeCustomEffect(BukkitConstants.REGENERATION);
                             if (b.persistent) {
                                 return b;
                             } else {
@@ -258,9 +259,9 @@ public class Brew implements Cloneable {
      */
     @Deprecated
     public static int getUID(PotionMeta potionMeta) {
-        if (potionMeta.hasCustomEffect(PotionEffectType.REGENERATION)) {
+        if (potionMeta.hasCustomEffect(BukkitConstants.REGENERATION)) {
             for (PotionEffect effect : potionMeta.getCustomEffects()) {
-                if (effect.getType().equals(PotionEffectType.REGENERATION)) {
+                if (effect.getType().equals(BukkitConstants.REGENERATION)) {
                     if (effect.getDuration() < -1) {
                         return effect.getDuration();
                     }

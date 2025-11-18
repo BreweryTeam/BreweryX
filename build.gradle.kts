@@ -38,7 +38,7 @@ plugins {
 }
 
 group = "com.dre.brewery"
-version = "3.6.0"
+version = "3.6.1"
 val langVersion: Int = 21
 val encoding: String = "UTF-8"
 
@@ -65,7 +65,7 @@ repositories {
 
 dependencies {
     // Spigot
-    compileOnly("org.spigotmc:spigot-api:1.20.2-R0.1-SNAPSHOT") {
+    compileOnly("org.spigotmc:spigot-api:1.21.10-R0.1-SNAPSHOT") {
         exclude("com.google.code.gson", "gson") // Implemented manually
     }
     // Paper Lib, performance improvements on Paper-based servers and async teleporting on Folia
@@ -185,7 +185,7 @@ tasks {
     }
 
     runServer {
-        minecraftVersion("1.21.4")
+        minecraftVersion("1.20.4")
     }
 
     register("publishToDiscord") {
@@ -264,7 +264,7 @@ modrinth {
         "1.20.2", "1.20.3", "1.20.4", "1.20.5",
         "1.20.6", "1.21", "1.21.1", "1.21.2",
         "1.21.3", "1.21.4", "1.21.5", "1.21.6",
-        "1.21.7", "1.21.8"
+        "1.21.7", "1.21.8", "1.21.9", "1.21.10"
     )
     changelog.set(readChangeLog())
 }
@@ -384,7 +384,7 @@ class DiscordWebhook(
         var description = embedDescription
         while (description.isNotEmpty()) {
             val chunkLength = minOf(MAX_EMBED_DESCRIPTION_LENGTH, description.length)
-            val chunk = description.substring(0, chunkLength)
+            val chunk = description.take(chunkLength)
             description = description.substring(chunkLength)
             embeds.add(JsonObject().apply {
                 addProperty("title", embedTitle)
@@ -416,7 +416,7 @@ class DiscordWebhook(
 
             val responseCode = connection.responseCode
             println("POST Response Code :: $responseCode")
-            if (responseCode == HttpURLConnection.HTTP_OK) {
+            if (responseCode in 200 until 300) {
                 println("Message sent successfully.")
             } else {
                 println("Failed to send message.")

@@ -30,6 +30,7 @@ import com.dre.brewery.configuration.files.Lang;
 import com.dre.brewery.lore.BrewLore;
 import com.dre.brewery.recipe.BEffect;
 import com.dre.brewery.utility.BUtil;
+import com.dre.brewery.utility.BukkitConstants;
 import com.dre.brewery.utility.Logging;
 import com.dre.brewery.utility.MinecraftVersion;
 import com.dre.brewery.utility.PermissionUtil;
@@ -619,7 +620,7 @@ public class BPlayer {
         if (event.isCancelled() || event.getCount() < 1) {
             return;
         }
-        BUtil.reapplyPotionEffect(player, PotionEffectType.HUNGER.createEffect(80, 4), true);
+        BUtil.reapplyPotionEffect(player, BukkitConstants.HUNGER.createEffect(80, 4), true);
 
         if (pTasks.isEmpty()) {
             task = BreweryPlugin.getScheduler().runTaskTimer(player, BPlayer::pukeTask, 1L, 1L);
@@ -716,7 +717,7 @@ public class BPlayer {
             duration *= 4;
         }
         List<PotionEffect> l = new ArrayList<>(1);
-        l.add(PotionEffectType.CONFUSION.createEffect(duration, 0));
+        l.add(BukkitConstants.NAUSEA.createEffect(duration, 0));
 
         PlayerEffectEvent event = new PlayerEffectEvent(player, PlayerEffectEvent.EffectType.ALCOHOL, l);
         BreweryPlugin.getInstance().getServer().getPluginManager().callEvent(event);
@@ -746,7 +747,7 @@ public class BPlayer {
             duration *= 4;
         }
         if (duration > 0) {
-            out.add(PotionEffectType.POISON.createEffect(duration, 0));
+            out.add(BukkitConstants.POISON.createEffect(duration, 0));
         }
 
         if (brewAlc > 10) {
@@ -760,7 +761,7 @@ public class BPlayer {
             if (VERSION.isOrEarlier(MinecraftVersion.V1_14)) {
                 duration *= 4;
             }
-            out.add(PotionEffectType.BLINDNESS.createEffect(duration, 0));
+            out.add(BukkitConstants.BLINDNESS.createEffect(duration, 0));
         }
         return out;
     }
@@ -808,8 +809,8 @@ public class BPlayer {
         int amplifier = getHangoverQuality() / 3;
 
         List<PotionEffect> list = new ArrayList<>(2);
-        list.add(PotionEffectType.SLOW.createEffect(duration, amplifier));
-        list.add(PotionEffectType.HUNGER.createEffect(duration, amplifier));
+        list.add(BukkitConstants.SLOWNESS.createEffect(duration, amplifier));
+        list.add(BukkitConstants.HUNGER.createEffect(duration, amplifier));
 
         PlayerEffectEvent event = new PlayerEffectEvent(player, PlayerEffectEvent.EffectType.HANGOVER, list);
         BreweryPlugin.getInstance().getServer().getPluginManager().callEvent(event);
