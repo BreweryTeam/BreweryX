@@ -22,6 +22,7 @@ package com.dre.brewery.recipe;
 
 import com.dre.brewery.BreweryPlugin;
 import com.dre.brewery.utility.BukkitConstants;
+import com.dre.brewery.utility.ClassUtil;
 import com.dre.brewery.utility.MinecraftVersion;
 import lombok.Getter;
 import org.bukkit.Color;
@@ -88,7 +89,7 @@ public class PotionColor {
             // We need to Hide Potion Effects even in 1.12, as it would otherwise show "No Effects"
 
             // Hide potion effects but keep lore visible
-            meta.addItemFlags(ItemFlag.HIDE_ADDITIONAL_TOOLTIP, ItemFlag.HIDE_ATTRIBUTES);
+            hidePotionEffects(meta);
             if (VERSION.isOrLater(MinecraftVersion.V1_11)) {
                 // BasePotionData was only used for the Color, so starting with 1.12 we can use setColor instead
                 meta.setColor(getColor());
@@ -99,6 +100,15 @@ public class PotionColor {
             potion.setDurability(getColorId(destillable));
             // To stop 1.8 from showing the potioneffect for the color id, add a dummy Effect
             meta.addCustomEffect(BukkitConstants.REGENERATION.createEffect(0, 0), true);
+        }
+    }
+
+    private void hidePotionEffects(PotionMeta meta) {
+        if (!ClassUtil.fieldExists("org.bukkit.inventory.ItemFlag", "HIDE_ADDITIONAL_TOOLTIP") ||
+            !ClassUtil.fieldExists("org.bukkit.inventory.ItemFlag", "HIDE_ATTRIBUTES")) {
+            meta.addItemFlags(ItemFlag.values());
+        } else {
+            meta.addItemFlags(ItemFlag.HIDE_ADDITIONAL_TOOLTIP, ItemFlag.HIDE_ATTRIBUTES);
         }
     }
 
