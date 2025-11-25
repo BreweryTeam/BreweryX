@@ -24,7 +24,6 @@ import com.dre.brewery.utility.Logging;
 import com.dre.brewery.utility.releases.ReleaseChecker;
 
 import java.io.IOException;
-import java.net.URI;
 import java.net.URL;
 import java.util.Scanner;
 import java.util.concurrent.CompletableFuture;
@@ -45,7 +44,7 @@ public class SpigotReleaseChecker extends ReleaseChecker {
     @Override
     public CompletableFuture<String> resolveLatest() {
         return CompletableFuture.supplyAsync(() -> {
-            try (Scanner scanner = new Scanner(URI.create(link).toURL().openStream())) {
+            try (Scanner scanner = new Scanner(new URL(link).openStream())) {
                 if (scanner.hasNext()) {
                     this.resolvedLatestVersion = scanner.next();
                     return this.resolvedLatestVersion;
