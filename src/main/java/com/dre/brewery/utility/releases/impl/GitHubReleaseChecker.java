@@ -50,25 +50,24 @@ public class GitHubReleaseChecker extends ReleaseChecker {
 
     @Override
     public CompletableFuture<String> resolveLatest() {
-        try (HttpClient client = HttpClient.newHttpClient()) {
-            HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(link))
-                .GET()
-                .build();
+        HttpClient client = HttpClient.newHttpClient();
+        HttpRequest request = HttpRequest.newBuilder()
+            .uri(URI.create(link))
+            .GET()
+            .build();
 
-            return CompletableFuture.supplyAsync(() -> {
-                try {
-                    HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-                    JsonObject jsonResponse = JsonParser.parseString(response.body()).getAsJsonObject();
-                    this.resolvedLatestVersion = jsonResponse.get(CONST_JSON_FIELD).getAsString();
-                    return this.resolvedLatestVersion;
-                } catch (IOException | InterruptedException e) {
-                    Logging.warningLog("Failed to resolve latest BreweryX version from GitHub. (No connection?)");
-                    this.resolvedLatestVersion = CONST_UNRESOLVED;
-                    return CONST_UNRESOLVED;
-                }
-            });
-        }
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+                JsonObject jsonResponse = JsonParser.parseString(response.body()).getAsJsonObject();
+                this.resolvedLatestVersion = jsonResponse.get(CONST_JSON_FIELD).getAsString();
+                return this.resolvedLatestVersion;
+            } catch (IOException | InterruptedException e) {
+                Logging.warningLog("Failed to resolve latest BreweryX version from GitHub. (No connection?)");
+                this.resolvedLatestVersion = CONST_UNRESOLVED;
+                return CONST_UNRESOLVED;
+            }
+        });
     }
 
     @Override
