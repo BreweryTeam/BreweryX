@@ -29,7 +29,6 @@ import com.dre.brewery.configuration.ConfigManager;
 import com.dre.brewery.configuration.files.CustomItemsFile;
 import com.dre.brewery.configuration.files.Lang;
 import com.dre.brewery.configuration.sector.capsule.ConfigRecipe;
-import com.dre.brewery.integration.Hook;
 import com.dre.brewery.integration.PlaceholderAPIHook;
 import com.dre.brewery.utility.BUtil;
 import com.dre.brewery.utility.Logging;
@@ -124,83 +123,88 @@ public class BRecipe implements Cloneable {
 
     @Nullable
     public static BRecipe fromConfig(String recipeId, ConfigRecipe configRecipe) {
-        BRecipe recipe = new BRecipe();
-        recipe.id = recipeId;
-        String nameList = configRecipe.getName();
-        if (nameList != null) {
-            String[] name = nameList.split("/");
-            if (name.length > 2) {
-                recipe.name = name;
-            } else {
-                recipe.name = new String[1];
-                recipe.name[0] = name[0];
-            }
-        } else {
-            Logging.errorLog(recipeId + ": Recipe Name missing or invalid!");
-            return null;
-        }
-        if (recipe.getRecipeName() == null || recipe.getRecipeName().isEmpty()) {
-            Logging.errorLog(recipeId + ": Recipe Name invalid");
-            return null;
-        }
-
-        recipe.ingredients = loadIngredients(configRecipe.getIngredients(), recipeId);
-        if (recipe.ingredients == null || recipe.ingredients.isEmpty()) {
-            Logging.errorLog("No ingredients for: " + recipe.getRecipeName());
-            return null;
-        }
-        recipe.cookingTime = configRecipe.getCookingTime() != null ? configRecipe.getCookingTime() : 0;
-        int dis = configRecipe.getDistillRuns() != null ? configRecipe.getDistillRuns() : 0;
-        if (dis > Byte.MAX_VALUE) {
-            recipe.distillruns = Byte.MAX_VALUE;
-        } else {
-            recipe.distillruns = (byte) dis;
-        }
-        recipe.distillTime = (configRecipe.getDistillTime() != null ? configRecipe.getDistillTime() : 0) * 20;
-        recipe.setBarrelTypes(BarrelWoodType.listFromAny(configRecipe.getWood()));
-        recipe.age = configRecipe.getAge() != null ? configRecipe.getAge() : 0;
-        recipe.difficulty = configRecipe.getDifficulty() != null ? configRecipe.getDifficulty() : 0;
-        recipe.alcohol = configRecipe.getAlcohol() != null ? configRecipe.getAlcohol() : 0;
-
-        String col = configRecipe.getColor() != null ? configRecipe.getColor() : "BLUE";
-        recipe.color = PotionColor.fromString(col);
-        if (recipe.color == PotionColor.WATER && !col.equals("WATER")) {
-            Logging.errorLog("Invalid Color '" + col + "' in Recipe: " + recipe.getRecipeName());
-            return null;
-        }
-
-        recipe.lore = loadQualityStringList(BUtil.getListSafely(configRecipe.getLore()), StringParser.ParseType.LORE);
-
-        recipe.servercmds = loadQualityStringList(configRecipe.getServerCommands(), StringParser.ParseType.CMD);
-        recipe.playercmds = loadQualityStringList(configRecipe.getPlayerCommands(), StringParser.ParseType.CMD);
-
-        recipe.drinkMsg = BUtil.color(configRecipe.getDrinkMessage());
-        recipe.drinkTitle = BUtil.color(configRecipe.getDrinkTitle());
-        recipe.glint = configRecipe.getGlint() != null ? configRecipe.getGlint() : false;
-
-        if (configRecipe.getCustomModelData() != null) {
-            String[] cmdParts = configRecipe.getCustomModelData().split("/");
-            int[] cmData = new int[3];
-            for (int i = 0; i < 3; i++) {
-                if (cmdParts.length > i) {
-                    cmData[i] = BUtil.getRandomIntInRange(cmdParts[i]);
+        try {
+            BRecipe recipe = new BRecipe();
+            recipe.id = recipeId;
+            String nameList = configRecipe.getName();
+            if (nameList != null) {
+                String[] name = nameList.split("/");
+                if (name.length > 2) {
+                    recipe.name = name;
                 } else {
-                    cmData[i] = i == 0 ? 0 : cmData[i - 1];
+                    recipe.name = new String[1];
+                    recipe.name[0] = name[0];
+                }
+            } else {
+                Logging.errorLog(recipeId + ": Recipe Name missing or invalid!");
+                return null;
+            }
+            if (recipe.getRecipeName() == null || recipe.getRecipeName().isEmpty()) {
+                Logging.errorLog(recipeId + ": Recipe Name invalid");
+                return null;
+            }
+
+            recipe.ingredients = loadIngredients(configRecipe.getIngredients(), recipeId);
+            if (recipe.ingredients == null || recipe.ingredients.isEmpty()) {
+                Logging.errorLog("No ingredients for: " + recipe.getRecipeName());
+                return null;
+            }
+            recipe.cookingTime = configRecipe.getCookingTime() != null ? configRecipe.getCookingTime() : 0;
+            int dis = configRecipe.getDistillRuns() != null ? configRecipe.getDistillRuns() : 0;
+            if (dis > Byte.MAX_VALUE) {
+                recipe.distillruns = Byte.MAX_VALUE;
+            } else {
+                recipe.distillruns = (byte) dis;
+            }
+            recipe.distillTime = (configRecipe.getDistillTime() != null ? configRecipe.getDistillTime() : 0) * 20;
+            recipe.setBarrelTypes(BarrelWoodType.listFromAny(configRecipe.getWood()));
+            recipe.age = configRecipe.getAge() != null ? configRecipe.getAge() : 0;
+            recipe.difficulty = configRecipe.getDifficulty() != null ? configRecipe.getDifficulty() : 0;
+            recipe.alcohol = configRecipe.getAlcohol() != null ? configRecipe.getAlcohol() : 0;
+
+            String col = configRecipe.getColor() != null ? configRecipe.getColor() : "BLUE";
+            recipe.color = PotionColor.fromString(col);
+            if (recipe.color == PotionColor.WATER && !col.equals("WATER")) {
+                Logging.errorLog("Invalid Color '" + col + "' in Recipe: " + recipe.getRecipeName());
+                return null;
+            }
+
+            recipe.lore = loadQualityStringList(BUtil.getListSafely(configRecipe.getLore()), StringParser.ParseType.LORE);
+
+            recipe.servercmds = loadQualityStringList(configRecipe.getServerCommands(), StringParser.ParseType.CMD);
+            recipe.playercmds = loadQualityStringList(configRecipe.getPlayerCommands(), StringParser.ParseType.CMD);
+
+            recipe.drinkMsg = BUtil.color(configRecipe.getDrinkMessage());
+            recipe.drinkTitle = BUtil.color(configRecipe.getDrinkTitle());
+            recipe.glint = configRecipe.getGlint() != null ? configRecipe.getGlint() : false;
+
+            if (configRecipe.getCustomModelData() != null) {
+                String[] cmdParts = configRecipe.getCustomModelData().split("/");
+                int[] cmData = new int[3];
+                for (int i = 0; i < 3; i++) {
+                    if (cmdParts.length > i) {
+                        cmData[i] = BUtil.getRandomIntInRange(cmdParts[i]);
+                    } else {
+                        cmData[i] = i == 0 ? 0 : cmData[i - 1];
+                    }
+                }
+                recipe.cmData = cmData;
+            }
+
+            List<String> effectStringList = configRecipe.getEffects() != null ? configRecipe.getEffects() : Collections.emptyList();
+            for (String effectString : effectStringList) {
+                BEffect effect = new BEffect(effectString);
+                if (effect.isValid()) {
+                    recipe.effects.add(effect);
+                } else {
+                    Logging.errorLog("Error adding Effect to Recipe: " + recipe.getRecipeName());
                 }
             }
-            recipe.cmData = cmData;
+            return recipe;
+        } catch (Throwable e) {
+            Logging.errorLog("Could not read recipe: " + recipeId, e);
+            return null;
         }
-
-        List<String> effectStringList = configRecipe.getEffects() != null ? configRecipe.getEffects() : Collections.emptyList();
-        for (String effectString : effectStringList) {
-            BEffect effect = new BEffect(effectString);
-            if (effect.isValid()) {
-                recipe.effects.add(effect);
-            } else {
-                Logging.errorLog("Error adding Effect to Recipe: " + recipe.getRecipeName());
-            }
-        }
-        return recipe;
     }
 
     public static List<RecipeItem> loadIngredients(ConfigurationSection cfg, String recipeId) {
@@ -312,8 +316,11 @@ public class BRecipe implements Cloneable {
     }
 
     public sealed interface IngredientResult {
-        record Success(RecipeItem ingredient) implements IngredientResult {}
-        record Error(IngredientError error, String invalidPart) implements IngredientResult {}
+        record Success(RecipeItem ingredient) implements IngredientResult {
+        }
+
+        record Error(IngredientError error, String invalidPart) implements IngredientResult {
+        }
     }
 
     @AllArgsConstructor
@@ -420,6 +427,7 @@ public class BRecipe implements Cloneable {
 
     /**
      * Gets the <strong>primary</strong> barrel type out of all supported.
+     *
      * @return the barrel type
      * @see #getBarrelTypes() for the full list
      */
@@ -486,6 +494,7 @@ public class BRecipe implements Cloneable {
         }
         return false;
     }
+
     public List<RecipeItem> getMissingIngredients(List<Ingredient> list) {
         List<RecipeItem> missing = new ArrayList<>();
         for (RecipeItem rItem : ingredients) {
