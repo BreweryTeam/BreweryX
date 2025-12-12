@@ -51,6 +51,7 @@ public enum MinecraftVersion {
     V1_20_4("1.20.4", "1.20.3"), // 1.20.4 & 1.20.3 are one and the same
     V1_21("1.21", "1.20.5", "1.20.6"), // 1.20.5, 1.20.6, & 1.21 are being used the same way in BreweryX.
     V1_21_10("1.21.10", "1.21.9"), // 1.21.10 & 1.21.9 are one and the same
+    V1_21_11("1.21.11"),
     UNKNOWN("Unknown");
 
 
