@@ -1,0 +1,194 @@
+# Polish lang translation for BreweryX
+# Author: Bogdantheloser
+# Brew
+Brew_times: razy
+Brew_BadPotion: Zepsuty Napar
+Brew_BarrelRiped: Leżakowany w beczce
+Brew_DistillUndefined: Mętny Destylat
+Brew_Distilled: Destylowany
+Brew_LessDistilled: Słabo Destylowany
+Brew_HundredsOfYears: Setki Lat
+Brew_Ingredients: Składniki
+Brew_MinutePluralPostfix: ''
+Brew_OneYear: Jeden Rok
+Brew_ThickBrew: Błotnisty Napar
+Brew_Undefined: Napar z Kotła
+Brew_Woodtype: Typ Beczki
+Brew_Years: Lat
+Brew_fermented: sfermentowany
+Brew_minute: min.
+Brew_Alc: Alk. &v1ml
+Brew_Alcoholic: Alkoholowy
+Brew_Brewer: 'Warzony przez: &v1'
+
+# CMD
+CMD_Copy_Error: '&6&v1 &cWięcej mikstur nie zmieściło się w twoim ekwipunku'
+CMD_Info_Drunk: '&v1 jest &6&v2% &fpijany, jakość naparu: &6&v3'
+CMD_Info_NotDrunk: '&v1 nie jest pijany'
+CMD_NonStatic: '&eMikstura nie jest już statyczna i będzie normalnie dojrzewać w beczkach.'
+CMD_Player: '&a&v1 jest teraz &6&v2% &apijany, jakość: &6&v3'
+CMD_Player_Error: '&cJakość musi wynosić od 1 do 10!'
+CMD_Reload: '&aKonfiguracja została przeładowana pomyślnie!'
+CMD_Created: '&aNapar stworzony!'
+CMD_Configname: '&aNazwa dla Konfiguracji to: &f&v1'
+CMD_Configname_Error: '&cNie znaleziono przedmiotu w ręce'
+CMD_Static: '&aMikstura jest teraz statyczna i nie zmieni się w beczkach ani w statywach alchemicznych.'
+CMD_UnLabel: '&aEtykieta usunięta!'
+CMD_Drink: '&aWypito jeden &v1'
+CMD_DrinkOther: '&a&v1 pije jeden &v2'
+CMD_Set: '&aPomyślnie ustawiono upicie gracza &v1 na &v2 z jakością &v3.'
+CMD_Simulated: '&aStworzono Symulowany Napar'
+CMD_Distilled: '&aNapar destylowany &v1 razy'
+CMD_Aged: '&aNapar leżakowany przez &v1 lat'
+CMD_Invalid_Option: '&c"&v1" nie jest poprawną opcją'
+CMD_Duplicate_Option: '&cZduplikowana opcja "&v1"'
+CMD_Invalid_Cook_Time: '&cCzas gotowania "&v1" musi być dodatnią liczbą całkowitą'
+CMD_Invalid_Distill_Runs: '&cLiczba destylacji "&v1" musi być dodatnią liczbą całkowitą'
+CMD_Invalid_Wood_Type: '&cNieprawidłowy typ beczki "&v1"'
+CMD_Invalid_Age_Time: '&cCzas leżakowania "&v1" musi być liczbą dodatnią'
+CMD_Ingredient: 'składnik'
+CMD_Invalid_Ingredient: '&c"&v1" nie jest prawidłowym składnikiem, czy chodziło o "&v2/&v1"?'
+CMD_Missing_Cook_Time: '&cSymulacja musi posiadać opcję "--cook" lub "--recipe"'
+CMD_Missing_Ingredients: '&cSymulacja musi zawierać co najmniej jeden składnik'
+CMD_Cannot_Distill: '&cTych składników nie można destylować'
+CMD_Distill_Ruined: '&eNapar został zniszczony w procesie destylacji'
+CMD_Age_Ruined: '&eNapar został zniszczony w procesie leżakowania'
+
+# Defects
+Defect_WrongIngredient:
+  - 'Jest tu coś, czego nie powinno tu być...'
+  - 'Jeden ze składników nie smakuje dobrze...'
+Defect_MissingIngredient:
+  - 'Wygląda na to, że czegoś brakuje...'
+  - 'Potrzeba czegoś więcej...'
+Defect_LowCount:
+  - 'Ledwo czuć jeden ze składników...'
+  - 'Smak jednego ze składników jest zbyt słaby...'
+Defect_HighCount:
+  - 'Jeden ze składników dominuje...'
+  - 'Smak jednego ze składników jest zbyt silny...'
+Defect_NeedsDistill:
+  - 'To wymaga destylacji...'
+Defect_NeedsDistillAlc:
+  - 'Nie czuć alkoholu...'
+Defect_BadDistill:
+  - 'Napar wyparował...'
+  - 'Smak zniknął...'
+Defect_Uncooked:
+  - 'To jest wciąż surowe...'
+  - 'Za mało czasu w piecu...'
+Defect_Overcooked:
+  - 'To jest spalone...'
+  - 'Za dużo czasu w piecu...'
+Defect_UnderAged:
+  - 'To wymaga fermentacji...'
+  - 'Napar smakuje zbyt ostro...'
+Defect_OverAged:
+  - 'Ten napar śmierdzi stęchlizną...'
+  - 'Ten napar jest starożytny...'
+Defect_OverAgedAlc:
+  - 'Ten napar śmierdzi jak ocet...'
+  - 'Ten napar jest starożytny...'
+Defect_BadAged:
+  - 'Ten napar nie powinien był być leżakowany...'
+Defect_WrongWood:
+  - 'Smakuje zbyt mocno jak &v1...'
+  - '&v1 dominuje w smaku...'
+Defect_NoRecipesRegistered:
+  - 'Ten wszechświat nie wspiera warzenia...'
+
+# Error
+Error_ConfigUpdate: 'Nieznana wersja konfiguracji Brewery: v&v1, config nie został zaktualizowany!'
+Error_ItemNotPotion: '&cPrzedmiot w twojej ręce nie został rozpoznany jako mikstura!'
+Error_SealingTableDisabled: '&cStół do Pieczętowania jest wyłączony'
+Error_SealedAlwaysStatic: 'Opieczętowane Napary są zawsze statyczne!'
+Error_AlreadyUnlabeled: '&cNapar w twojej ręce nie ma już etykiety!'
+Error_NoBarrelAccess: '&cNie masz uprawnień, aby otworzyć tę beczkę!'
+Error_NoBrewName: '&cNie znaleziono przepisu o nazwie: ''&v1&c''!'
+Error_NoPermissions: '&cNie masz uprawnień, aby to zrobić!'
+Error_PlayerCommand: '&cTa komenda może być wykonana tylko przez gracza!'
+Error_Recipeload: '&cNie wszystkie przepisy mogły zostać przywrócone: Więcej informacji w logach serwera!'
+Error_ShowHelp: Użyj &6/brew help &faby wyświetlić pomoc
+Error_UnknownCommand: Nieznana Komenda
+Error_YmlRead: 'Nie można odczytać pliku config.yml, upewnij się, że plik ma poprawny format yml (poprawne spacje, użycie '' '' itp.)'
+Error_NoPlayer: '&cGracz nie znaleziony: &v1'
+Error_InvalidAmount: '&cNieprawidłowa ilość: &v1'
+Error_InvalidPluginItem: '&cNie można znaleźć przedmiotu pluginu: &v1'
+Error_InvalidMaterial: '&cNie można znaleźć materiału: &v1'
+Error_MissingBarrelType: '&cNieprawidłowy Typ Beczki'
+
+# Etc
+Etc_Barrel: Beczka
+Etc_Page: Strona
+Etc_Usage: 'Użycie:'
+Etc_SealingTable: Stół do Pieczętowania Naparów
+Etc_NewRelease: '&rDostępna jest nowa wersja BreweryX! &2&v1 &r-> &2&v2&r Pobierz&7: &2&v3'
+Etc_LandsFlag_Title: 'Dostęp do Beczek'
+Etc_LandsFlag_Description: '&r&7Pozwala na otwieranie\n&r&7beczek BreweryX.'
+
+# Help
+Help_Copy: '&6/brew copy [Ilość]&9 Kopiuje miksturę trzymaną w ręce'
+Help_Create: '&6/brew create <Przepis> [Jakość] [Gracz] &9Tworzy Napar o opcjonalnej jakości (1-10)'
+Help_Give: '&6/brew give <Przepis> [Jakość] [Gracz] &9To samo co /brew create'
+Help_Distill: '&6/brew distill [Ilość] &9Destyluje miksturę trzymaną w ręce'
+Help_Age: '&6/brew age <Typ Beczki> <Czas> &9Leżakuje miksturę trzymaną w ręce'
+Help_Simulate: '&6/brew simulate <Opcje...> [Składniki...] &9Symuluje warzenie'
+Help_Simulate_Options: '&eOpcje:'
+Help_Simulate_Recipe: '&6-r/--recipe <Przepis>'
+Help_Simulate_Cook: '&6-c/--cook <Czas Gotowania>'
+Help_Simulate_Distill: '&6-d/--distill <Ilość Destylacji>'
+Help_Simulate_Age: '&6-a/--age <Typ Beczki> <Czas Leżakowania>'
+Help_Simulate_Brewer: '&6-b/--brewer <Gracz>'
+Help_Simulate_Player: '&6-p/--player <Gracz>'
+Help_Delete: '&6/brew delete &9Usuwa miksturę trzymaną w ręce'
+Help_Help: '&6/brew help [Strona] &9Pokazuje konkretną stronę pomocy'
+Help_Info: '&6/brew info&9 Wyświetla twoje aktualne Upicie i Jakość'
+Help_InfoOther: '&6/brew info [Gracz]&9 Wyświetla aktualne Upicie i Jakość [Gracza]'
+Help_Reload: '&6/brew reload &9Przeładowuje konfigurację'
+Help_Configname: '&6/brew ItemName &9Wyświetla nazwę przedmiotu w ręce dla konfiguracji'
+Help_Static: '&6/brew static &9Czyni Napar statycznym -> Brak dalszego leżakowania lub destylacji'
+Help_Set: '&6/brew set <gracz> <upicie> [jakość] &9Ustawia Upicie (i Jakość) Gracza'
+Help_UnLabel: '&6/brew unlabel &9Usuwa szczegółową etykietę mikstury'
+Help_Seal: '&6/brew seal &9Pieczętuje Napary do sprzedaży w sklepach'
+Help_Wakeup: '&6/brew wakeup list <Strona>&9 Wyświetla listę wszystkich punktów przebudzenia'
+Help_WakeupAdd: '&6/brew wakeup add &9Dodaje punkt przebudzenia w twojej obecnej pozycji'
+Help_WakeupCheck: '&6/brew wakeup check &9Teleportuje do wszystkich punktów przebudzenia'
+Help_WakeupCheckSpecific: '&6/brew wakeup check <id> &9Teleportuje do punktu przebudzenia o podanym <id>'
+Help_WakeupList: '&6/brew wakeup list <Strona> [Świat]&9 Wyświetla listę punktów przebudzenia w <świecie>'
+Help_WakeupRemove: '&6/brew wakeup remove <id> &9Usuwa punkt przebudzenia o podanym <id>'
+Help_Puke: '&6/brew puke [Gracz] [Ilość] &9Sprawia, że ty lub [Gracz] wymiotujecie'
+Help_Drink: '&6/brew drink <Przepis> [Jakość] [Gracz] &9Symuluje wypicie Naparu przez [Gracza]'
+
+# Perms
+Perms_NoBarrelCreate: '&cNie masz uprawnień do tworzenia beczek!'
+Perms_NoBigBarrelCreate: '&cNie masz uprawnień do tworzenia dużych beczek!'
+Perms_NoCauldronFill: '&cNie masz uprawnień do napełniania butelek z tego kotła!'
+Perms_NoCauldronInsert: '&cNie masz uprawnień do wkładania składników do kotłów!'
+Perms_NoSmallBarrelCreate: '&cNie masz uprawnień do tworzenia małych beczek!'
+
+# Player
+Player_BarrelCreated: Beczka stworzona
+Player_BarrelFull: '&cW tej beczce nie zmieści się więcej naparów'
+Player_CantDrink: Nie możesz już więcej wypić.
+Player_CauldronInfo1: Ten kocioł gotuje się od &v1 min.
+Player_CauldronInfo2: Ten kocioł właśnie zaczął się gotować.
+Player_DrunkPassOut: Wypiłeś za dużo i straciłeś przytomność.
+Player_LoginDeny: Twoja postać próbuje wejść, ale jest zbyt pijana, by znaleźć serwer. Spróbuj ponownie!
+Player_LoginDenyLong: Twoja postać jest bardzo pijana i straciła przytomność. Spróbuj ponownie za 10 min.!
+Player_TriedToSay: '&v1 próbował powiedzieć: &0&v2'
+Player_Wake: O nie! Nie pamiętam jak się tu znalazłem...
+Player_WakeAlreadyDeleted: '&cPunkt Przebudzenia o id: &6&v1 &czostał już usunięty!'
+Player_WakeCancel: '&6Sprawdzanie Punktów Przebudzenia anulowane'
+Player_WakeCreated: '&aPunkt Przebudzenia o id: &6&v1 &azostał pomyślnie utworzony!'
+Player_WakeDeleted: '&aPunkt Przebudzenia o id: &6&v1 &azostał pomyślnie usunięty!'
+Player_WakeFilled: '&cPunkt Przebudzenia o id: &6&v1&c na pozycji &6&v2 &v3, &v4, &v5&c jest wypełniony blokami!'
+Player_WakeHint1: 'Do następnego Punktu Przebudzenia: Uderz pięścią w powietrze'
+Player_WakeHint2: 'Aby Anulować: &9/brew wakeup cancel'
+Player_WakeLast: '&aTo był ostatni Punkt Przebudzenia'
+Player_WakeNoCheck: '&cŻadne sprawdzanie Punktów Przebudzenia nie jest aktywne'
+Player_WakeNoPoints: '&cNie ma żadnych Punktów Przebudzenia!'
+Player_WakeNotExist: '&cPunkt Przebudzenia o id: &6&v1 &cnie istnieje!'
+Player_WakeTeleport: 'Teleportacja do Punktu Przebudzenia o id: &6&v1&f Na pozycji: &6&v2 &v3, &v4, &v5'
+Player_ShopSealBrew: '&eZaleca się handlować/sprzedawać &6opieczętowane &eNapary'
+Player_Drunkeness: 'Upicie: '
+Player_Hangover: 'Twój Kac'
