@@ -3,8 +3,8 @@
 
 config:
   language: |
-    Sprachedatei die genutzt werden sollte [en]
-    Available types: en (English), de (German), es (Spanish), fr (French), it (Italian), ru (Russian), zh (Chinese), uk (Ukrainian)
+    Sprachdatei, die genutzt werden soll [en]
+    Verfügbare Typen: en (Englisch), de (Deutsch), es (Spanisch), fr (Französisch), it (Italienisch), ru (Russisch), zh (Chinesisch), uk (Ukrainisch), pl (Polnisch)
   updateCheck: |
     Should BreweryX check for updates? Specify which service you'd like to use for update checking or disable it.
     Options available: GitHub, Snapshots, Spigot, None [GitHub]

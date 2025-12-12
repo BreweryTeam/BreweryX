@@ -4,7 +4,7 @@
 config:
   language: |
     语言文件 [默认配置: en]
-    可用选项: en (English), de (German), es (Spanish), fr (French), it (Italian), ru (Russian), zh (Chinese), uk (Ukrainian)
+    可用选项: en (英语), de (德语), es (西班牙语), fr (法语), it (意大利语), ru (俄语), zh (中文), uk (乌克兰语), pl (波兰语)
   updateCheck: |
     BreweryX应该检查更新吗? 指定要用于更新检查的服务或将其禁用.
     可用选项: GitHub, Snapshots, Spigot, None [默认配置: GitHub]
