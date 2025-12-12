@@ -46,7 +46,6 @@ repositories {
     mavenCentral()
     maven("https://repo.jsinco.dev/releases") // UniversalScheduler
     maven("https://jitpack.io") // GriefPrevention, SlimeFun, PlaceholderAPI
-    maven("https://repo.md-5.net/content/groups/public/") // Bungee
     maven("https://hub.spigotmc.org/nexus/content/repositories/snapshots/") // Spigot
     maven("https://maven.enginehub.org/repo/") // WorldEdit, WorldGuard
     maven("https://ci.ender.zone/plugin/repository/everything/") // LWC Extended
@@ -64,7 +63,7 @@ repositories {
 
 dependencies {
     // Spigot
-    compileOnly("org.spigotmc:spigot-api:1.21.10-R0.1-SNAPSHOT") {
+    compileOnly("org.spigotmc:spigot-api:1.21.11-R0.1-SNAPSHOT") {
         exclude("com.google.code.gson", "gson") // Implemented manually
     }
     // Paper Lib, performance improvements on Paper-based servers and async teleporting on Folia
@@ -105,7 +104,7 @@ dependencies {
         exclude("com.google")
     }
     compileOnly("com.github.TechFortress:GriefPrevention:16.18") // https://www.spigotmc.org/resources/griefprevention.1884/history
-    compileOnly("de.diddiz:logblock:1.16.5.1") // https://www.spigotmc.org/resources/logblock.67333/history
+    compileOnly(files("lib/LogBlock.jar")) // https://www.spigotmc.org/resources/logblock.67333/history | https://www.iani.de/jenkins/job/LogBlock/123/
     compileOnly("com.github.Slimefun:Slimefun4:RC-35") // https://github.com/Slimefun/Slimefun4/releases
     compileOnly("io.lumine:MythicLib-dist:1.6-SNAPSHOT") // https://www.spigotmc.org/resources/mythiclib.90306/history
     compileOnly("com.acrobot.chestshop:chestshop:3.12.2") // https://github.com/ChestShop-authors/ChestShop-3/releases
