@@ -563,11 +563,14 @@ public class BRecipe implements Cloneable {
 
     private void executeCommand(Player player, String cmd, String playerName, int quality, boolean isServerCommand) {
         String finalCommand = PlaceholderAPIHook.PLACEHOLDERAPI.setPlaceholders(player, BUtil.applyPlaceholders(cmd, playerName, quality));
-        if (isServerCommand) {
-            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), finalCommand);
-        } else {
-            Bukkit.dispatchCommand(player, finalCommand);
-        }
+        BreweryPlugin.getScheduler().execute(() -> {
+                if (isServerCommand) {
+                    Bukkit.dispatchCommand(Bukkit.getConsoleSender(), finalCommand);
+                } else {
+                    Bukkit.dispatchCommand(player, finalCommand);
+                }
+            }
+        );
     }
 
     /**
