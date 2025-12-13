@@ -29,7 +29,6 @@ import com.dre.brewery.configuration.ConfigManager;
 import com.dre.brewery.configuration.files.CustomItemsFile;
 import com.dre.brewery.configuration.files.Lang;
 import com.dre.brewery.configuration.sector.capsule.ConfigRecipe;
-import com.dre.brewery.integration.Hook;
 import com.dre.brewery.integration.PlaceholderAPIHook;
 import com.dre.brewery.utility.BUtil;
 import com.dre.brewery.utility.Logging;
@@ -311,21 +310,6 @@ public class BRecipe implements Cloneable {
         }
     }
 
-    public sealed interface IngredientResult {
-        record Success(RecipeItem ingredient) implements IngredientResult {}
-        record Error(IngredientError error, String invalidPart) implements IngredientResult {}
-    }
-
-    @AllArgsConstructor
-    @Getter
-    public enum IngredientError implements Translatable {
-        INVALID_AMOUNT("Error_InvalidAmount"),
-        INVALID_PLUGIN_ITEM("Error_InvalidPluginItem"),
-        INVALID_MATERIAL("Error_InvalidMaterial");
-
-        private final String translationKey;
-    }
-
     /**
      * Load a list of strings from a ConfigurationSection and parse the quality
      */
@@ -347,6 +331,80 @@ public class BRecipe implements Cloneable {
             result.add(StringParser.parseQuality(line, parseType));
         }
         return result;
+    }
+
+    /**
+     * Gets a Modifiable Sublist of the Recipes that are loaded by config.
+     * <p>Changes are directly reflected by the main list of all recipes
+     * <br>Changes to the main List of all recipes will make the reference to this sublist invalid
+     *
+     * <p>After adding or removing elements, BRecipe.numConfigRecipes MUST be updated!
+     */
+    public static List<BRecipe> getConfigRecipes() {
+        return recipes.subList(0, numConfigRecipes);
+    }
+
+    /**
+     * Gets a Modifiable Sublist of the Recipes that are added by plugins.
+     * <p>Changes are directly reflected by the main list of all recipes
+     * <br>Changes to the main List of all recipes will make the reference to this sublist invalid
+     */
+    public static List<BRecipe> getAddedRecipes() {
+        return recipes.subList(numConfigRecipes, recipes.size());
+    }
+
+    /**
+     * Gets the main List of all recipes.
+     */
+    public static List<BRecipe> getAllRecipes() {
+        return recipes;
+    }
+
+    /**
+     * Get the BRecipe that has the given name as one of its quality names.
+     */
+    @Nullable
+    public static BRecipe getMatching(String name) {
+        BRecipe mainNameRecipe = get(name);
+        if (mainNameRecipe != null) {
+            return mainNameRecipe;
+        }
+        for (BRecipe recipe : recipes) {
+            if (recipe.getName(1).equalsIgnoreCase(name)) {
+                return recipe;
+            } else if (recipe.getName(10).equalsIgnoreCase(name)) {
+                return recipe;
+            }
+        }
+        for (BRecipe recipe : recipes) {
+            if (name.equalsIgnoreCase(recipe.getId())) {
+                return recipe;
+            }
+        }
+        return null;
+    }
+
+    @Nullable
+    public static BRecipe getById(String id) {
+        for (BRecipe recipe : recipes) {
+            if (id.equals(recipe.getId())) {
+                return recipe;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Get the BRecipe that has that name as its name
+     */
+    @Nullable
+    public static BRecipe get(String name) {
+        for (BRecipe recipe : recipes) {
+            if (recipe.getRecipeName().equalsIgnoreCase(name)) {
+                return recipe;
+            }
+        }
+        return null;
     }
 
     public boolean isAlcoholic() {
@@ -420,6 +478,7 @@ public class BRecipe implements Cloneable {
 
     /**
      * Gets the <strong>primary</strong> barrel type out of all supported.
+     *
      * @return the barrel type
      * @see #getBarrelTypes() for the full list
      */
@@ -427,12 +486,12 @@ public class BRecipe implements Cloneable {
         return barrelTypes.isEmpty() ? BarrelWoodType.ANY : barrelTypes.get(0);
     }
 
-    public boolean usesAnyWood() {
-        return getWood() == BarrelWoodType.ANY;
-    }
-
     public void setWood(BarrelWoodType wood) {
         barrelTypes = Collections.singletonList(wood);
+    }
+
+    public boolean usesAnyWood() {
+        return getWood() == BarrelWoodType.ANY;
     }
 
     public void setBarrelTypes(List<BarrelWoodType> barrelTypes) {
@@ -486,6 +545,7 @@ public class BRecipe implements Cloneable {
         }
         return false;
     }
+
     public List<RecipeItem> getMissingIngredients(List<Ingredient> list) {
         List<RecipeItem> missing = new ArrayList<>();
         for (RecipeItem rItem : ingredients) {
@@ -563,12 +623,18 @@ public class BRecipe implements Cloneable {
 
     private void executeCommand(Player player, String cmd, String playerName, int quality, boolean isServerCommand) {
         String finalCommand = PlaceholderAPIHook.PLACEHOLDERAPI.setPlaceholders(player, BUtil.applyPlaceholders(cmd, playerName, quality));
-        if (isServerCommand) {
-            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), finalCommand);
-        } else {
-            Bukkit.dispatchCommand(player, finalCommand);
-        }
+        BreweryPlugin.getScheduler().execute(() -> {
+                if (isServerCommand) {
+                    Bukkit.dispatchCommand(Bukkit.getConsoleSender(), finalCommand);
+                } else {
+                    Bukkit.dispatchCommand(player, finalCommand);
+                }
+            }
+        );
     }
+
+
+    // Getter
 
     /**
      * Create a Potion from this Recipe with best values.
@@ -620,9 +686,6 @@ public class BRecipe implements Cloneable {
             }
         }
     }
-
-
-    // Getter
 
     /**
      * how many of a specific ingredient in the recipe
@@ -689,6 +752,10 @@ public class BRecipe implements Cloneable {
         return color;
     }
 
+    public void setColor(@NotNull PotionColor color) {
+        this.color = color;
+    }
+
     public boolean hasLore() {
         return lore != null && !lore.isEmpty();
     }
@@ -736,12 +803,6 @@ public class BRecipe implements Cloneable {
         return list;
     }
 
-
-    public void setColor(@NotNull PotionColor color) {
-        this.color = color;
-    }
-
-
     @Override
     public String toString() {
         return "BRecipe{" +
@@ -764,82 +825,6 @@ public class BRecipe implements Cloneable {
             ", drinkTitle='" + drinkTitle + '\'' +
             ", glint=" + glint +
             '}';
-    }
-
-    /**
-     * Gets a Modifiable Sublist of the Recipes that are loaded by config.
-     * <p>Changes are directly reflected by the main list of all recipes
-     * <br>Changes to the main List of all recipes will make the reference to this sublist invalid
-     *
-     * <p>After adding or removing elements, BRecipe.numConfigRecipes MUST be updated!
-     */
-    public static List<BRecipe> getConfigRecipes() {
-        return recipes.subList(0, numConfigRecipes);
-    }
-
-    /**
-     * Gets a Modifiable Sublist of the Recipes that are added by plugins.
-     * <p>Changes are directly reflected by the main list of all recipes
-     * <br>Changes to the main List of all recipes will make the reference to this sublist invalid
-     */
-    public static List<BRecipe> getAddedRecipes() {
-        return recipes.subList(numConfigRecipes, recipes.size());
-    }
-
-    /**
-     * Gets the main List of all recipes.
-     */
-    public static List<BRecipe> getAllRecipes() {
-        return recipes;
-    }
-
-
-    /**
-     * Get the BRecipe that has the given name as one of its quality names.
-     */
-    @Nullable
-    public static BRecipe getMatching(String name) {
-        BRecipe mainNameRecipe = get(name);
-        if (mainNameRecipe != null) {
-            return mainNameRecipe;
-        }
-        for (BRecipe recipe : recipes) {
-            if (recipe.getName(1).equalsIgnoreCase(name)) {
-                return recipe;
-            } else if (recipe.getName(10).equalsIgnoreCase(name)) {
-                return recipe;
-            }
-        }
-        for (BRecipe recipe : recipes) {
-            if (name.equalsIgnoreCase(recipe.getId())) {
-                return recipe;
-            }
-        }
-        return null;
-    }
-
-    @Nullable
-    public static BRecipe getById(String id) {
-        for (BRecipe recipe : recipes) {
-            if (id.equals(recipe.getId())) {
-                return recipe;
-            }
-        }
-        return null;
-    }
-
-
-    /**
-     * Get the BRecipe that has that name as its name
-     */
-    @Nullable
-    public static BRecipe get(String name) {
-        for (BRecipe recipe : recipes) {
-            if (recipe.getRecipeName().equalsIgnoreCase(name)) {
-                return recipe;
-            }
-        }
-        return null;
     }
 
     @Override
@@ -878,6 +863,25 @@ public class BRecipe implements Cloneable {
         }
     }
 
+
+    @AllArgsConstructor
+    @Getter
+    public enum IngredientError implements Translatable {
+        INVALID_AMOUNT("Error_InvalidAmount"),
+        INVALID_PLUGIN_ITEM("Error_InvalidPluginItem"),
+        INVALID_MATERIAL("Error_InvalidMaterial");
+
+        private final String translationKey;
+    }
+
+    public sealed interface IngredientResult {
+        record Success(RecipeItem ingredient) implements IngredientResult {
+        }
+
+        record Error(IngredientError error, String invalidPart) implements IngredientResult {
+        }
+    }
+
 	/*public static void saveAddedRecipes(ConfigurationSection cfg) {
 		int i = 0;
 		for (BRecipe recipe : getAddedRecipes()) {
@@ -886,7 +890,6 @@ public class BRecipe implements Cloneable {
 			}
 		}
 	}*/
-
 
     /**
      * Builder to easily create Recipes
