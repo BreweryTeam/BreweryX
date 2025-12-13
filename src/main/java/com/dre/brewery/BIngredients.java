@@ -361,7 +361,10 @@ public class BIngredients {
                 return result;
             } else {
                 RecipeEvaluation eval = found.eval();
-                eval.fatal(new BrewDefect.CookTimeMismatch(cookedTime, 0));
+                int needed = found.recipe().getCookingTime();
+                if (cookedTime != needed) {
+                    eval.fatal(new BrewDefect.CookTimeMismatch(cookedTime, needed));
+                }
                 return new BestRecipeResult.Error(found.recipe(), eval);
             }
         }
@@ -489,7 +492,10 @@ public class BIngredients {
         }
 
         if (cookedTime < 1) {
-            eval.deduct(new BrewDefect.CookTimeMismatch(0, recipe.getCookingTime()), 10);
+            int needed = recipe.getCookingTime();
+            if (0 != needed) {
+                eval.deduct(new BrewDefect.CookTimeMismatch(0, needed), 10);
+            }
         } else if (cookedTime != recipe.getCookingTime()) {
             float cookTimeDeduction = ((float) Math.abs(cookedTime - recipe.getCookingTime()) / recipe.allowedTimeDiff(recipe.getCookingTime())) * 10.0f;
             eval.deduct(new BrewDefect.CookTimeMismatch(cookedTime, recipe.getCookingTime()), cookTimeDeduction);

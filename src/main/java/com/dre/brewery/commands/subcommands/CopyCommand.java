@@ -68,14 +68,22 @@ public class CopyCommand implements SubCommand {
         ItemStack hand = player.getItemInHand();
         if (hand != null) {
             if (Brew.isBrew(hand)) {
-                while (count > 0) {
-                    ItemStack item = hand.clone();
-                    if (!(player.getInventory().addItem(item)).isEmpty()) {
-                        lang.sendEntry(sender, "CMD_Copy_Error", "" + count);
-                        return;
+                // Copy items to add for thread-safe batch operation
+                final int finalCount = count;
+                final ItemStack handClone = hand.clone();
+                
+                // Use UniversalScheduler to ensure inventory modifications run on correct thread/region
+                BreweryPlugin.getScheduler().execute(player, () -> {
+                    int remaining = finalCount;
+                    while (remaining > 0) {
+                        ItemStack item = handClone.clone();
+                        if (!(player.getInventory().addItem(item)).isEmpty()) {
+                            lang.sendEntry(sender, "CMD_Copy_Error", "" + remaining);
+                            return;
+                        }
+                        remaining--;
                     }
-                    count--;
-                }
+                });
                 return;
             }
         }

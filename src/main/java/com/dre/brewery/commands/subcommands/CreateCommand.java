@@ -20,6 +20,7 @@
 
 package com.dre.brewery.commands.subcommands;
 
+import com.dre.brewery.BCauldron;
 import com.dre.brewery.Brew;
 import com.dre.brewery.BreweryPlugin;
 import com.dre.brewery.commands.CommandUtil;
@@ -52,7 +53,8 @@ public class CreateCommand implements SubCommand {
 
             ItemStack item = brewForPlayer.a().createItem(null, brewForPlayer.b());
             if (item != null) {
-                brewForPlayer.b().getInventory().addItem(item);
+                // Use BCauldron.giveItem for thread-safe inventory modification
+                BCauldron.giveItem(brewForPlayer.b(), item);
                 lang.sendEntry(sender, "CMD_Created");
             }
         }
