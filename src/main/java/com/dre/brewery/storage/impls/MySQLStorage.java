@@ -69,7 +69,14 @@ public class MySQLStorage extends DataManager {
     public MySQLStorage(ConfiguredDataManager record) throws StorageInitException {
         super(record.getType());
         try {
-            this.connection = DriverManager.getConnection(URL + record.getAddress(), record.getUsername(), record.getPassword());
+            String jdbcUrl = URL + record.getAddress()
+                + "/" + record.getDatabase()
+                + "?autoReconnect=true";
+            this.connection = DriverManager.getConnection(
+                jdbcUrl,
+                record.getUsername(),
+                record.getPassword()
+            );
             this.tablePrefix = record.getTablePrefix();
             this.serializer = new SQLDataSerializer();
         } catch (SQLException e) {
