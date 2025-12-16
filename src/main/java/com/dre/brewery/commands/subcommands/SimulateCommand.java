@@ -20,6 +20,7 @@
 
 package com.dre.brewery.commands.subcommands;
 
+import com.dre.brewery.BCauldron;
 import com.dre.brewery.BIngredients;
 import com.dre.brewery.BarrelWoodType;
 import com.dre.brewery.Brew;
@@ -148,9 +149,11 @@ public class SimulateCommand implements SubCommand {
 
     private static void giveBrew(Lang lang, CommandSender sender, ItemStack item, @Nullable Player player) {
         if (player != null) {
-            player.getInventory().addItem(item);
+            // Use BCauldron.giveItem for thread-safe inventory modification
+            BCauldron.giveItem(player, item);
         } else if (sender instanceof Player self) {
-            self.getInventory().addItem(item);
+            // Use BCauldron.giveItem for thread-safe inventory modification
+            BCauldron.giveItem(self, item);
         } else {
             Brew fromItem = Brew.get(item);
             if (fromItem == null) {
