@@ -22,6 +22,7 @@ package com.dre.brewery.recipe;
 
 import com.dre.brewery.BreweryPlugin;
 import com.dre.brewery.utility.Logging;
+import com.dre.brewery.utility.MinecraftVersion;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
@@ -208,6 +209,9 @@ public class CustomItem extends RecipeItem implements Ingredient {
         }
 
         if (customModelData != 0) {
+            if (BreweryPlugin.getMCVersion().isOrLater(MinecraftVersion.V1_21_5)) {
+                return meta.hasCustomModelDataComponent() && meta.getCustomModelDataComponent().getFloats().stream().anyMatch(x -> Math.abs(customModelData - x) < 0.01);
+            }
             return meta.hasCustomModelData() && meta.getCustomModelData() == customModelData;
         }
         return true;
