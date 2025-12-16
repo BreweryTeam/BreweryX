@@ -187,9 +187,6 @@ public class CustomItem extends RecipeItem implements Ingredient {
                 return false;
             }
         }
-        if (name == null && !hasLore()) {
-            return true;
-        }
         if (!item.hasItemMeta()) {
             return false;
         }
