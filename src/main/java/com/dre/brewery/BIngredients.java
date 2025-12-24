@@ -361,7 +361,7 @@ public class BIngredients {
                 return result;
             } else {
                 RecipeEvaluation eval = found.eval();
-                eval.fatal(new BrewDefect.CookTimeMismatch(cookedTime, 0));
+                eval.fatal(new BrewDefect.CookingNotNeeded());
                 return new BestRecipeResult.Error(found.recipe(), eval);
             }
         }

@@ -271,7 +271,7 @@ public class SimulateCommand implements SubCommand {
 
                 case COOK -> {
                     int cookedTime = BUtil.parseInt(arg).orElse(-1);
-                    if (cookedTime <= 0) {
+                    if (cookedTime < 0) {
                         return new Status.Error(ErrorType.COOK, arg);
                     }
                     this.cookedTime = cookedTime;

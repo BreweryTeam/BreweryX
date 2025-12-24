@@ -107,6 +107,18 @@ public interface BrewDefect {
         }
     }
 
+    record CookingNotNeeded() implements BrewDefect {
+        @Override
+        public List<String> getMessages(Lang lang) {
+            return lang.getEntries("Defect_Overcooked");
+        }
+
+        @Override
+        public String toString() {
+            return "CookingNotNeeded{}";
+        }
+    }
+
     record CookTimeMismatch(int actual, int needed) implements BrewDefect {
         public CookTimeMismatch {
             if (actual == needed) {
