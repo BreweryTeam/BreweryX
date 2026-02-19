@@ -68,7 +68,10 @@ dependencies {
     }
     // Paper Lib, performance improvements on Paper-based servers and async teleporting on Folia
     implementation("io.papermc:paperlib:1.0.8")
-
+    // Database source implementation
+    implementation("com.zaxxer:HikariCP:7.0.2") {
+        exclude("org.slf4j", "slf4j-api")
+    }
     // Implemented manually mainly due to older server versions implementing versions of GSON
     // which don't support records.
     implementation("com.google.code.gson:gson:2.11.0")
@@ -159,6 +162,7 @@ tasks {
         relocate("com.mongodb", "$pack.mongodb")
         relocate("org.bson", "$pack.bson")
         relocate("io.papermc.lib", "$pack.paperlib")
+        relocate("com.zaxxer.hikari", "$pack.hikari")
 
         archiveClassifier.set("")
     }
