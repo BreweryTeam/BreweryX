@@ -76,9 +76,17 @@ public class CustomItem extends RecipeItem implements Ingredient {
         assert itemMeta != null;
         if (itemMeta.hasDisplayName()) {
             name = itemMeta.getDisplayName();
+        } else if (itemMeta.hasItemName()) {
+            name = itemMeta.getItemName();
         }
         if (itemMeta.hasLore()) {
             lore = itemMeta.getLore();
+        }
+        if (itemMeta.hasCustomModelDataComponent()) {
+            List<Float> floats = itemMeta.getCustomModelDataComponent().getFloats();
+            if (!floats.isEmpty()) {
+                customModelData = floats.getFirst().intValue();
+            }
         }
     }
 
