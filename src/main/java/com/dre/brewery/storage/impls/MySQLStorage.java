@@ -36,10 +36,11 @@ import com.dre.brewery.storage.records.SerializableWakeup;
 import com.dre.brewery.storage.serialization.SQLDataSerializer;
 import com.dre.brewery.utility.FutureUtil;
 import com.dre.brewery.utility.Logging;
+import com.zaxxer.hikari.HikariConfig;
 import org.jetbrains.annotations.Nullable;
 
+import javax.sql.DataSource;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -62,28 +63,22 @@ public class MySQLStorage extends DataManager {
         "wakeups (id VARCHAR(36) PRIMARY KEY, data LONGTEXT);"
     };
 
-    private final Connection connection;
     private final String tablePrefix;
     private final SQLDataSerializer serializer;
+    private final DataSource source;
 
     public MySQLStorage(ConfiguredDataManager record) throws StorageInitException {
         super(record.getType());
-        try {
-            String jdbcUrl = URL + record.getAddress()
-                + "/" + record.getDatabase()
-                + "?autoReconnect=true";
-            this.connection = DriverManager.getConnection(
-                jdbcUrl,
-                record.getUsername(),
-                record.getPassword()
-            );
-            this.tablePrefix = record.getTablePrefix();
-            this.serializer = new SQLDataSerializer();
-        } catch (SQLException e) {
-            throw new StorageInitException("Failed to connect to MySQL database! (Did you configure it correctly?)", e);
-        }
+        String jdbcUrl = URL + record.getAddress()
+            + "/" + record.getDatabase();
+        HikariConfig config = new HikariConfig();
+        config.setJdbcUrl(jdbcUrl);
+        this.source = config.getDataSource();
+        this.tablePrefix = record.getTablePrefix();
+        this.serializer = new SQLDataSerializer();
 
-        try {
+
+        try (Connection connection = source.getConnection()) {
             try (PreparedStatement statement = connection.prepareStatement("USE " + record.getDatabase())) {
                 statement.execute();
             }
@@ -99,20 +94,10 @@ public class MySQLStorage extends DataManager {
     }
 
     @Override
-    protected void closeConnection() {
-        try {
-            connection.close();
-        } catch (SQLException e) {
-            Logging.errorLog("Failed to close MySQL connection!", e);
-        }
-    }
-
-
-    @Override
     public boolean createTable(String name, int maxIdLength) {
         String sql = "CREATE TABLE IF NOT EXISTS " + tablePrefix + name + " (id VARCHAR(" + maxIdLength + ") PRIMARY KEY, data LONGTEXT);";
-        try (PreparedStatement statement = connection.prepareStatement(sql)) {
-            statement.execute();
+        try (Connection connection = source.getConnection()) {
+            connection.prepareStatement(sql).execute();
             return true;
         } catch (SQLException e) {
             Logging.errorLog("Failed to create table: " + name + " due to MySQL exception!", e);
@@ -123,8 +108,8 @@ public class MySQLStorage extends DataManager {
     @Override
     public boolean dropTable(String name) {
         String sql = "DROP TABLE IF EXISTS " + tablePrefix + name;
-        try (PreparedStatement statement = connection.prepareStatement(sql)) {
-            statement.execute();
+        try (Connection connection = source.getConnection()) {
+            connection.prepareStatement(sql).execute();
             return true;
         } catch (SQLException e) {
             Logging.errorLog("Failed to drop table: " + name + " due to MySQL exception!", e);
@@ -135,7 +120,7 @@ public class MySQLStorage extends DataManager {
     @Override
     public <T extends SerializableThing> T getGeneric(String id, String table, Class<T> type) {
         String sql = "SELECT data FROM " + tablePrefix + table + " WHERE id = ?";
-        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+        try (Connection connection = source.getConnection(); PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, id.toString());
             try (ResultSet resultSet = statement.executeQuery()) {
                 if (resultSet.next()) {
@@ -153,7 +138,7 @@ public class MySQLStorage extends DataManager {
         String sql = "SELECT id, data FROM " + tablePrefix + table;
         List<T> objects = new ArrayList<>();
 
-        try (PreparedStatement statement = connection.prepareStatement(sql);
+        try (Connection connection = source.getConnection(); PreparedStatement statement = connection.prepareStatement(sql);
              ResultSet resultSet = statement.executeQuery()) {
 
             while (resultSet.next()) {
@@ -179,8 +164,7 @@ public class MySQLStorage extends DataManager {
         String dropTempTableSql = "DROP TEMPORARY TABLE temp_" + table;
         String deleteOldRecordsSql = "DELETE FROM " + tablePrefix + table + " WHERE id NOT IN (SELECT id FROM temp_" + table + ")";
 
-        try {
-            connection.setAutoCommit(false);
+        try (Connection connection = source.getConnection()) {
 
             try (PreparedStatement createTempTableStmt = connection.prepareStatement(createTempTableSql);
                  PreparedStatement insertTempTableStmt = connection.prepareStatement(insertTempTableSql)) {
@@ -220,7 +204,7 @@ public class MySQLStorage extends DataManager {
     @Override
     public <T extends SerializableThing> void saveGeneric(T serializableThing, String table) {
         String sql = "INSERT INTO " + tablePrefix + table + " (id, data) VALUES (?, ?) ON DUPLICATE KEY UPDATE data = VALUES(data)";
-        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+        try (Connection connection = source.getConnection(); PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, serializableThing.getId());
             statement.setString(2, serializer.serialize(serializableThing));
             statement.execute();
@@ -232,7 +216,7 @@ public class MySQLStorage extends DataManager {
     @Override
     public void deleteGeneric(String id, String table) {
         String sql = "DELETE FROM " + tablePrefix + table + " WHERE id = ?";
-        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+        try (Connection connection = source.getConnection(); PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, id);
             statement.execute();
         } catch (SQLException e) {
@@ -382,7 +366,7 @@ public class MySQLStorage extends DataManager {
     @Override
     public BreweryMiscData getBreweryMiscData() {
         String sql = "SELECT CASE WHEN EXISTS (SELECT 1 FROM " + tablePrefix + "misc WHERE id = 'misc') THEN (SELECT data FROM " + tablePrefix + "misc WHERE id = 'misc') ELSE NULL END AS data";
-        try (PreparedStatement statement = connection.prepareStatement(sql);
+        try (Connection connection = source.getConnection(); PreparedStatement statement = connection.prepareStatement(sql);
              ResultSet resultSet = statement.executeQuery()) {
             if (resultSet.next() && resultSet.getString("data") != null) {
                 return serializer.deserialize(resultSet.getString("data"), BreweryMiscData.class);
@@ -396,7 +380,7 @@ public class MySQLStorage extends DataManager {
     @Override
     public void saveBreweryMiscData(BreweryMiscData data) {
         String sql = "INSERT INTO " + tablePrefix + "misc (id, data) VALUES ('misc', ?) ON DUPLICATE KEY UPDATE data = VALUES(data)";
-        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+        try (Connection connection = source.getConnection(); PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, serializer.serialize(data));
             statement.execute();
         } catch (SQLException e) {
