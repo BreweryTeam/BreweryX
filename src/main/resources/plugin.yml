@@ -6,7 +6,6 @@ load: POSTWORLD
 folia-supported: true
 website: 'https://brewery.lumamc.net/'
 authors: [Jsinco, Mitality, Nadwey, Szarkans, Vutka1, Thorinwasher, Tisawesomeness]
-libraries: ['org.jetbrains.kotlin:kotlin-stdlib:2.0.21']
 softdepend:
   - LWC
   - LogBlock
