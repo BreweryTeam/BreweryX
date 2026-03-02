@@ -53,7 +53,6 @@ public class RecipesSector extends AbstractOkaeriConfigSector<ConfigRecipe> {
         .drinkTitle("Warms you from inside")
         .glint(true)
         .customModelData("556/557/557")
-        .itemModel("phytor:tales/items/player_grave;phytor:tales/items/player_grave;phytor:tales/items/lightning_in_a_bottle;phytor:tales/enchanting/aurorium_crystal")
         .effects(List.of(BukkitConstants.FIRE_RESISTANCE.getKey().getKey().toUpperCase() + "/20", BukkitConstants.INSTANT_HEALTH.getKey().getKey().toUpperCase() + "/1", BukkitConstants.WEAKNESS.getKey().getKey().toUpperCase() + "/2-3/50-60", BukkitConstants.POISON.getKey().getKey().toUpperCase() + "/1-0/20-0"))
         .build();
 
