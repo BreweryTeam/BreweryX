@@ -86,6 +86,7 @@ public class BRecipe implements Cloneable {
     private int alcohol; // Alcohol in perfect potion
     private List<Tuple<Integer, String>> lore; // Custom Lore on the Potion. The int is for Quality Lore, 0 = any, 1,2,3 = Bad,Middle,Good
     private int[] cmData; // Custom Model Data[3] for each quality
+    private String[] itemModel; // item model Data[3] for each quality
 
     // drinking
     private List<BEffect> effects = new ArrayList<>(); // Special Effects when drinking
@@ -189,6 +190,19 @@ public class BRecipe implements Cloneable {
                 }
             }
             recipe.cmData = cmData;
+        }
+
+        if (configRecipe.getItemModel() != null) {
+            String[] cmdParts = configRecipe.getItemModel().split(";");
+            String[] cmData = new String[3];
+            for (int i = 0; i < 3; i++) {
+                if (cmdParts.length > i) {
+                    cmData[i] = cmdParts[i];
+                } else {
+                    cmData[i] = i == 0 ? "" : cmData[i - 1];
+                }
+            }
+            recipe.itemModel = cmData;
         }
 
         List<String> effectStringList = configRecipe.getEffects() != null ? configRecipe.getEffects() : Collections.emptyList();
