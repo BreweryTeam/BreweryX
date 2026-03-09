@@ -22,6 +22,7 @@ package com.dre.brewery.listeners;
 
 import com.dre.brewery.Barrel;
 import com.dre.brewery.storage.DataManager;
+import com.dre.brewery.utility.Logging;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -32,6 +33,7 @@ public record WorldListener(DataManager dataManager) implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onWorldLoad(WorldLoadEvent event) {
+        Logging.debugLog("Loading barrels in world: " + event.getWorld().getUID());
         dataManager.getAllBarrels()
             .thenAcceptAsync(barrels -> barrels.stream()
                 .filter(barrel -> barrel.getSpigot().getWorld().equals(event.getWorld()))
@@ -41,6 +43,7 @@ public record WorldListener(DataManager dataManager) implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onWorldLoad(WorldUnloadEvent event) {
+        Logging.debugLog("Unloading barrels in world: " + event.getWorld().getUID());
         Barrel.onUnload(event.getWorld());
     }
 }
