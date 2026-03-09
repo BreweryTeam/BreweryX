@@ -277,8 +277,6 @@ public final class BreweryPlugin extends JavaPlugin {
         // save Data to Disk
         if (dataManager != null) dataManager.exit(true, false);
 
-        BSealer.unregisterRecipe();
-
         PlaceholderAPIHook placeholderAPIHook = PlaceholderAPIHook.PLACEHOLDERAPI;
         if (placeholderAPIHook.isEnabled()) {
             placeholderAPIHook.getInstance().unregister();
