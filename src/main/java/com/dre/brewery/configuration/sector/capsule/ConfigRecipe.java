@@ -65,5 +65,6 @@ public class ConfigRecipe extends OkaeriConfig {
     private String drinkTitle;
     private Boolean glint;
     private String customModelData;
+    private String itemModel;
     private List<String> effects;
 }
