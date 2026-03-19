@@ -22,7 +22,7 @@ package com.dre.brewery.recipe;
 
 import com.dre.brewery.BreweryPlugin;
 import com.dre.brewery.utility.Logging;
-import com.dre.brewery.utility.MinecraftVersion;
+import com.dre.brewery.utility.ItemMetaCompat;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
@@ -83,11 +83,9 @@ public class CustomItem extends RecipeItem implements Ingredient {
         if (itemMeta.hasLore()) {
             lore = itemMeta.getLore();
         }
-        if (itemMeta.hasCustomModelDataComponent()) {
-            List<Float> floats = itemMeta.getCustomModelDataComponent().getFloats();
-            if (!floats.isEmpty()) {
-                customModelData = floats.getFirst().intValue();
-            }
+        Integer readCustomModelData = ItemMetaCompat.getCustomModelData(itemMeta);
+        if (readCustomModelData != null) {
+            customModelData = readCustomModelData;
         }
     }
 
@@ -214,10 +212,8 @@ public class CustomItem extends RecipeItem implements Ingredient {
         }
 
         if (customModelData != 0) {
-            if (BreweryPlugin.getMCVersion().isOrLater(MinecraftVersion.V1_21_5)) {
-                return meta.hasCustomModelDataComponent() && meta.getCustomModelDataComponent().getFloats().stream().anyMatch(x -> Math.abs(customModelData - x) < 0.01);
-            }
-            return meta.hasCustomModelData() && meta.getCustomModelData() == customModelData;
+            Integer usedCustomModelData = ItemMetaCompat.getCustomModelData(meta);
+            return usedCustomModelData != null && usedCustomModelData == customModelData;
         }
         return true;
     }
