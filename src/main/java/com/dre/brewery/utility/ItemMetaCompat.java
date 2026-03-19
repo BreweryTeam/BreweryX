@@ -22,6 +22,7 @@ package com.dre.brewery.utility;
 
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -54,7 +55,7 @@ public final class ItemMetaCompat {
         return false;
     }
 
-    public static Integer getCustomModelData(@NotNull ItemMeta meta) {
+    public static @Nullable Integer getCustomModelData(@NotNull ItemMeta meta) {
         if (HAS_COMPONENT_METHOD != null && GET_COMPONENT_METHOD != null) {
             Integer componentValue = readComponentValue(meta);
             if (componentValue != null) {
@@ -73,7 +74,7 @@ public final class ItemMetaCompat {
         return null;
     }
 
-    private static Integer readComponentValue(@NotNull ItemMeta meta) {
+    private static @Nullable Integer readComponentValue(@NotNull ItemMeta meta) {
         try {
             Object component = GET_COMPONENT_METHOD.invoke(meta);
             if (component == null) {
@@ -100,7 +101,7 @@ public final class ItemMetaCompat {
         return null;
     }
 
-    private static Method findMethod(Class<?> type, String name) {
+    private static @Nullable Method findMethod(Class<?> type, String name) {
         try {
             return type.getMethod(name);
         } catch (NoSuchMethodException ignored) {
