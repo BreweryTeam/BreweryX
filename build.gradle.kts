@@ -38,7 +38,7 @@ plugins {
 }
 
 group = "com.dre.brewery"
-version = "3.6.3"
+version = "3.6.4"
 val langVersion: Int = 21
 val encoding: String = "UTF-8"
 
@@ -187,7 +187,7 @@ tasks {
     }
 
     runServer {
-        minecraftVersion("1.20.4")
+        minecraftVersion("1.21.11")
     }
 
     register("publishToDiscord") {
