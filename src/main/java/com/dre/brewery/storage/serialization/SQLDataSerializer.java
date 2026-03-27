@@ -39,7 +39,7 @@ public class SQLDataSerializer {
     }
 
     public <T> T deserialize(String data, Class<T> type) {
-        return gson.fromJson(new String(Base64.getDecoder().decode(data)), type);
+        return gson.fromJson(new String(Base64.getMimeDecoder().decode(data)), type);
     }
 
     public <T> T deserialize(String data, Class<T> type, T defaultValue) {
