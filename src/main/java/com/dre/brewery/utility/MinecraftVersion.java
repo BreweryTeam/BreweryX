@@ -56,7 +56,8 @@ public enum MinecraftVersion {
     UNKNOWN("Unknown");
 
 
-    private @Getter static final boolean isFolia = MinecraftVersion.checkFolia();
+    private @Getter static final boolean isFolia = ClassUtil.exists("io.papermc.paper.threadedregions.RegionizedServer");
+    private @Getter static final boolean isCanvas = ClassUtil.exists("io.canvasmc.canvas.Config"); // Popular Folia fork
     private @Getter static final boolean useNBT = NBTUtil.initNbt();
 
     private final String[] versions;
@@ -109,14 +110,5 @@ public enum MinecraftVersion {
 
     public String getVersion() {
         return versions[0];
-    }
-
-    private static boolean checkFolia() {
-        try {
-            Class.forName("io.papermc.paper.threadedregions.RegionizedServer");
-            return true;
-        } catch (ClassNotFoundException ignored) {
-            return false;
-        }
     }
 }
