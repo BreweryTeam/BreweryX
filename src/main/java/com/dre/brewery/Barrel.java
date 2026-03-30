@@ -597,6 +597,12 @@ public class Barrel extends BarrelBody implements InventoryHolder {
         public void run() {
             barrels.keySet()
                 .forEach(worldUuid -> {
+                    // Folia doesn't fire 'WorldUnloadEvent' but Canvas does.
+                    if (MinecraftVersion.isFolia() && !MinecraftVersion.isCanvas() && Bukkit.getWorld(worldUuid) == null) {
+                        barrels.remove(worldUuid); // remove this world and assume that it was unloaded on Folia servers
+                        return;
+                    }
+
                     int counter = checkCounters.computeIfAbsent(worldUuid, ignored -> -1);
 
                     List<Barrel> worldBarrels = barrels.get(worldUuid);
