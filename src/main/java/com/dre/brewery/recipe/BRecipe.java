@@ -256,11 +256,8 @@ public class BRecipe implements Cloneable {
         // Check if this is a Plugin Item
         String[] pluginItem = matParts[0].split(":");
         if (pluginItem.length > 1) {
-            StringBuilder itemId = new StringBuilder();
-            for (int i = 1; i < pluginItem.length; i++) { // Append all but the first part to include namespaces.
-                itemId.append(pluginItem[i]);
-            }
-            RecipeItem custom = PluginItem.fromConfig(pluginItem[0], itemId.toString());
+            String itemId = String.join(":", Arrays.copyOfRange(pluginItem, 1, pluginItem.length)); // Append all but the first part to include namespaces.
+            RecipeItem custom = PluginItem.fromConfig(pluginItem[0], itemId);
             if (custom != null) {
                 custom.setAmount(amount);
                 custom.makeImmutable();
