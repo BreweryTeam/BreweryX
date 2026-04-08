@@ -29,7 +29,6 @@ import com.dre.brewery.configuration.ConfigManager;
 import com.dre.brewery.configuration.files.CustomItemsFile;
 import com.dre.brewery.configuration.files.Lang;
 import com.dre.brewery.configuration.sector.capsule.ConfigRecipe;
-import com.dre.brewery.integration.Hook;
 import com.dre.brewery.integration.PlaceholderAPIHook;
 import com.dre.brewery.utility.BUtil;
 import com.dre.brewery.utility.Logging;
@@ -254,10 +253,9 @@ public class BRecipe implements Cloneable {
 
 
         // Check if this is a Plugin Item
-        String[] pluginItem = matParts[0].split(":");
+        String[] pluginItem = matParts[0].split(":", 2);
         if (pluginItem.length > 1) {
-            String itemId = String.join(":", Arrays.copyOfRange(pluginItem, 1, pluginItem.length)); // Append all but the first part to include namespaces.
-            RecipeItem custom = PluginItem.fromConfig(pluginItem[0], itemId);
+            RecipeItem custom = PluginItem.fromConfig(pluginItem[0], pluginItem[1]);
             if (custom != null) {
                 custom.setAmount(amount);
                 custom.makeImmutable();
@@ -309,8 +307,11 @@ public class BRecipe implements Cloneable {
     }
 
     public sealed interface IngredientResult {
-        record Success(RecipeItem ingredient) implements IngredientResult {}
-        record Error(IngredientError error, String invalidPart) implements IngredientResult {}
+        record Success(RecipeItem ingredient) implements IngredientResult {
+        }
+
+        record Error(IngredientError error, String invalidPart) implements IngredientResult {
+        }
     }
 
     @AllArgsConstructor
@@ -417,6 +418,7 @@ public class BRecipe implements Cloneable {
 
     /**
      * Gets the <strong>primary</strong> barrel type out of all supported.
+     *
      * @return the barrel type
      * @see #getBarrelTypes() for the full list
      */
@@ -483,6 +485,7 @@ public class BRecipe implements Cloneable {
         }
         return false;
     }
+
     public List<RecipeItem> getMissingIngredients(List<Ingredient> list) {
         List<RecipeItem> missing = new ArrayList<>();
         for (RecipeItem rItem : ingredients) {
