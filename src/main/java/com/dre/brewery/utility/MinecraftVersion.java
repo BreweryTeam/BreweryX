@@ -59,7 +59,7 @@ public enum MinecraftVersion {
     V1_21_11("1.21.11"),
     UNKNOWN("Unknown");
 
-    public static final Pattern VERSION_PATTERN = Pattern.compile("^([0-9]+)\\.([0-9]+)(?:\\.([0-9]+))?");
+    private static final Pattern VERSION_PATTERN = Pattern.compile("^([0-9]+)\\.([0-9]+)(?:\\.([0-9]+))?");
 
     private @Getter static final boolean isFolia = ClassUtil.exists("io.papermc.paper.threadedregions.RegionizedServer");
     private @Getter static final boolean isCanvas = ClassUtil.exists("io.canvasmc.canvas.Config"); // Popular Folia fork
