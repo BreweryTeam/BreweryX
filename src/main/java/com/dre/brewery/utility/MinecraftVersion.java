@@ -25,6 +25,10 @@ import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Arrays;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 /**
  * Enum for major Minecraft versions where Brewery needs
  * to handle things differently.
@@ -55,6 +59,7 @@ public enum MinecraftVersion {
     V1_21_11("1.21.11"),
     UNKNOWN("Unknown");
 
+    public static final Pattern VERSION_PATTERN = Pattern.compile("^([0-9]+)\\.([0-9]+)(?:\\.([0-9]+))?");
 
     private @Getter static final boolean isFolia = ClassUtil.exists("io.papermc.paper.threadedregions.RegionizedServer");
     private @Getter static final boolean isCanvas = ClassUtil.exists("io.canvasmc.canvas.Config"); // Popular Folia fork
@@ -92,12 +97,14 @@ public enum MinecraftVersion {
     public static MinecraftVersion getIt() {
         String rawVersion = Bukkit.getVersion();
         String rawVersionParsed = rawVersion.substring(rawVersion.indexOf("(MC: ") + 5, rawVersion.indexOf(")"));
-        String[] versionSplit = rawVersionParsed.split("\\.");
 
-        Preconditions.checkState(versionSplit.length == 3 || versionSplit.length == 2, "Unexpected Minecraft version format: " + rawVersionParsed);
+        Matcher matcher = VERSION_PATTERN.matcher(rawVersionParsed);
+        if (!matcher.find()) {
+            throw new IllegalStateException("Could not parse Minecraft version from: " + rawVersion);
+        }
+        Preconditions.checkState(matcher.groupCount() == 3 || matcher.groupCount() == 2, "Unexpected Minecraft version format: " + rawVersionParsed);
 
-
-        return get(versionSplit[0], versionSplit[1], versionSplit[2]);
+        return get(matcher.group(1), matcher.group(2), matcher.group(3));
     }
 
     public boolean isOrLater(MinecraftVersion version) {
