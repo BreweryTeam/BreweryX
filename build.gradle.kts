@@ -30,11 +30,12 @@ import java.nio.charset.Charset
 plugins {
     id("java")
     id("maven-publish")
-    id("com.gradleup.shadow") version "8.3.5"
-    id("io.papermc.hangar-publish-plugin") version "0.1.2"
-    id("com.modrinth.minotaur") version "2.8.7"
-    id("xyz.jpenilla.run-paper") version "2.3.1"
+    id("com.gradleup.shadow") version "9.4.1"
+    id("io.papermc.hangar-publish-plugin") version "0.1.4"
+    id("com.modrinth.minotaur") version "2.9.0"
+    id("xyz.jpenilla.run-paper") version "3.0.2"
     id("io.github.apdevteam.github-packages") version "1.2.2"
+    id("org.ajoberstar.grgit") version ("5.3.3")
 }
 
 group = "com.dre.brewery"
@@ -147,7 +148,7 @@ tasks {
         outputs.upToDateWhen { false }
         filter<ReplaceTokens>(
             mapOf(
-                "tokens" to mapOf("version" to "${project.version};${getGitBranch()}"),
+                "tokens" to mapOf("version" to "${project.version};${grgit.branch.current().name}"),
                 "beginToken" to "\${",
                 "endToken" to "}"
             )
@@ -289,19 +290,6 @@ hangarPublish {
             }
         }
     }
-}
-
-
-
-fun getGitBranch(): String = ByteArrayOutputStream().use { stream ->
-    var branch = "none"
-    // TODO: can some nice person replace this deprecated method please? :)
-    project.exec {
-        commandLine = listOf("git", "rev-parse", "--abbrev-ref", "HEAD")
-        standardOutput = stream
-    }
-    if (stream.size() > 0) branch = stream.toString(Charset.defaultCharset().name()).trim()
-    return branch
 }
 
 fun readChangeLog(): String {
