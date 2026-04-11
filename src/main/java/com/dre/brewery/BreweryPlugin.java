@@ -77,6 +77,7 @@ import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -182,6 +183,7 @@ public final class BreweryPlugin extends JavaPlugin {
                 BCauldron::getBlock, Function.identity(),
                 (existing, replacement) -> replacement // Issues#68
             )));
+        BCauldron.startAllFoliaParticleTasks();
         BPlayer.getPlayers().putAll(dataManager.getAllPlayers()
             .stream()
             .filter(Objects::nonNull)
@@ -241,7 +243,7 @@ public final class BreweryPlugin extends JavaPlugin {
         // Heartbeat
         BreweryPlugin.getScheduler().runTaskTimer(new BreweryRunnable(), 650, 1200);
         BreweryPlugin.getScheduler().runTaskTimer(new DrunkRunnable(), 120, 120);
-        if (getMCVersion().isOrLater(MinecraftVersion.V1_9))
+        if (getMCVersion().isOrLater(MinecraftVersion.V1_9) && !MinecraftVersion.isFolia())
             BreweryPlugin.getScheduler().runTaskTimer(new CauldronParticles(), 1, 1);
 
 
@@ -270,6 +272,8 @@ public final class BreweryPlugin extends JavaPlugin {
 
         // Disable listeners
         HandlerList.unregisterAll(this);
+
+        BCauldron.stopAllFoliaParticleTasks();
 
         // Stop schedulers
         BreweryPlugin.getScheduler().cancelTasks(this);
@@ -332,7 +336,7 @@ public final class BreweryPlugin extends JavaPlugin {
             for (BCauldron bCauldron : BCauldron.bcauldrons.values()) {
                 BreweryPlugin.getScheduler().runTask(bCauldron.getBlock().getLocation(), () -> {
                     if (!bCauldron.onUpdate()) {
-                        BCauldron.bcauldrons.remove(bCauldron.getBlock());
+                        BCauldron.remove(bCauldron.getBlock());
                     }
                 });
             }
@@ -362,7 +366,7 @@ public final class BreweryPlugin extends JavaPlugin {
             Config config = ConfigManager.getConfig(Config.class);
 
             if (!config.isEnableCauldronParticles()) return;
-            if (config.isMinimalParticles() && BCauldron.particleRandom.nextFloat() > 0.5f) {
+            if (config.isMinimalParticles() && ThreadLocalRandom.current().nextFloat() > 0.5f) {
                 return;
             }
             BCauldron.processCookEffects();
