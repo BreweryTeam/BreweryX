@@ -29,6 +29,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.Nullable;
 
 @Getter
 @Setter
@@ -55,7 +56,8 @@ public class Hook {
     private final String name;
     @ApiStatus.Internal
     private boolean enabled;
-    private boolean checked;
+    @ApiStatus.Internal
+    protected boolean checked;
 
     public Hook(String name) {
         this.name = name;
@@ -78,7 +80,7 @@ public class Hook {
     }
 
     @Contract
-    public Plugin getPlugin() {
+    public @Nullable Plugin getPlugin() {
         if (isEnabled()) {
             Plugin plugin = Bukkit.getPluginManager().getPlugin(name);
             if (plugin == null) {
