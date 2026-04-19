@@ -62,49 +62,58 @@ public class DebugInfoCommand implements SubCommand {
         return true;
     }
 
-
     public void debugInfo(CommandSender sender, String recipeName) {
-        if (BreweryPlugin.getMCVersion().isOrEarlier(MinecraftVersion.V1_9) || !sender.isOp()) return;
+        if (BreweryPlugin.getMCVersion().isOrEarlier(MinecraftVersion.V1_9)) return;
+
         Player player = (Player) sender;
         ItemStack hand = player.getInventory().getItemInMainHand();
-        if (hand != null) {
-            Brew brew = Brew.get(hand);
-            if (brew == null) return;
-            Logging.log(brew.toString());
-            BIngredients ingredients = brew.getIngredients();
-            if (recipeName == null) {
-                Logging.log("&lIngredients:");
-                for (Ingredient ing : ingredients.getIngredientList()) {
-                    Logging.log(ing.toString());
-                }
-                Logging.log("&lTesting Recipes");
-                for (BRecipe recipe : BRecipe.getAllRecipes()) {
-                    logRecipe(recipe, brew);
-                }
-                BestRecipeResult distill = ingredients.getBestRecipeFull(brew.getWood(), brew.getAgeTime(), true);
-                Logging.log("&lDistill-Recipe: &r" + ChatColor.stripColor(distill.toString()));
-                BestRecipeResult nonDistill = ingredients.getBestRecipeFull(brew.getWood(), brew.getAgeTime(), false);
-                Logging.log("&lRecipe: &r" + ChatColor.stripColor(nonDistill.toString()));
-            } else {
-                BRecipe recipe = BRecipe.getMatching(recipeName);
-                if (recipe == null) {
-                    Logging.msg(player, "Could not find Recipe " + recipeName);
-                    return;
-                }
-                Logging.log("&lIngredients in Recipe " + recipe.getRecipeName() + "&r&l:&r");
-                for (RecipeItem ri : recipe.getIngredients()) {
-                    Logging.log(ri.toString());
-                }
-                Logging.log("&lIngredients in Brew:");
-                for (Ingredient ingredient : ingredients.getIngredientList()) {
-                    int amountInRecipe = recipe.amountOf(ingredient);
-                    Logging.log(ingredient.toString() + ": " + amountInRecipe + " of this are in the Recipe");
-                }
-                logRecipe(recipe, brew);
-            }
+        Brew brew = Brew.get(hand);
 
-            Logging.msg(player, "Debug Info for item written into Log");
+        if (brew == null) return;
+
+        Logging.log(brew.toString());
+        BIngredients ingredients = brew.getIngredients();
+
+        if (recipeName == null) {
+            logAllRecipes(ingredients, brew);
+        } else {
+            logSpecificRecipe(player, ingredients, brew, recipeName);
         }
+
+        Logging.msg(player, "Debug Info for item written into Log");
+    }
+
+    private static void logAllRecipes(BIngredients ingredients, Brew brew) {
+        Logging.log("&lIngredients:");
+        for (Ingredient ing : ingredients.getIngredientList()) {
+            Logging.log(ing.toString());
+        }
+        Logging.log("&lTesting Recipes");
+        for (BRecipe recipe : BRecipe.getAllRecipes()) {
+            logRecipe(recipe, brew);
+        }
+        BestRecipeResult distill = ingredients.getBestRecipeFull(brew.getWood(), brew.getAgeTime(), true);
+        Logging.log("&lDistill-Recipe: &r" + ChatColor.stripColor(distill.toString()));
+        BestRecipeResult nonDistill = ingredients.getBestRecipeFull(brew.getWood(), brew.getAgeTime(), false);
+        Logging.log("&lRecipe: &r" + ChatColor.stripColor(nonDistill.toString()));
+    }
+
+    private static void logSpecificRecipe(Player player, BIngredients ingredients, Brew brew, String recipeName) {
+        BRecipe recipe = BRecipe.getMatching(recipeName);
+        if (recipe == null) {
+            Logging.msg(player, "Could not find Recipe " + recipeName);
+            return;
+        }
+        Logging.log("&lIngredients in Recipe " + recipe.getRecipeName() + "&r&l:&r");
+        for (RecipeItem ri : recipe.getIngredients()) {
+            Logging.log(ri.toString());
+        }
+        Logging.log("&lIngredients in Brew:");
+        for (Ingredient ingredient : ingredients.getIngredientList()) {
+            int amountInRecipe = recipe.amountOf(ingredient);
+            Logging.log(ingredient.toString() + ": " + amountInRecipe + " of this are in the Recipe");
+        }
+        logRecipe(recipe, brew);
     }
 
     private static void logRecipe(BRecipe recipe, Brew brew) {
