@@ -26,6 +26,7 @@ import com.dre.brewery.utility.MinecraftVersion;
 import com.github.Anon8281.universalScheduler.UniversalRunnable;
 import com.github.Anon8281.universalScheduler.scheduling.tasks.MyScheduledTask;
 import io.papermc.lib.PaperLib;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BrewingStand;
@@ -196,30 +197,30 @@ public class BDistiller {
 
         @Override
         public void run() {
-            BreweryPlugin.getScheduler().runTask(standBlock.getLocation(), () -> {
+            Location standLocation = standBlock.getLocation();
+            BreweryPlugin.getScheduler().runTask(standLocation, () -> {
+                if (!standLocation.getWorld().isChunkLoaded(standLocation.getChunk())) {
+                    return;
+                }
                 if (standBlock.getType() != Material.BREWING_STAND) {
                     this.cancel();
                     trackedDistillers.remove(standBlock);
                     Logging.debugLog("The block was replaced; not a brewing stand.");
                     return;
                 }
-
-                BrewingStand stand = (BrewingStand) PaperLib.getBlockState(standBlock, true).getState();
+                BrewingStand stand = (BrewingStand) PaperLib.getBlockState(standBlock, false).getState();
                 if (brewTime == -1 && !prepareForDistillables(stand)) { // check at the beginning for distillables
                     return;
                 }
 
                 brewTime--; // count down.
-                stand.setBrewingTime((int) ((float) brewTime / ((float) runTime / (float) DISTILLTIME)) + 1);
-
                 if (brewTime > 1) {
-                    stand.update();
+                    stand.setBrewingTime((int) ((float) brewTime / ((float) runTime / (float) DISTILLTIME)) + 1);
                     return;
                 }
 
                 contents = getDistillContents(stand.getInventory()); // Get the contents again at the end just in case
                 stand.setBrewingTime(0);
-                stand.update();
                 if (!runDistill(stand.getInventory(), contents)) {
                     this.cancel();
                     trackedDistillers.remove(standBlock);
@@ -254,7 +255,6 @@ public class BDistiller {
                             stand.setBrewingTime(Short.MAX_VALUE << 1);
                         }
                         stand.setFuelLevel(fuel);
-                        stand.update();
                     }
                 case 0:
                     // No custom potion, cancel and ignore
