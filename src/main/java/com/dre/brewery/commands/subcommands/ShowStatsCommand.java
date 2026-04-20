@@ -39,7 +39,7 @@ public class ShowStatsCommand implements SubCommand {
         //if (sender instanceof ConsoleCommandSender && !sender.isOp()) return;
 
         Logging.msg(sender, "Drunk Players: " + BPlayer.numDrunkPlayers());
-        Logging.msg(sender, "Brews created: " + BreweryPlugin.getInstance().getBreweryStats().brewsCreated);
+        Logging.msg(sender, "Brews created: " + BreweryPlugin.getInstance().getMetrics().getBstatsBrewery().brewsCreated);
         Logging.msg(sender, "Barrels built: " + Barrel.getAllBarrels().size());
         Logging.msg(sender, "Cauldrons boiling: " + BCauldron.bcauldrons.size());
         Logging.msg(sender, "Number of Recipes: " + BRecipe.getAllRecipes().size());

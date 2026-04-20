@@ -53,7 +53,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
 import org.bukkit.potion.PotionType;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
@@ -890,7 +889,7 @@ public class Brew implements Cloneable {
         }
         save(potionMeta);
         potion.setItemMeta(potionMeta);
-        BreweryPlugin.getInstance().getBreweryStats().metricsForCreate(true);
+        BreweryPlugin.getInstance().getMetrics().getBstatsBrewery().metricsForCreate(true);
         return potion;
     }
 

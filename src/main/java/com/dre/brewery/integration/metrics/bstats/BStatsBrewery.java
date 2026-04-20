@@ -18,7 +18,7 @@
  * along with BreweryX. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-package com.dre.brewery.integration.bstats;
+package com.dre.brewery.integration.metrics.bstats;
 
 import com.dre.brewery.BCauldron;
 import com.dre.brewery.BPlayer;
@@ -28,10 +28,10 @@ import com.dre.brewery.BreweryPlugin;
 import com.dre.brewery.Wakeup;
 import com.dre.brewery.configuration.ConfigManager;
 import com.dre.brewery.configuration.files.Config;
-import com.dre.brewery.integration.bstats.Metrics.AdvancedPie;
-import com.dre.brewery.integration.bstats.Metrics.DrilldownPie;
-import com.dre.brewery.integration.bstats.Metrics.SimplePie;
-import com.dre.brewery.integration.bstats.Metrics.SingleLineChart;
+import com.dre.brewery.integration.metrics.bstats.BStats.AdvancedPie;
+import com.dre.brewery.integration.metrics.bstats.BStats.DrilldownPie;
+import com.dre.brewery.integration.metrics.bstats.BStats.SimplePie;
+import com.dre.brewery.integration.metrics.bstats.BStats.SingleLineChart;
 import com.dre.brewery.recipe.BRecipe;
 import com.dre.brewery.utility.Logging;
 import org.bukkit.Bukkit;
@@ -42,7 +42,7 @@ import java.util.Map;
 /**
  * General stats written by the original author of Brewery.
  */
-public class BreweryStats {
+public class BStatsBrewery {
 
     private static final int BSTATS_ID = 3494;
 
@@ -76,12 +76,12 @@ public class BreweryStats {
 
     public void setupBStats() {
         try {
-            Metrics metrics = new Metrics(BreweryPlugin.getInstance(), BSTATS_ID);
-            metrics.addCustomChart(new SingleLineChart("drunk_players", BPlayer::numDrunkPlayers));
-            metrics.addCustomChart(new SingleLineChart("brews_in_existence", () -> brewsCreated));
-            metrics.addCustomChart(new SingleLineChart("barrels_built", Barrel.getAllBarrels()::size));
-            metrics.addCustomChart(new SingleLineChart("cauldrons_boiling", BCauldron.bcauldrons::size));
-            metrics.addCustomChart(new AdvancedPie("brew_quality", () -> {
+            BStats bstats = new BStats(BreweryPlugin.getInstance(), BSTATS_ID);
+            bstats.addCustomChart(new SingleLineChart("drunk_players", BPlayer::numDrunkPlayers));
+            bstats.addCustomChart(new SingleLineChart("brews_in_existence", () -> brewsCreated));
+            bstats.addCustomChart(new SingleLineChart("barrels_built", Barrel.getAllBarrels()::size));
+            bstats.addCustomChart(new SingleLineChart("cauldrons_boiling", BCauldron.bcauldrons::size));
+            bstats.addCustomChart(new AdvancedPie("brew_quality", () -> {
                 Map<String, Integer> map = new HashMap<>(8);
                 map.put("excellent", exc);
                 map.put("good", good);
@@ -90,14 +90,14 @@ public class BreweryStats {
                 map.put("terrible", terr);
                 return map;
             }));
-            metrics.addCustomChart(new AdvancedPie("brews_created", () -> {
+            bstats.addCustomChart(new AdvancedPie("brews_created", () -> {
                 Map<String, Integer> map = new HashMap<>(4);
                 map.put("by command", brewsCreatedCmd);
                 map.put("brewing", brewsCreated - brewsCreatedCmd);
                 return map;
             }));
 
-            metrics.addCustomChart(new SimplePie("number_of_recipes", () -> {
+            bstats.addCustomChart(new SimplePie("number_of_recipes", () -> {
                 int recipes = BRecipe.getAllRecipes().size();
                 if (recipes < 7) {
                     return "Less than 7";
@@ -128,7 +128,7 @@ public class BreweryStats {
                 }
 
             }));
-            metrics.addCustomChart(new SimplePie("cauldron_particles", () -> {
+            bstats.addCustomChart(new SimplePie("cauldron_particles", () -> {
                 if (!config.isEnableCauldronParticles()) {
                     return "disabled";
                 }
@@ -137,7 +137,7 @@ public class BreweryStats {
                 }
                 return "enabled";
             }));
-            metrics.addCustomChart(new SimplePie("wakeups", () -> {
+            bstats.addCustomChart(new SimplePie("wakeups", () -> {
                 if (!config.isEnableWake()) {
                     return "disabled";
                 }
@@ -154,7 +154,7 @@ public class BreweryStats {
                     return "More than 20";
                 }
             }));
-            metrics.addCustomChart(new SimplePie("v2_mc_version", () -> {
+            bstats.addCustomChart(new SimplePie("v2_mc_version", () -> {
                 String mcv = Bukkit.getBukkitVersion();
                 mcv = mcv.substring(0, mcv.indexOf('.', 2));
                 int index = mcv.indexOf('-');
@@ -168,7 +168,7 @@ public class BreweryStats {
                     return "undef";
                 }
             }));
-            metrics.addCustomChart(new DrilldownPie("plugin_mc_version", () -> {
+            bstats.addCustomChart(new DrilldownPie("plugin_mc_version", () -> {
                 Map<String, Map<String, Integer>> map = new HashMap<>(3);
                 String mcv = Bukkit.getBukkitVersion();
                 mcv = mcv.substring(0, mcv.indexOf('.', 2));
@@ -187,9 +187,9 @@ public class BreweryStats {
                 map.put(BreweryPlugin.getInstance().getDescription().getVersion(), innerMap);
                 return map;
             }));
-            metrics.addCustomChart(new SimplePie("language", config::getLanguage));
-            metrics.addCustomChart(new SimplePie("config_scramble", () -> config.isEnableEncode() ? "enabled" : "disabled"));
-            metrics.addCustomChart(new SimplePie("config_lore_color", () -> {
+            bstats.addCustomChart(new SimplePie("language", config::getLanguage));
+            bstats.addCustomChart(new SimplePie("config_scramble", () -> config.isEnableEncode() ? "enabled" : "disabled"));
+            bstats.addCustomChart(new SimplePie("config_lore_color", () -> {
                 if (config.isColorInBarrels()) {
                     if (config.isColorInBrewer()) {
                         return "both";
@@ -204,7 +204,7 @@ public class BreweryStats {
                     }
                 }
             }));
-            metrics.addCustomChart(new SimplePie("config_always_show", () -> {
+            bstats.addCustomChart(new SimplePie("config_always_show", () -> {
                 if (config.isAlwaysShowQuality()) {
                     if (config.isAlwaysShowAlc()) {
                         return "both";
