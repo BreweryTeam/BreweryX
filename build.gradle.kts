@@ -59,6 +59,7 @@ repositories {
     maven("https://repo.oraxen.com/releases") // Oraxen
     maven("https://storehouse.okaeri.eu/repository/maven-public/") // Okaeri Config
     maven("https://repo.papermc.io/repository/maven-public/") // PaperLib
+    maven("https://repo.faststats.dev/releases") // FastStats
     maven { githubPackage("apdevteam/movecraft")(this) } // Movecraft
 }
 
@@ -99,6 +100,7 @@ dependencies {
             }
         }
     }
+    implementation("dev.faststats.metrics:bukkit:0.22.0")
 
     // Plugin Compatability
     compileOnly("com.sk89q:worldguard:6.1") // https://dev.bukkit.org/projects/worldedit/files
@@ -165,6 +167,7 @@ tasks {
         relocate("org.bson", "$pack.bson")
         relocate("io.papermc.lib", "$pack.paperlib")
         relocate("com.zaxxer.hikari", "$pack.hikari")
+        relocate("dev.faststats", "$pack.faststats")
 
         archiveClassifier.set("")
     }

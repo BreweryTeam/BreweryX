@@ -31,8 +31,9 @@ import com.dre.brewery.integration.Hook;
 import com.dre.brewery.integration.LandsHook;
 import com.dre.brewery.integration.PlaceholderAPIHook;
 import com.dre.brewery.integration.barrel.BlockLockerBarrel;
-import com.dre.brewery.integration.bstats.BreweryStats;
-import com.dre.brewery.integration.bstats.BreweryXStats;
+import com.dre.brewery.integration.metrics.Metrics;
+import com.dre.brewery.integration.metrics.bstats.BStatsBrewery;
+import com.dre.brewery.integration.metrics.bstats.BStatsBreweryX;
 import com.dre.brewery.integration.listeners.ChestShopListener;
 import com.dre.brewery.integration.listeners.IntegrationListener;
 import com.dre.brewery.integration.listeners.ShopKeepersListener;
@@ -91,7 +92,7 @@ public final class BreweryPlugin extends JavaPlugin {
 
 
     private final Map<String, Function<ItemLoader, Ingredient>> ingredientLoaders = new HashMap<>(); // Registrations
-    private BreweryStats breweryStats; // Metrics
+    private Metrics metrics;
 
     {
         // Basically just racing to be the first code to execute.
@@ -152,7 +153,7 @@ public final class BreweryPlugin extends JavaPlugin {
         ConfigManager.loadRecipes();
         ConfigManager.loadDistortWords();
         ConfigManager.loadSeed();
-        this.breweryStats = new BreweryStats(); // Load metrics
+        this.metrics = new Metrics();
 
 
         Logging.log("Minecraft version&7:&a " + MCVersion.getVersion());
@@ -196,8 +197,7 @@ public final class BreweryPlugin extends JavaPlugin {
 
         addonManager.enableAddons();
         // Setup Metrics
-        this.breweryStats.setupBStats();
-        new BreweryXStats().setupBStats();
+        this.metrics.enable();
 
         // Register command and aliases
         PluginCommand defaultCommand = getCommand("breweryx");
@@ -273,6 +273,8 @@ public final class BreweryPlugin extends JavaPlugin {
 
         // Stop schedulers
         BreweryPlugin.getScheduler().cancelTasks(this);
+
+        this.metrics.disable();
 
         // save Data to Disk
         if (dataManager != null) dataManager.exit(true, false);

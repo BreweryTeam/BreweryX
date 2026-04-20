@@ -14,7 +14,7 @@
  * Violations will result in a ban of your plugin and account from bStats.
  */
 
-package com.dre.brewery.integration.bstats;
+package com.dre.brewery.integration.metrics.bstats;
 
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -51,7 +51,7 @@ import java.util.stream.Collectors;
 import java.util.zip.GZIPOutputStream;
 
 // Copied from bStats because Gradle wasn't returning the right class
-public class Metrics {
+public class BStats {
 
     private final Plugin plugin;
 
@@ -64,7 +64,7 @@ public class Metrics {
      * @param serviceId The id of the service. It can be found at <a
      *                  href="https://bstats.org/what-is-my-plugin-id">What is my plugin id?</a>
      */
-    public Metrics(JavaPlugin plugin, int serviceId) {
+    public BStats(JavaPlugin plugin, int serviceId) {
         this.plugin = plugin;
         // Get the config file
         File bStatsFolder = new File(plugin.getDataFolder().getParentFile(), "bStats");

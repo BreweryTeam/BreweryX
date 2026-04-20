@@ -27,6 +27,7 @@ import com.dre.brewery.api.events.brew.BrewDrinkEvent;
 import com.dre.brewery.configuration.ConfigManager;
 import com.dre.brewery.configuration.files.Config;
 import com.dre.brewery.configuration.files.Lang;
+import com.dre.brewery.integration.metrics.faststats.FastStats;
 import com.dre.brewery.lore.BrewLore;
 import com.dre.brewery.recipe.BEffect;
 import com.dre.brewery.utility.BUtil;
@@ -55,7 +56,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.Nullable;
 
@@ -212,7 +212,7 @@ public class BPlayer {
         if (brew.hasRecipe()) {
             brew.getCurrentRecipe().applyDrinkFeatures(player, brew.getQuality());
         }
-        BreweryPlugin.getInstance().getBreweryStats().forDrink(brew);
+        BreweryPlugin.getInstance().getMetrics().getBstatsBrewery().forDrink(brew);
 
         int brewAlc = drinkEvent.getAddedAlcohol();
         int quality = drinkEvent.getQuality();
