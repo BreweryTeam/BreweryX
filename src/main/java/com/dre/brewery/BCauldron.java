@@ -31,6 +31,7 @@ import com.dre.brewery.utility.BukkitConstants;
 import com.dre.brewery.utility.MaterialUtil;
 import com.dre.brewery.utility.MinecraftVersion;
 import com.dre.brewery.utility.Tuple;
+import com.github.Anon8281.universalScheduler.scheduling.tasks.MyScheduledTask;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Color;
@@ -56,10 +57,10 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ThreadLocalRandom;
 
 @Getter
 @Setter
@@ -69,7 +70,6 @@ public class BCauldron {
     private static final Config config = ConfigManager.getConfig(Config.class);
     private static final Lang lang = ConfigManager.getConfig(Lang.class);
     public static final int PARTICLEPAUSE = 15;
-    public static Random particleRandom = new Random();
     private static final Set<UUID> plInteracted = new HashSet<>(); // Interact Event helper
     @Getter
     public static Map<Block, BCauldron> bcauldrons = new ConcurrentHashMap<>(); // All active cauldrons. Mapped to their block for fast retrieve
@@ -82,6 +82,7 @@ public class BCauldron {
     private Color particleColor;
     private final Location particleLocation;
     private final UUID id;
+    private volatile MyScheduledTask foliaParticleTask;
 
     public BCauldron(Block block) {
         this.block = block;
@@ -181,6 +182,7 @@ public class BCauldron {
             if (bcauldron == null) {
                 bcauldron = new BCauldron(block);
                 BCauldron.bcauldrons.put(block, bcauldron);
+                bcauldron.startFoliaParticleTask();
             }
 
             IngedientAddEvent event = new IngedientAddEvent(player, block, bcauldron, ingredient.clone(), rItem);
@@ -208,12 +210,12 @@ public class BCauldron {
         if (VERSION.isOrLater(MinecraftVersion.V1_13)) {
             BlockData data = block.getBlockData();
             if (!(data instanceof Levelled)) {
-                bcauldrons.remove(block);
+                remove(block);
                 return false;
             }
             Levelled cauldron = ((Levelled) data);
             if (cauldron.getLevel() <= 0) {
-                bcauldrons.remove(block);
+                remove(block);
                 return false;
             }
 
@@ -221,7 +223,7 @@ public class BCauldron {
             if (MaterialUtil.WATER_CAULDRON != null && cauldron.getLevel() == 1) {
                 // Empty Cauldron
                 block.setType(Material.CAULDRON);
-                bcauldrons.remove(block);
+                remove(block);
             } else {
                 cauldron.setLevel(cauldron.getLevel() - 1);
 
@@ -231,7 +233,7 @@ public class BCauldron {
                 block.setBlockData(data);
 
                 if (cauldron.getLevel() <= 0) {
-                    bcauldrons.remove(block);
+                    remove(block);
                 } else {
                     changed = true;
                 }
@@ -243,14 +245,14 @@ public class BCauldron {
             if (data > 3) {
                 data = 3;
             } else if (data <= 0) {
-                bcauldrons.remove(block);
+                remove(block);
                 return false;
             }
             data -= 1;
             MaterialUtil.setData(block, data);
 
             if (data == 0) {
-                bcauldrons.remove(block);
+                remove(block);
             } else {
                 changed = true;
             }
@@ -284,6 +286,8 @@ public class BCauldron {
     }
 
     public void cookEffect() {
+        assert !VERSION.isFolia() || BreweryPlugin.getScheduler().isRegionThread(block.getLocation())
+            : "cookEffect must run on owning region thread";
         if (BUtil.isChunkLoaded(block) && MaterialUtil.isCauldronHeatSource(block.getRelative(BlockFace.DOWN))) {
             Color color = getParticleColor();
             // Colorable spirally spell, 0 count enables color instead of the offset variables
@@ -304,17 +308,17 @@ public class BCauldron {
                 return;
             }
 
-            if (particleRandom.nextFloat() > 0.85) {
+            if (ThreadLocalRandom.current().nextFloat() > 0.85f) {
                 // Dark pixely smoke cloud at 0.4 random in x and z
                 // 0 count enables direction, send to y = 1 with speed 0.09
                 block.getWorld().spawnParticle(BukkitConstants.LARGE_SMOKE, getRandParticleLoc(), 0, 0, 1, 0, 0.09);
             }
-            if (particleRandom.nextFloat() > 0.2) {
+            if (ThreadLocalRandom.current().nextFloat() > 0.2f) {
                 // A Water Splash with 0.2 offset in x and z
                 block.getWorld().spawnParticle(BukkitConstants.SPLASH, particleLocation, 1, 0.2, 0, 0.2);
             }
 
-            if (VERSION.isOrLater(MinecraftVersion.V1_13) && particleRandom.nextFloat() > 0.4) {
+            if (VERSION.isOrLater(MinecraftVersion.V1_13) && ThreadLocalRandom.current().nextFloat() > 0.4f) {
                 // Two hovering pixely dust clouds, a bit of offset and with DustOptions to give some color and size
                 block.getWorld().spawnParticle(BukkitConstants.DUST, particleLocation, 2, 0.15, 0.2, 0.15, new Particle.DustOptions(color, 1.5f));
             }
@@ -323,9 +327,9 @@ public class BCauldron {
 
     private Location getRandParticleLoc() {
         return new Location(particleLocation.getWorld(),
-            particleLocation.getX() + (particleRandom.nextDouble() * 0.8) - 0.4,
+            particleLocation.getX() + (ThreadLocalRandom.current().nextDouble() * 0.8) - 0.4,
             particleLocation.getY(),
-            particleLocation.getZ() + (particleRandom.nextDouble() * 0.8) - 0.4);
+            particleLocation.getZ() + (ThreadLocalRandom.current().nextDouble() * 0.8) - 0.4);
     }
 
     /**
@@ -404,6 +408,7 @@ public class BCauldron {
     }
 
     public static void processCookEffects() {
+        if (VERSION.isFolia()) return;
         if (!config.isEnableCauldronParticles()) return;
         if (bcauldrons.isEmpty()) {
             return;
@@ -411,9 +416,60 @@ public class BCauldron {
         final float chance = 1f / PARTICLEPAUSE;
 
         for (BCauldron cauldron : bcauldrons.values()) {
-            if (particleRandom.nextFloat() < chance) {
+            if (ThreadLocalRandom.current().nextFloat() < chance) {
                 BreweryPlugin.getScheduler().runTask(cauldron.block.getLocation(), cauldron::cookEffect);
             }
+        }
+    }
+
+    public void startFoliaParticleTask() {
+        if (!VERSION.isFolia() || !config.isEnableCauldronParticles()) {
+            return;
+        }
+        synchronized (this) {
+            if (foliaParticleTask != null && !foliaParticleTask.isCancelled()) {
+                return;
+            }
+            long delay = ThreadLocalRandom.current().nextLong(1, PARTICLEPAUSE + 1L);
+            foliaParticleTask = BreweryPlugin.getScheduler().runTaskTimer(block.getLocation(), () -> {
+                if (!config.isEnableCauldronParticles()) {
+                    return;
+                }
+                if (config.isMinimalParticles() && ThreadLocalRandom.current().nextFloat() > 0.5f) {
+                    return;
+                }
+                cookEffect();
+            }, delay, PARTICLEPAUSE);
+        }
+    }
+
+    public void stopFoliaParticleTask() {
+        if (!VERSION.isFolia()) {
+            return;
+        }
+        synchronized (this) {
+            if (foliaParticleTask != null) {
+                foliaParticleTask.cancel();
+                foliaParticleTask = null;
+            }
+        }
+    }
+
+    public static void startAllFoliaParticleTasks() {
+        if (!VERSION.isFolia() || !config.isEnableCauldronParticles()) {
+            return;
+        }
+        for (BCauldron cauldron : bcauldrons.values()) {
+            cauldron.startFoliaParticleTask();
+        }
+    }
+
+    public static void stopAllFoliaParticleTasks() {
+        if (!VERSION.isFolia()) {
+            return;
+        }
+        for (BCauldron cauldron : bcauldrons.values()) {
+            cauldron.stopFoliaParticleTask();
         }
     }
 
@@ -529,8 +585,10 @@ public class BCauldron {
      */
     public static void reload() {
         if (!config.isEnableCauldronParticles()) {
+            stopAllFoliaParticleTasks();
             return;
         }
+        startAllFoliaParticleTasks();
 
         var scheduler = BreweryPlugin.getScheduler();
         for (BCauldron cauldron : bcauldrons.values()) {
@@ -549,7 +607,12 @@ public class BCauldron {
      * reset to normal cauldron
      */
     public static boolean remove(Block block) {
-        return bcauldrons.remove(block) != null;
+        BCauldron removed = bcauldrons.remove(block);
+        if (removed != null) {
+            removed.stopFoliaParticleTask();
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -562,7 +625,10 @@ public class BCauldron {
     // unloads cauldrons that are in a unloading world
     // as they were written to file just before, this is safe to do
     public static void onUnload(World world) {
-        bcauldrons.keySet().removeIf(block -> block.getWorld().equals(world));
+        List<Block> blocksToRemove = bcauldrons.keySet().stream()
+            .filter(block -> block.getWorld().equals(world))
+            .toList();
+        blocksToRemove.forEach(BCauldron::remove);
     }
 
     /**
@@ -570,7 +636,10 @@ public class BCauldron {
      */
     public static void unloadWorlds() {
         List<World> worlds = BreweryPlugin.getInstance().getServer().getWorlds();
-        bcauldrons.keySet().removeIf(block -> !worlds.contains(block.getWorld()));
+        List<Block> blocksToRemove = bcauldrons.keySet().stream()
+            .filter(block -> !worlds.contains(block.getWorld()))
+            .toList();
+        blocksToRemove.forEach(BCauldron::remove);
     }
 
     public static void save(ConfigurationSection config, ConfigurationSection oldData) {
