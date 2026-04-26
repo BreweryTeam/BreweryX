@@ -57,6 +57,7 @@ public enum MinecraftVersion {
     V1_21_5("1.21.5"), // Int CustomModelData is deprecated since version 1.21.5
     V1_21_10("1.21.10", "1.21.9"), // 1.21.10 & 1.21.9 are one and the same
     V1_21_11("1.21.11"),
+    V26_1("26.1"),
     UNKNOWN("Unknown");
 
     private static final Pattern VERSION_PATTERN = Pattern.compile("^([0-9]+)\\.([0-9]+)(?:\\.([0-9]+))?");
