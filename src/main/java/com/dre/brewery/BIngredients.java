@@ -136,7 +136,7 @@ public class BIngredients {
     /**
      * Add an ingredient to this based on the given RecipeItem
      *
-     * @param rItem      the RecipeItem that matches the ingredient
+     * @param rItem the RecipeItem that matches the ingredient
      */
     public void addGeneric(RecipeItem rItem) {
         add(rItem.toIngredientGeneric());
@@ -265,6 +265,7 @@ public class BIngredients {
     public @Nullable BRecipe getBestRecipe(BarrelWoodType wood, float time, boolean distilled) {
         return getBestRecipeFull(wood, time, distilled).getSuccessRecipe();
     }
+
     /**
      * best recipe for current state of potion, STILL not always returns the correct one...
      */
@@ -288,10 +289,10 @@ public class BIngredients {
             RecipeEvaluation completeRecipeEval;
 
             RecipeEvaluation ingredientEval = getIngredientQualityFull(recipe);
-            int ingredientQuality = ingredientEval.getQuality();
+            float ingredientQuality = ingredientEval.getQuality();
 
             RecipeEvaluation cookingEval = getCookingQualityFull(recipe, distilled);
-            int cookingQuality = cookingEval.getQuality();
+            float cookingQuality = cookingEval.getQuality();
 
             // age and wood quality cannot be fatal, only need to check ingredient and cooking
             boolean isFatal = ingredientEval.isFatal() || cookingEval.isFatal();
@@ -299,10 +300,10 @@ public class BIngredients {
             if (recipe.needsToAge() || time > 0.5) {
                 // needs riping in barrel
                 RecipeEvaluation ageEval = getAgeQualityFull(recipe, time);
-                int ageQuality = ageEval.getQuality();
+                float ageQuality = ageEval.getQuality();
 
                 RecipeEvaluation woodEval = getWoodQualityFull(recipe, wood);
-                int woodQuality = woodEval.getQuality();
+                float woodQuality = woodEval.getQuality();
 
                 // is this recipe better than the previous best?
                 Logging.debugLog("Ingredient Quality: " + ingredientQuality + " Cooking Quality: " + cookingQuality +
@@ -352,6 +353,7 @@ public class BIngredients {
     public @Nullable BRecipe getCookRecipe() {
         return getCookRecipeFull().getSuccessRecipe();
     }
+
     public BestRecipeResult getCookRecipeFull() {
         BestRecipeResult result = getBestRecipeFull(BarrelWoodType.ANY, 0, false);
 
@@ -395,6 +397,7 @@ public class BIngredients {
     public @Nullable BRecipe getDistillRecipe(BarrelWoodType wood, float time) {
         return getDistillRecipeFull(wood, time).getSuccessRecipe();
     }
+
     public BestRecipeResult getDistillRecipeFull(BarrelWoodType wood, float time) {
         BestRecipeResult result = getBestRecipeFull(wood, time, true);
 
@@ -417,6 +420,7 @@ public class BIngredients {
     public @Nullable BRecipe getAgeRecipe(BarrelWoodType wood, float time, boolean distilled) {
         return getAgeRecipeFull(wood, time, distilled).getSuccessRecipe();
     }
+
     public BestRecipeResult getAgeRecipeFull(BarrelWoodType wood, float time, boolean distilled) {
         BestRecipeResult result = getBestRecipeFull(wood, time, distilled);
 
@@ -436,8 +440,9 @@ public class BIngredients {
      * returns the quality of the ingredients conditioning given recipe, -1 if no recipe is near them
      */
     public int getIngredientQuality(BRecipe recipe) {
-        return getIngredientQualityFull(recipe).getQuality();
+        return Math.round(getIngredientQualityFull(recipe).getQuality());
     }
+
     public RecipeEvaluation getIngredientQualityFull(BRecipe recipe) {
         RecipeEvaluation eval = new RecipeEvaluation();
 
@@ -480,8 +485,9 @@ public class BIngredients {
      * returns the quality regarding the cooking-time conditioning given Recipe
      */
     public int getCookingQuality(BRecipe recipe, boolean distilled) {
-        return getCookingQualityFull(recipe, distilled).getQuality();
+        return Math.round(getCookingQualityFull(recipe, distilled).getQuality());
     }
+
     public RecipeEvaluation getCookingQualityFull(BRecipe recipe, boolean distilled) {
         RecipeEvaluation eval = new RecipeEvaluation();
         if (recipe.needsDistilling() != distilled) {
@@ -511,7 +517,7 @@ public class BIngredients {
      * returns the quality regarding the barrel wood conditioning given Recipe
      */
     public int getWoodQuality(BRecipe recipe, BarrelWoodType wood) {
-        return getWoodQualityFull(recipe, wood).getQuality();
+        return Math.round(getWoodQualityFull(recipe, wood).getQuality());
     }
 
     public RecipeEvaluation getWoodQualityFull(BRecipe recipe, BarrelWoodType wood) {
@@ -532,6 +538,7 @@ public class BIngredients {
         }
         return eval;
     }
+
     // At difficulty 1, distances 0-5 have quality 10, 10, 9, 8, 7, 6
     // At difficulty 5, distances 0-5 have quality 10, 8, 4, 1, 0, 0
     // At difficulty 10, distances 0-5 have quality 10, 5, 0, 0, 0, 0
@@ -558,8 +565,9 @@ public class BIngredients {
      * returns the quality regarding the ageing time conditioning given Recipe
      */
     public int getAgeQuality(BRecipe recipe, float time) {
-        return getAgeQualityFull(recipe, time).getQuality();
+        return Math.round(getAgeQualityFull(recipe, time).getQuality());
     }
+
     public RecipeEvaluation getAgeQualityFull(BRecipe recipe, float time) {
         RecipeEvaluation eval = new RecipeEvaluation();
         if (!BUtil.isClose(time, recipe.getAge())) {
