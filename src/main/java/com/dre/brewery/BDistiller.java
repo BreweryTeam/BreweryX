@@ -216,11 +216,13 @@ public class BDistiller {
                 brewTime--; // count down.
                 if (brewTime > 1) {
                     stand.setBrewingTime((int) ((float) brewTime / ((float) runTime / (float) DISTILLTIME)) + 1);
+                    stand.update();
                     return;
                 }
 
                 contents = getDistillContents(stand.getInventory()); // Get the contents again at the end just in case
                 stand.setBrewingTime(0);
+                stand.update();
                 if (!runDistill(stand.getInventory(), contents)) {
                     this.cancel();
                     trackedDistillers.remove(standBlock);
