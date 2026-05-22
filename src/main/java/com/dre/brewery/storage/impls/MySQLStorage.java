@@ -37,6 +37,7 @@ import com.dre.brewery.storage.serialization.SQLDataSerializer;
 import com.dre.brewery.utility.FutureUtil;
 import com.dre.brewery.utility.Logging;
 import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 import org.jetbrains.annotations.Nullable;
 
 import javax.sql.DataSource;
@@ -72,8 +73,10 @@ public class MySQLStorage extends DataManager {
         String jdbcUrl = URL + record.getAddress()
             + "/" + record.getDatabase();
         HikariConfig config = new HikariConfig();
+        config.setPassword(record.getPassword());
+        config.setUsername(record.getUsername());
         config.setJdbcUrl(jdbcUrl);
-        this.source = config.getDataSource();
+        this.source = new HikariDataSource(config);
         this.tablePrefix = record.getTablePrefix();
         this.serializer = new SQLDataSerializer();
 
