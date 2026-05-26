@@ -61,6 +61,8 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 
+import java.util.Map;
+
 
 public class PlayerListener implements Listener {
 
@@ -232,20 +234,34 @@ public class PlayerListener implements Listener {
                     event.setCancelled(true);
                     return;
                 }
-                /*if (player.getGameMode() != org.bukkit.GameMode.CREATIVE) {
-                    brew.remove(item);
-                }*/
                 if (VERSION.isOrLater(MinecraftVersion.V1_9)) {
-                    if (player.getGameMode() != GameMode.CREATIVE) {
-// replace the potion with an empty potion to avoid effects
-                        event.setItem(new ItemStack(Material.POTION));
+                    event.setCancelled(true);
+
+                    if (player.getGameMode() == GameMode.CREATIVE)
+                        return;
+
+                    ItemStack remaining = event.getItem().clone();
+
+                    int amount = remaining.getAmount();
+
+                    if (amount <= 1) {
+                        player.getInventory().setItem(event.getHand(), new ItemStack(Material.GLASS_BOTTLE));
                     } else {
-// Don't replace the item when keeping the potion, just cancel the event
-                        event.setCancelled(true);
+                        remaining.setAmount(amount - 1);
+                        player.getInventory().setItem(event.getHand(), remaining);
+
+                        var leftovers = player.getInventory().addItem(new ItemStack(Material.GLASS_BOTTLE));
+
+                        for (ItemStack leftover : leftovers.values()) {
+                            player.getWorld().dropItemNaturally(player.getLocation(), leftover);
+                        }
                     }
                 }
             }
-        } else if (BUtil.getMaterialMap(config.getDrainItems()).containsKey(item.getType())) {
+            return;
+        }
+
+        if (BUtil.getMaterialMap(config.getDrainItems()).containsKey(item.getType())) {
             BPlayer bplayer = BPlayer.get(player);
             if (bplayer != null) {
                 bplayer.drainByItem(player, item.getType());
