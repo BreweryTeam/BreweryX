@@ -58,7 +58,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.PotionMeta;
 
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -310,14 +309,7 @@ public class InventoryListener implements Listener {
         if (!config.isAgeInMCBarrels()) return;
 
         Inventory inv = event.getInventory();
-        for (MCBarrel barrel : MCBarrel.openBarrels) {
-            if (barrel.getInventory().equals(inv)) {
-                barrel.clickInv(event);
-                return;
-            }
-        }
-        MCBarrel barrel = new MCBarrel(inv);
-        MCBarrel.openBarrels.add(barrel);
+        MCBarrel barrel = MCBarrel.openBarrels.computeIfAbsent(inv, MCBarrel::new);
         barrel.clickInv(event);
     }
 
@@ -363,14 +355,7 @@ public class InventoryListener implements Listener {
         // Check for MC Barrel
         if (event.getInventory().getType() == InventoryType.BARREL) {
             Inventory inv = event.getInventory();
-            for (MCBarrel barrel : MCBarrel.openBarrels) {
-                if (barrel.getInventory().equals(inv)) {
-                    barrel.open();
-                    return;
-                }
-            }
-            MCBarrel barrel = new MCBarrel(inv);
-            MCBarrel.openBarrels.add(barrel);
+            MCBarrel barrel = MCBarrel.openBarrels.computeIfAbsent(inv, MCBarrel::new);
             barrel.open();
         }
     }
@@ -433,16 +418,14 @@ public class InventoryListener implements Listener {
         // Check for MC Barrel
         if (config.isAgeInMCBarrels() && event.getInventory().getType() == InventoryType.BARREL) {
             Inventory inv = event.getInventory();
-            for (Iterator<MCBarrel> iter = MCBarrel.openBarrels.iterator(); iter.hasNext(); ) {
-                MCBarrel barrel = iter.next();
-                if (barrel.getInventory().equals(inv)) {
-                    barrel.close();
-                    if (inv.getViewers().size() == 1) {
-                        // Last viewer, remove Barrel from List of open Barrels
-                        iter.remove();
-                    }
-                    return;
+            MCBarrel barrel = MCBarrel.openBarrels.get(inv);
+            if (barrel != null) {
+                barrel.close();
+                if (inv.getViewers().size() == 1) {
+                    // Last viewer, remove Barrel from open Barrel tracking
+                    MCBarrel.openBarrels.remove(inv, barrel);
                 }
+                return;
             }
             new MCBarrel(inv).close();
         }
