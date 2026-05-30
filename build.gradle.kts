@@ -39,8 +39,10 @@ plugins {
 }
 
 group = "com.dre.brewery"
-version = "3.6.5"
+version = "3.7.0"
+
 val langVersion: Int = 21
+val runTaskJavaVersion: Int = 25
 val encoding: String = "UTF-8"
 
 repositories {
@@ -191,7 +193,7 @@ tasks {
     }
 
     runServer {
-        minecraftVersion("1.21.11")
+        minecraftVersion("26.1.2")
     }
 
     register("publishToDiscord") {
@@ -206,7 +208,7 @@ tasks {
 tasks.withType(xyz.jpenilla.runtask.task.AbstractRun::class) {
     javaLauncher = javaToolchains.launcherFor {
         vendor = JvmVendorSpec.ADOPTIUM
-        languageVersion = JavaLanguageVersion.of(21)
+        languageVersion = JavaLanguageVersion.of(runTaskJavaVersion)
     }
 }
 

@@ -94,12 +94,12 @@ public class RecipeEvaluation {
      * If there are fatal defects, or if the quality is deducted to less than 0,the quality will be -1.
      * @return the quality
      */
-    public int getQuality() {
+    public float getQuality() {
         float quality = getTrueQuality();
         if (quality < 0) {
             return -1;
         }
-        return Math.round(quality);
+        return quality;
     }
 
     /**

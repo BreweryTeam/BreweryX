@@ -187,25 +187,28 @@ public class DistortChat {
 
     // Distort players words when he talks
     public static void playerChat(AsyncPlayerChatEvent event) {
-        BPlayer bPlayer = BPlayer.get(event.getPlayer());
-        if (bPlayer != null) {
-            if (!words.isEmpty()) {
-                String message = event.getMessage();
-                if (config.isLogRealChat()) {
-                    Logging.log(lang.getEntry("Player_TriedToSay", event.getPlayer().getName(), message));
-                }
-
-                String distorted = distortMessage(message, bPlayer.getDrunkeness());
-                PlayerChatDistortEvent call = new PlayerChatDistortEvent(event.isAsynchronous(), event.getPlayer(), bPlayer, message, distorted);
-                BreweryPlugin.getInstance().getServer().getPluginManager().callEvent(call);
-                if (call.isCancelled()) {
-                    return;
-                }
-                distorted = call.getDistortedMessage();
-
-                event.setMessage(distorted);
-            }
+        if (event.getPlayer().hasPermission("brewery.bypass.chatdistort")) {
+            return;
         }
+
+        BPlayer bPlayer = BPlayer.get(event.getPlayer());
+        if (bPlayer == null || words.isEmpty())
+            return;
+
+        String message = event.getMessage();
+        if (config.isLogRealChat()) {
+            Logging.log(lang.getEntry("Player_TriedToSay", event.getPlayer().getName(), message));
+        }
+
+        String distorted = distortMessage(message, bPlayer.getDrunkeness());
+        PlayerChatDistortEvent call = new PlayerChatDistortEvent(event.isAsynchronous(), event.getPlayer(), bPlayer, message, distorted);
+        BreweryPlugin.getInstance().getServer().getPluginManager().callEvent(call);
+        if (call.isCancelled()) {
+            return;
+        }
+        distorted = call.getDistortedMessage();
+
+        event.setMessage(distorted);
     }
 
     // distorts a message, ignoring text enclosed in ignoreText letters

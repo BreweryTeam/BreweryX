@@ -165,6 +165,9 @@ permissions:
     description: Will despite config-setting not be kicked on overdrink
   brewery.bypass.teleport:
     description: Will despite config-setting not be teleported on login
+  brewery.bypass.chatdistort:
+    description: Prevents chat messages from being distorted by drunkenness
+    default: false
 
 # -- Modifiers --
 
