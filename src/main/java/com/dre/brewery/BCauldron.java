@@ -82,7 +82,7 @@ public class BCauldron {
     private Color particleColor;
     private final Location particleLocation;
     private final UUID id;
-    private volatile MyScheduledTask foliaParticleTask;
+    private MyScheduledTask foliaParticleTask;
 
     public BCauldron(Block block) {
         this.block = block;
@@ -422,41 +422,42 @@ public class BCauldron {
         }
     }
 
-    public void startFoliaParticleTask() {
-        if (!VERSION.isFolia() || !config.isEnableCauldronParticles()) {
-            return;
-        }
-        synchronized (this) {
-            if (foliaParticleTask != null && !foliaParticleTask.isCancelled()) {
-                return;
-            }
-            long delay = ThreadLocalRandom.current().nextLong(1, PARTICLEPAUSE + 1L);
-            foliaParticleTask = BreweryPlugin.getScheduler().runTaskTimer(block.getLocation(), () -> {
-                if (!config.isEnableCauldronParticles()) {
-                    return;
-                }
-                if (config.isMinimalParticles() && ThreadLocalRandom.current().nextFloat() > 0.5f) {
-                    return;
-                }
-                cookEffect();
-            }, delay, PARTICLEPAUSE);
-        }
-    }
-
-    public void stopFoliaParticleTask() {
+    private synchronized void startFoliaParticleTask() {
         if (!VERSION.isFolia()) {
             return;
         }
-        synchronized (this) {
-            if (foliaParticleTask != null) {
-                foliaParticleTask.cancel();
-                foliaParticleTask = null;
+        if (!config.isEnableCauldronParticles()) {
+            stopFoliaParticleTask();
+            return;
+        }
+        if (foliaParticleTask != null && !foliaParticleTask.isCancelled()) {
+            return;
+        }
+        long delay = ThreadLocalRandom.current().nextLong(1, PARTICLEPAUSE + 1L);
+        foliaParticleTask = BreweryPlugin.getScheduler().runTaskTimer(block.getLocation(), () -> {
+            if (config.isMinimalParticles() && ThreadLocalRandom.current().nextFloat() > 0.5f) {
+                return;
             }
+            cookEffect();
+        }, delay, PARTICLEPAUSE);
+    }
+
+    private synchronized void stopFoliaParticleTask() {
+        if (!VERSION.isFolia()) {
+            return;
+        }
+        if (foliaParticleTask != null) {
+            foliaParticleTask.cancel();
+            foliaParticleTask = null;
         }
     }
 
     public static void startAllFoliaParticleTasks() {
-        if (!VERSION.isFolia() || !config.isEnableCauldronParticles()) {
+        if (!VERSION.isFolia()) {
+            return;
+        }
+        if (!config.isEnableCauldronParticles()) {
+            stopAllFoliaParticleTasks();
             return;
         }
         for (BCauldron cauldron : bcauldrons.values()) {
