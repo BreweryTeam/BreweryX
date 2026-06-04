@@ -44,6 +44,7 @@ import com.dre.brewery.utility.MinecraftVersion;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
@@ -454,7 +455,23 @@ public class Brew implements Cloneable {
 
     public void updateCustomModelData(ItemMeta meta) {
         if (VERSION.isOrEarlier(MinecraftVersion.V1_14)) return;
-        if (currentRecipe != null && currentRecipe.getCmData() != null) {
+        if (VERSION.isOrLater(MinecraftVersion.V1_21_4) && currentRecipe != null  && currentRecipe.getItemModel() != null && !currentRecipe.getItemModel()[0].isEmpty()) {
+            String cm;
+            if (quality > 7) {
+                cm = currentRecipe.getItemModel()[2];
+            } else if (quality > 3) {
+                cm = currentRecipe.getItemModel()[1];
+            } else {
+                cm = currentRecipe.getItemModel()[0];
+            }
+            if (cm == null || cm.isEmpty()) {
+                meta.setItemModel(null);
+            } else {
+                meta.setItemModel(NamespacedKey.fromString(cm.toLowerCase()));
+//                BreweryPlugin.getInstance().getLogger().info("set itemmodel to "+cm.toLowerCase());
+            }
+        }
+        else if (currentRecipe != null && currentRecipe.getCmData() != null) {
             int cm;
             if (quality > 7) {
                 cm = currentRecipe.getCmData()[2];

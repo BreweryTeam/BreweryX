@@ -37,6 +37,7 @@ import com.dre.brewery.storage.serialization.SQLDataSerializer;
 import com.dre.brewery.utility.FutureUtil;
 import com.dre.brewery.utility.Logging;
 import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 import org.jetbrains.annotations.Nullable;
 
 import javax.sql.DataSource;
@@ -72,17 +73,15 @@ public class MySQLStorage extends DataManager {
         String jdbcUrl = URL + record.getAddress()
             + "/" + record.getDatabase();
         HikariConfig config = new HikariConfig();
+        config.setPassword(record.getPassword());
+        config.setUsername(record.getUsername());
         config.setJdbcUrl(jdbcUrl);
-        this.source = config.getDataSource();
+        this.source = new HikariDataSource(config);
         this.tablePrefix = record.getTablePrefix();
         this.serializer = new SQLDataSerializer();
 
 
         try (Connection connection = source.getConnection()) {
-            try (PreparedStatement statement = connection.prepareStatement("USE " + record.getDatabase())) {
-                statement.execute();
-            }
-
             for (String table : TABLES) {
                 try (PreparedStatement statement = connection.prepareStatement("CREATE TABLE IF NOT EXISTS " + tablePrefix + table)) {
                     statement.execute();
@@ -165,10 +164,9 @@ public class MySQLStorage extends DataManager {
         String deleteOldRecordsSql = "DELETE FROM " + tablePrefix + table + " WHERE id NOT IN (SELECT id FROM temp_" + table + ")";
 
         try (Connection connection = source.getConnection()) {
-
+            connection.setAutoCommit(false);
             try (PreparedStatement createTempTableStmt = connection.prepareStatement(createTempTableSql);
                  PreparedStatement insertTempTableStmt = connection.prepareStatement(insertTempTableSql)) {
-
                 createTempTableStmt.execute();
 
                 for (SerializableThing serializableThing : serializableThings) {
