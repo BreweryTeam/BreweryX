@@ -102,7 +102,9 @@ dependencies {
             }
         }
     }
-    implementation("dev.faststats.metrics:bukkit:0.22.0")
+
+    implementation("org.bstats:bstats-bukkit:3.2.1")
+    implementation("dev.faststats.metrics:bukkit:0.23.0")
 
     // Plugin Compatability
     compileOnly("com.sk89q:worldguard:6.1") // https://dev.bukkit.org/projects/worldedit/files
@@ -170,6 +172,7 @@ tasks {
         relocate("io.papermc.lib", "$pack.paperlib")
         relocate("com.zaxxer.hikari", "$pack.hikari")
         relocate("dev.faststats", "$pack.faststats")
+        relocate("org.bstats", "$pack.bstats")
 
         archiveClassifier.set("")
     }

@@ -31,9 +31,7 @@ import com.dre.brewery.integration.Hook;
 import com.dre.brewery.integration.LandsHook;
 import com.dre.brewery.integration.PlaceholderAPIHook;
 import com.dre.brewery.integration.barrel.BlockLockerBarrel;
-import com.dre.brewery.integration.metrics.Metrics;
-import com.dre.brewery.integration.metrics.bstats.BStatsBrewery;
-import com.dre.brewery.integration.metrics.bstats.BStatsBreweryX;
+import com.dre.brewery.integration.metrics.BreweryMetrics;
 import com.dre.brewery.integration.listeners.ChestShopListener;
 import com.dre.brewery.integration.listeners.IntegrationListener;
 import com.dre.brewery.integration.listeners.ShopKeepersListener;
@@ -43,6 +41,10 @@ import com.dre.brewery.integration.listeners.movecraft.RotationListener;
 import com.dre.brewery.integration.listeners.movecraft.SinkListener;
 import com.dre.brewery.integration.listeners.movecraft.TranslationListener;
 import com.dre.brewery.integration.listeners.movecraft.properties.BreweryProperties;
+import com.dre.brewery.integration.metrics.MetricsManager;
+import com.dre.brewery.integration.metrics.bstats.BStatsBrewery;
+import com.dre.brewery.integration.metrics.bstats.BStatsBreweryX;
+import com.dre.brewery.integration.metrics.faststats.FastStats;
 import com.dre.brewery.listeners.BlockListener;
 import com.dre.brewery.listeners.CauldronListener;
 import com.dre.brewery.listeners.EntityListener;
@@ -76,6 +78,7 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
@@ -90,9 +93,8 @@ public final class BreweryPlugin extends JavaPlugin {
     private @Getter static MinecraftVersion MCVersion;
     private @Getter @Setter static DataManager dataManager;
 
-
     private final Map<String, Function<ItemLoader, Ingredient>> ingredientLoaders = new HashMap<>(); // Registrations
-    private Metrics metrics;
+    private MetricsManager metrics;
 
     {
         // Basically just racing to be the first code to execute.
@@ -153,8 +155,8 @@ public final class BreweryPlugin extends JavaPlugin {
         ConfigManager.loadRecipes();
         ConfigManager.loadDistortWords();
         ConfigManager.loadSeed();
-        this.metrics = new Metrics();
 
+        this.metrics = new MetricsManager();
 
         Logging.log("Minecraft version&7:&a " + MCVersion.getVersion());
         if (MCVersion == MinecraftVersion.UNKNOWN) {
@@ -196,7 +198,7 @@ public final class BreweryPlugin extends JavaPlugin {
             .toList());
 
         addonManager.enableAddons();
-        // Setup Metrics
+
         this.metrics.enable();
 
         // Register command and aliases

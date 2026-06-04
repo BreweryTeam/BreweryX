@@ -26,12 +26,16 @@ import com.dre.brewery.Barrel;
 import com.dre.brewery.BreweryPlugin;
 import com.dre.brewery.configuration.ConfigManager;
 import com.dre.brewery.configuration.files.Config;
-import com.dre.brewery.integration.metrics.bstats.BStats.AdvancedPie;
-import com.dre.brewery.integration.metrics.bstats.BStats.DrilldownPie;
-import com.dre.brewery.integration.metrics.bstats.BStats.SimplePie;
-import com.dre.brewery.integration.metrics.bstats.BStats.SingleLineChart;
+import com.dre.brewery.integration.metrics.BreweryMetrics;
+import com.dre.brewery.integration.metrics.StatsBuffer;
 import com.dre.brewery.recipe.BRecipe;
 import com.dre.brewery.utility.Logging;
+import org.bstats.bukkit.Metrics;
+import org.bstats.charts.AdvancedPie;
+import org.bstats.charts.DrilldownPie;
+import org.bstats.charts.SimplePie;
+import org.bstats.charts.SingleLineChart;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -39,11 +43,13 @@ import java.util.Map;
 /**
  * Stats which are exclusive to BreweryX.
  */
-public class BStatsBreweryX {
+public class BStatsBreweryX implements BreweryMetrics {
 
     private static final int BSTATS_ID = 24059;
 
     private final Config config = ConfigManager.getConfig(Config.class);
+
+    private Metrics bstats;
 
     public static String getBranch() {
         String versionString = BreweryPlugin.getInstance().getDescription().getVersion();
@@ -53,9 +59,10 @@ public class BStatsBreweryX {
         return "unknown";
     }
 
-    public void setupBStats() {
+    @Override
+    public void enable() {
         try {
-            BStats bstats = new BStats(BreweryPlugin.getInstance(), BSTATS_ID);
+            bstats = new Metrics(BreweryPlugin.getInstance(), BSTATS_ID);
 
             bstats.addCustomChart(new DrilldownPie("storage_type", () -> {
                 Map<String, Map<String, Integer>> map = new HashMap<>();
@@ -113,5 +120,15 @@ public class BStatsBreweryX {
         } catch (Exception | LinkageError e) {
             Logging.errorLog("Failed to submit stats data to bStats.org (BreweryXStats)", e);
         }
+    }
+
+    @Override
+    public void disable() {
+        bstats.shutdown();
+    }
+
+    @Override
+    public @Nullable StatsBuffer getStatsCache() {
+        return null;
     }
 }

@@ -20,31 +20,25 @@
 
 package com.dre.brewery.integration.metrics;
 
-import com.dre.brewery.integration.metrics.bstats.BStatsBrewery;
-import com.dre.brewery.integration.metrics.bstats.BStatsBreweryX;
-import com.dre.brewery.integration.metrics.faststats.FastStats;
-import lombok.Getter;
+import java.util.HashMap;
+import java.util.Map;
 
-@Getter
-public class Metrics {
+public class StatsBuffer {
+    public final Map<StatsType, Object> stats = new HashMap<>();
 
-     private final FastStats fastStats;
-     private final BStatsBrewery bstatsBrewery;
-     private final BStatsBreweryX bStatsBreweryX;
+    public StatsBuffer() {
+        for (StatsType statsType : StatsType.values()) {
+            stats.put(statsType, statsType.getDefaultValue());
+        }
+    }
 
-     public Metrics() {
-          this.fastStats = new FastStats();
-          this.bstatsBrewery  = new BStatsBrewery();
-          this.bStatsBreweryX = new BStatsBreweryX();
-     }
+    public Object get(StatsType statsType) {
+        return stats.get(statsType);
+    }
 
-     public void enable() {
-          fastStats.enable();
-          bstatsBrewery.setupBStats();
-          bStatsBreweryX.setupBStats();
-     }
-
-     public void disable() {
-         fastStats.disable();
-     }
+    public void clear() {
+        for (StatsType statsType : StatsType.values()) {
+            stats.put(statsType, statsType.getDefaultValue());
+        }
+    }
 }

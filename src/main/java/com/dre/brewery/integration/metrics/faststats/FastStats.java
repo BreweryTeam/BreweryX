@@ -26,16 +26,20 @@ import com.dre.brewery.Barrel;
 import com.dre.brewery.BreweryPlugin;
 import com.dre.brewery.configuration.ConfigManager;
 import com.dre.brewery.configuration.files.Config;
+import com.dre.brewery.integration.metrics.BreweryMetrics;
+import com.dre.brewery.integration.metrics.StatsBuffer;
 import com.dre.brewery.integration.metrics.bstats.BStatsBreweryX;
 import com.dre.brewery.recipe.BRecipe;
 import dev.faststats.bukkit.BukkitMetrics;
 import dev.faststats.core.data.Metric;
+import org.jetbrains.annotations.Nullable;
 
-public class FastStats {
+public class FastStats implements BreweryMetrics {
 
     private static final String TOKEN = "9e823f79476a54405051b485438be8e7";
     private final BukkitMetrics metrics;
     private final Config config = ConfigManager.getConfig(Config.class);
+    private final StatsBuffer statsBuffer = new StatsBuffer();
 
     public FastStats() {
         this.metrics = BukkitMetrics.factory()
@@ -51,14 +55,23 @@ public class FastStats {
             .addMetric(Metric.number("barrels_built", Barrel.getAllBarrels()::size))
             .addMetric(Metric.number("cauldrons_boiling", BCauldron.bcauldrons::size))
 
+            .onFlush(statsBuffer::clear)
+
             .create(BreweryPlugin.getInstance());
     }
 
+    @Override
     public void enable() {
         metrics.ready();
     }
 
+    @Override
     public void disable() {
         metrics.shutdown();
+    }
+
+    @Override
+    public @Nullable StatsBuffer getStatsCache() {
+        return this.statsBuffer;
     }
 }
