@@ -82,10 +82,6 @@ public class MySQLStorage extends DataManager {
 
 
         try (Connection connection = source.getConnection()) {
-            try (PreparedStatement statement = connection.prepareStatement("USE " + record.getDatabase())) {
-                statement.execute();
-            }
-
             for (String table : TABLES) {
                 try (PreparedStatement statement = connection.prepareStatement("CREATE TABLE IF NOT EXISTS " + tablePrefix + table)) {
                     statement.execute();
@@ -168,10 +164,9 @@ public class MySQLStorage extends DataManager {
         String deleteOldRecordsSql = "DELETE FROM " + tablePrefix + table + " WHERE id NOT IN (SELECT id FROM temp_" + table + ")";
 
         try (Connection connection = source.getConnection()) {
-
+            connection.setAutoCommit(false);
             try (PreparedStatement createTempTableStmt = connection.prepareStatement(createTempTableSql);
                  PreparedStatement insertTempTableStmt = connection.prepareStatement(insertTempTableSql)) {
-
                 createTempTableStmt.execute();
 
                 for (SerializableThing serializableThing : serializableThings) {
