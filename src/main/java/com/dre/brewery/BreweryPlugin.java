@@ -47,6 +47,7 @@ import com.dre.brewery.listeners.CauldronListener;
 import com.dre.brewery.listeners.EntityListener;
 import com.dre.brewery.listeners.InventoryListener;
 import com.dre.brewery.listeners.PlayerListener;
+import com.dre.brewery.listeners.WorldListener;
 import com.dre.brewery.recipe.CustomItem;
 import com.dre.brewery.recipe.Ingredient;
 import com.dre.brewery.recipe.ItemLoader;
@@ -225,6 +226,7 @@ public final class BreweryPlugin extends JavaPlugin {
         pluginManager.registerEvents(new EntityListener(), this);
         pluginManager.registerEvents(new InventoryListener(), this);
         pluginManager.registerEvents(new IntegrationListener(), this);
+        pluginManager.registerEvents(new WorldListener(dataManager), this);
         if (getMCVersion().isOrLater(MinecraftVersion.V1_9))
             pluginManager.registerEvents(new CauldronListener(), this);
         if (Hook.CHESTSHOP.isEnabled() && getMCVersion().isOrLater(MinecraftVersion.V1_13))

@@ -460,6 +460,7 @@ public class Barrel extends BarrelBody implements InventoryHolder {
         BarrelRemoveEvent event = new BarrelRemoveEvent(this, dropItems);
         // Listened to by LWCBarrel (IntegrationListener)
         BreweryPlugin.getInstance().getServer().getPluginManager().callEvent(event);
+        BreweryPlugin.getDataManager().deleteBarrel(id);
 
         if (inventory != null) {
             List<HumanEntity> viewers = new ArrayList<>(inventory.getViewers());
@@ -599,7 +600,10 @@ public class Barrel extends BarrelBody implements InventoryHolder {
                 .forEach(worldUuid -> {
                     // Folia doesn't fire 'WorldUnloadEvent' but Canvas does.
                     if (MinecraftVersion.isFolia() && !MinecraftVersion.isCanvas() && Bukkit.getWorld(worldUuid) == null) {
-                        barrels.remove(worldUuid); // remove this world and assume that it was unloaded on Folia servers
+                        List<Barrel> unloadedBarrels = barrels.remove(worldUuid);
+                        if (unloadedBarrels != null) {
+                            unloadedBarrels.forEach(BreweryPlugin.getDataManager()::saveBarrel);
+                        }
                         return;
                     }
 
