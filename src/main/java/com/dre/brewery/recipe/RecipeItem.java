@@ -151,7 +151,8 @@ public abstract class RecipeItem implements Cloneable, DebuggableItem {
     /**
      * Tries to find a matching RecipeItem for this item. It checks custom items and if it has found a unique custom item
      * it will return that. If there are multiple matching custom items, a new CustomItem with all item info is returned.
-     * <br>If there is no matching CustomItem, it will return a SimpleItem with the items type
+     * <br>If there is no matching CustomItem, it will return a SimpleItem with the item's type.
+     * When {@code acceptAll} is false, customized items never fall back to a material-only match.
      *
      * @param item      The Item for which to find a matching RecipeItem
      * @param acceptAll If true it will accept any item and return a SimpleItem even if not on the accepted list
@@ -184,6 +185,12 @@ public abstract class RecipeItem implements Cloneable, DebuggableItem {
             return new CustomItem(item);
         }
         if (rItem == null && (acceptAll || BCauldronRecipe.acceptedSimple.contains(item.getType()))) {
+            // Do not consume customized items for recipes that only match by material. A configured
+            // CustomItem or PluginItem must explicitly match the metadata first.
+            if (!acceptAll && item.hasItemMeta()) {
+                return null;
+            }
+
             // No Custom item found
             if (VERSION.isOrLater(MinecraftVersion.V1_13)) {
                 return new SimpleItem(item.getType());
