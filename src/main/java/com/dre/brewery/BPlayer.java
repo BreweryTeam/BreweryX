@@ -78,7 +78,7 @@ public class BPlayer {
 
     private static final ConcurrentHashMap<String, BPlayer> players = new ConcurrentHashMap<>();// Players uuid and BPlayer
     private static final ConcurrentHashMap<Player, Integer> pTasks = new ConcurrentHashMap<>();// Player and count
-    private static MyScheduledTask task;
+    private static final ConcurrentHashMap<Player, MyScheduledTask> pukeTaskHandles = new ConcurrentHashMap<>();
     private static Random pukeRand;
 
     private final String uuid;
@@ -622,29 +622,38 @@ public class BPlayer {
         }
         BUtil.reapplyPotionEffect(player, BukkitConstants.HUNGER.createEffect(80, 4), true);
 
-        if (pTasks.isEmpty()) {
-            task = BreweryPlugin.getScheduler().runTaskTimer(player, BPlayer::pukeTask, 1L, 1L);
-        }
         pTasks.put(player, event.getCount());
+        pukeTaskHandles.computeIfAbsent(player, key ->
+            BreweryPlugin.getScheduler().runTaskTimer(player, () -> pukeTask(player), 1L, 1L));
     }
 
     public static void pukeTask() {
-        for (Iterator<Map.Entry<Player, Integer>> iter = pTasks.entrySet().iterator(); iter.hasNext(); ) {
-            Map.Entry<Player, Integer> entry = iter.next();
-            Player player = entry.getKey();
-            int count = entry.getValue();
-            if (!player.isValid() || !player.isOnline()) {
-                iter.remove();
-                continue;
-            }
-            puke(player);
-            if (count <= 1) {
-                iter.remove();
-            } else {
-                entry.setValue(count - 1);
-            }
+        for (Player player : pTasks.keySet()) {
+            BreweryPlugin.getScheduler().runTask(player, () -> pukeTask(player));
         }
-        if (pTasks.isEmpty()) {
+    }
+
+    private static void pukeTask(Player player) {
+        Integer count = pTasks.get(player);
+        if (count == null || !player.isValid() || !player.isOnline()) {
+            pTasks.remove(player);
+            stopPukeTask(player);
+            return;
+        }
+
+        puke(player);
+        if (count <= 1) {
+            if (pTasks.remove(player, count)) {
+                stopPukeTask(player);
+            }
+        } else {
+            pTasks.replace(player, count, count - 1);
+        }
+    }
+
+    private static void stopPukeTask(Player player) {
+        MyScheduledTask task = pukeTaskHandles.remove(player);
+        if (task != null) {
             task.cancel();
         }
     }
@@ -835,13 +844,15 @@ public class BPlayer {
                 if (bplayer.offlineDrunk == 0) {
                     Player player = BUtil.getPlayerfromString(name);
                     if (player != null) {
-
-                        bplayer.drunkEffects(player);
-
-                        if (config.isEnablePuke()) {
-                            bplayer.drunkPuke(player);
-                        }
-
+                        BreweryPlugin.getScheduler().runTask(player, () -> {
+                            if (!player.isOnline()) {
+                                return;
+                            }
+                            bplayer.drunkEffects(player);
+                            if (config.isEnablePuke()) {
+                                bplayer.drunkPuke(player);
+                            }
+                        });
                     }
                 }
             }
