@@ -194,7 +194,9 @@ public abstract class DataManager {
 
     private void doSave(Collection<Barrel> barrels, Collection<BCauldron> cauldrons, Collection<BPlayer> players, Collection<Wakeup> wakeups) {
         this.saveBreweryMiscData(getLoadedMiscData());
-        this.saveAllBarrels(barrels);
+        // Barrels from unloaded worlds are intentionally absent from the in-memory registry. Upsert
+        // loaded barrels instead of deleting every stored barrel that is not currently in memory.
+        barrels.forEach(this::saveBarrel);
         this.saveAllCauldrons(cauldrons);
         this.saveAllPlayers(players);
         this.saveAllWakeups(wakeups);

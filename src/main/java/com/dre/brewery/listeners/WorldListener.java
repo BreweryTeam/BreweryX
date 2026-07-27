@@ -28,19 +28,23 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.world.WorldLoadEvent;
 import org.bukkit.event.world.WorldUnloadEvent;
 
+import java.util.Objects;
+
 public record WorldListener(DataManager dataManager) implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onWorldLoad(WorldLoadEvent event) {
         dataManager.getAllBarrels()
             .thenAcceptAsync(barrels -> barrels.stream()
+                .filter(Objects::nonNull)
                 .filter(barrel -> barrel.getSpigot().getWorld().equals(event.getWorld()))
                 .forEach(Barrel::registerBarrel)
             );
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
-    public void onWorldLoad(WorldUnloadEvent event) {
+    public void onWorldUnload(WorldUnloadEvent event) {
+        Barrel.getBarrels(event.getWorld().getUID()).forEach(dataManager::saveBarrel);
         Barrel.onUnload(event.getWorld());
     }
 }
