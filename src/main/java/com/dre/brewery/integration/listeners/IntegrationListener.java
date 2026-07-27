@@ -33,6 +33,7 @@ import com.dre.brewery.integration.BlockLockerHook;
 import com.dre.brewery.integration.Hook;
 import com.dre.brewery.integration.WorldGuarkHook;
 import com.dre.brewery.integration.barrel.BlockLockerBarrel;
+import com.dre.brewery.integration.barrel.DominionBarrel;
 import com.dre.brewery.integration.barrel.GriefPreventionBarrel;
 import com.dre.brewery.integration.barrel.LWCBarrel;
 import com.dre.brewery.integration.barrel.LandsBarrel;
@@ -203,6 +204,28 @@ public class IntegrationListener implements Listener {
             if (!LandsBarrel.checkAccess(event)) {
                 lang.sendEntry(event.getPlayer(), "Error_NoBarrelAccess");
                 event.setCancelled(true);
+                return;
+            }
+        }
+
+        if (Hook.DOMINION.isEnabled()) {
+            try {
+                if (!DominionBarrel.checkAccess(event)) {
+                    event.setCancelled(true);
+                    return;
+                }
+            } catch (Throwable e) {
+                event.setCancelled(true);
+                Logging.errorLog("Failed to check Dominion for barrel open permissions!", e);
+                Logging.errorLog("Brewery was tested with Dominion API v4.8.3");
+                Logging.errorLog("Disable Dominion support in the config and do /brew reload");
+                Player player = event.getPlayer();
+                if (player.hasPermission("brewery.admin") || player.hasPermission("brewery.mod")) {
+                    Logging.msg(player, "&cDominion check error, Brewery was tested with Dominion API v4.8.3");
+                    Logging.msg(player, "&cSet &7useDominion: false &cin the config and /brew reload");
+                } else {
+                    Logging.msg(player, "&cError opening Barrel, please report to an Admin!");
+                }
                 return;
             }
         }

@@ -188,6 +188,7 @@ public class Config extends AbstractOkaeriConfigFile {
     private boolean useGriefPrevention = true;
     private boolean useTowny = true;
     private boolean useLands = true;
+    private boolean useDominion = true;
     private boolean useBlockLocker = true;
     private boolean useGMInventories = true;
 
