@@ -88,7 +88,7 @@ public class BSealer implements InventoryHolder {
     public void clickInv() {
         contents = null;
         if (task == null) {
-            task = BreweryPlugin.getScheduler().runTaskTimer(BreweryPlugin.getInstance(), this::itemChecking, 1, 1);
+            task = BreweryPlugin.getScheduler().runTaskTimer(player, this::itemChecking, 1, 1);
         }
     }
 
