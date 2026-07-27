@@ -241,7 +241,7 @@ public class RecipesSector extends AbstractOkaeriConfigSector<ConfigRecipe> {
 
     ConfigRecipe absinthe = ConfigRecipe.builder()
         .name("Poor Absinthe/Absinthe/Strong Absinthe")
-        .ingredients(List.of(Material.SHORT_GRASS.name() + "/15"))
+        .ingredients(List.of(BukkitConstants.SHORT_GRASS.name() + "/15"))
         .cookingTime(3)
         .distillRuns(6)
         .distillTime(80)
@@ -254,7 +254,7 @@ public class RecipesSector extends AbstractOkaeriConfigSector<ConfigRecipe> {
 
     ConfigRecipe gr_absinthe = ConfigRecipe.builder()
         .name("Poor Absinthe/Green Absinthe/Bright Green Absinthe")
-        .ingredients(List.of(Material.SHORT_GRASS.name() + "/17", Material.POISONOUS_POTATO.name() + "/2"))
+        .ingredients(List.of(BukkitConstants.SHORT_GRASS.name() + "/17", Material.POISONOUS_POTATO.name() + "/2"))
         .cookingTime(5)
         .distillRuns(6)
         .distillTime(85)
@@ -267,7 +267,7 @@ public class RecipesSector extends AbstractOkaeriConfigSector<ConfigRecipe> {
 
     ConfigRecipe potato_soup = ConfigRecipe.builder()
         .name("Potato soup")
-        .ingredients(List.of(Material.POTATO.name() + "/5", Material.SHORT_GRASS.name() + "/3"))
+        .ingredients(List.of(Material.POTATO.name() + "/5", BukkitConstants.SHORT_GRASS.name() + "/3"))
         .cookingTime(3)
         .color("ORANGE")
         .difficulty(1)

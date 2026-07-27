@@ -33,6 +33,7 @@ import com.dre.brewery.lore.Base91DecoderStream;
 import com.dre.brewery.recipe.Ingredient;
 import com.dre.brewery.recipe.SimpleItem;
 import com.dre.brewery.utility.BUtil;
+import com.dre.brewery.utility.BukkitConstants;
 import com.dre.brewery.utility.BoundingBox;
 import com.dre.brewery.utility.FutureUtil;
 import com.dre.brewery.utility.Logging;
@@ -258,7 +259,7 @@ public class BData {
             Material m = Material.getMaterial(matSplit[0]);
             if (m == null && VERSION.isOrLater(MinecraftVersion.V1_13)) {
                 if (matSplit[0].equals("LONG_GRASS")) {
-                    m = Material.SHORT_GRASS;
+                    m = BukkitConstants.SHORT_GRASS;
                 } else {
                     m = Material.matchMaterial(matSplit[0], true);
                 }
