@@ -21,6 +21,7 @@
 package com.dre.brewery.configuration.sector;
 
 import com.dre.brewery.configuration.sector.capsule.ConfigCauldronIngredient;
+import com.dre.brewery.utility.BukkitConstants;
 import eu.okaeri.configs.annotation.Comment;
 import lombok.Getter;
 import lombok.Setter;
@@ -82,7 +83,7 @@ public class CauldronSector extends AbstractOkaeriConfigSector<ConfigCauldronIng
 
     ConfigCauldronIngredient grass = ConfigCauldronIngredient.builder()
         .name("Boiled herbs")
-        .ingredients(List.of(Material.SHORT_GRASS.name()))
+        .ingredients(List.of(BukkitConstants.SHORT_GRASS.name()))
         .color("99ff66")
         .cookParticles(List.of("GREEN/2", "99ff99/20"))
         .build();
@@ -229,7 +230,7 @@ public class CauldronSector extends AbstractOkaeriConfigSector<ConfigCauldronIng
 
     ConfigCauldronIngredient poi_grass = ConfigCauldronIngredient.builder()
         .name("Boiled acidy herbs")
-        .ingredients(List.of(Material.SHORT_GRASS.name(), Material.POISONOUS_POTATO.name()))
+        .ingredients(List.of(BukkitConstants.SHORT_GRASS.name(), Material.POISONOUS_POTATO.name()))
         .color("99ff66")
         .cookParticles(List.of("GREEN/2", "99ff99/20"))
         .build();
