@@ -77,8 +77,7 @@ public class BPlayer {
     private static final Lang lang = ConfigManager.getConfig(Lang.class);
 
     private static final ConcurrentHashMap<String, BPlayer> players = new ConcurrentHashMap<>();// Players uuid and BPlayer
-    private static final ConcurrentHashMap<Player, Integer> pTasks = new ConcurrentHashMap<>();// Player and count
-    private static MyScheduledTask task;
+    private static final ConcurrentHashMap<Player, PukeTask> pTasks = new ConcurrentHashMap<>();
     private static Random pukeRand;
 
     private final String uuid;
@@ -622,30 +621,44 @@ public class BPlayer {
         }
         BUtil.reapplyPotionEffect(player, BukkitConstants.HUNGER.createEffect(80, 4), true);
 
-        if (pTasks.isEmpty()) {
-            task = BreweryPlugin.getScheduler().runTaskTimer(player, BPlayer::pukeTask, 1L, 1L);
+        PukeTask pukeTask = pTasks.get(player);
+        if (pukeTask != null) {
+            pukeTask.count = event.getCount();
+            return;
         }
-        pTasks.put(player, event.getCount());
+        pukeTask = new PukeTask(event.getCount());
+        pTasks.put(player, pukeTask);
+        pukeTask.task = BreweryPlugin.getScheduler().runTaskTimer(player, () -> pukeTask(player), 1L, 1L);
     }
 
-    public static void pukeTask() {
-        for (Iterator<Map.Entry<Player, Integer>> iter = pTasks.entrySet().iterator(); iter.hasNext(); ) {
-            Map.Entry<Player, Integer> entry = iter.next();
-            Player player = entry.getKey();
-            int count = entry.getValue();
-            if (!player.isValid() || !player.isOnline()) {
-                iter.remove();
-                continue;
-            }
-            puke(player);
-            if (count <= 1) {
-                iter.remove();
-            } else {
-                entry.setValue(count - 1);
-            }
+    public static void stopPuking(Player player) {
+        PukeTask pukeTask = pTasks.remove(player);
+        if (pukeTask != null && pukeTask.task != null) {
+            pukeTask.task.cancel();
         }
-        if (pTasks.isEmpty()) {
-            task.cancel();
+    }
+
+    private static void pukeTask(Player player) {
+        PukeTask pukeTask = pTasks.get(player);
+        if (pukeTask == null) {
+            return;
+        }
+        if (!player.isValid() || !player.isOnline()) {
+            stopPuking(player);
+            return;
+        }
+        puke(player);
+        if (--pukeTask.count <= 0) {
+            stopPuking(player);
+        }
+    }
+
+    private static class PukeTask {
+        private int count;
+        private MyScheduledTask task;
+
+        private PukeTask(int count) {
+            this.count = count;
         }
     }
 

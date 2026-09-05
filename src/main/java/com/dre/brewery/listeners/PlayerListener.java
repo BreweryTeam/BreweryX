@@ -327,6 +327,7 @@ public class PlayerListener implements Listener {
         if (bplayer != null) {
             bplayer.disconnecting();
         }
+        BPlayer.stopPuking(event.getPlayer());
         PermissionUtil.logout(event.getPlayer());
     }
 
@@ -336,6 +337,7 @@ public class PlayerListener implements Listener {
         if (bplayer != null) {
             bplayer.disconnecting();
         }
+        BPlayer.stopPuking(event.getPlayer());
         PermissionUtil.logout(event.getPlayer());
     }
 }
