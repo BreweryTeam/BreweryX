@@ -227,25 +227,52 @@ public class PlayerListener implements Listener {
         ItemStack item = event.getItem();
         if (item.getType() == Material.POTION) {
             Brew brew = Brew.get(item);
-            if (brew != null) {
-                if (!BPlayer.drink(brew, player, item.getItemMeta(), event)) {
-                    event.setCancelled(true);
-                    return;
-                }
-                /*if (player.getGameMode() != org.bukkit.GameMode.CREATIVE) {
-                    brew.remove(item);
-                }*/
-                if (VERSION.isOrLater(MinecraftVersion.V1_9)) {
-                    if (player.getGameMode() != GameMode.CREATIVE) {
-// replace the potion with an empty potion to avoid effects
-                        event.setItem(new ItemStack(Material.POTION));
-                    } else {
-// Don't replace the item when keeping the potion, just cancel the event
-                        event.setCancelled(true);
-                    }
-                }
+
+            if (brew == null) {
+                return;
             }
-        } else if (BUtil.getMaterialMap(config.getDrainItems()).containsKey(item.getType())) {
+
+            if (!BPlayer.drink(brew, player, item.getItemMeta(), event)) {
+                event.setCancelled(true);
+                return;
+            }
+
+            if (!VERSION.isOrLater(MinecraftVersion.V1_9)) {
+                return;
+            }
+
+            if (player.getGameMode() == GameMode.CREATIVE) {
+                event.setCancelled(true);
+                return;
+            }
+
+            ItemStack remaining = event.getItem().clone();
+            int amount = remaining.getAmount();
+
+            // If there's only 1 item left, don't cancel the event and let vanilla handle the logic
+            if (item.getAmount() <= 1) {
+                // replace the potion with an empty potion to avoid effects
+                event.setItem(new ItemStack(Material.POTION));
+                return;
+            }
+
+            event.setCancelled(true);
+
+            // vanilla doesn't like it when you drink from a stack
+            // we only do that if there's more than 1 item, because it looks funny (visual glitches)
+            remaining.setAmount(amount - 1);
+            player.getInventory().setItem(event.getHand(), remaining);
+
+            var leftovers = player.getInventory().addItem(new ItemStack(Material.GLASS_BOTTLE));
+
+            for (ItemStack leftover : leftovers.values()) {
+                player.getWorld().dropItemNaturally(player.getLocation(), leftover);
+            }
+
+            return;
+        }
+
+        if (BUtil.getMaterialMap(config.getDrainItems()).containsKey(item.getType())) {
             BPlayer bplayer = BPlayer.get(player);
             if (bplayer != null) {
                 bplayer.drainByItem(player, item.getType());
