@@ -31,8 +31,6 @@ import com.dre.brewery.integration.Hook;
 import com.dre.brewery.integration.LandsHook;
 import com.dre.brewery.integration.PlaceholderAPIHook;
 import com.dre.brewery.integration.barrel.BlockLockerBarrel;
-import com.dre.brewery.integration.bstats.BreweryStats;
-import com.dre.brewery.integration.bstats.BreweryXStats;
 import com.dre.brewery.integration.listeners.ChestShopListener;
 import com.dre.brewery.integration.listeners.IntegrationListener;
 import com.dre.brewery.integration.listeners.ShopKeepersListener;
@@ -42,6 +40,7 @@ import com.dre.brewery.integration.listeners.movecraft.RotationListener;
 import com.dre.brewery.integration.listeners.movecraft.SinkListener;
 import com.dre.brewery.integration.listeners.movecraft.TranslationListener;
 import com.dre.brewery.integration.listeners.movecraft.properties.BreweryProperties;
+import com.dre.brewery.integration.metrics.MetricsManager;
 import com.dre.brewery.listeners.BlockListener;
 import com.dre.brewery.listeners.CauldronListener;
 import com.dre.brewery.listeners.EntityListener;
@@ -90,9 +89,8 @@ public final class BreweryPlugin extends JavaPlugin {
     private @Getter static MinecraftVersion MCVersion;
     private @Getter @Setter static DataManager dataManager;
 
-
     private final Map<String, Function<ItemLoader, Ingredient>> ingredientLoaders = new HashMap<>(); // Registrations
-    private BreweryStats breweryStats; // Metrics
+    private MetricsManager metrics;
 
     {
         // Basically just racing to be the first code to execute.
@@ -153,8 +151,8 @@ public final class BreweryPlugin extends JavaPlugin {
         ConfigManager.loadRecipes();
         ConfigManager.loadDistortWords();
         ConfigManager.loadSeed();
-        this.breweryStats = new BreweryStats(); // Load metrics
 
+        this.metrics = new MetricsManager();
 
         Logging.log("Minecraft version&7:&a " + MCVersion.getVersion());
         if (MCVersion == MinecraftVersion.UNKNOWN) {
@@ -197,9 +195,8 @@ public final class BreweryPlugin extends JavaPlugin {
             .toList());
 
         addonManager.enableAddons();
-        // Setup Metrics
-        this.breweryStats.setupBStats();
-        new BreweryXStats().setupBStats();
+
+        this.metrics.enable();
 
         // Register command and aliases
         PluginCommand defaultCommand = getCommand("breweryx");
@@ -277,6 +274,8 @@ public final class BreweryPlugin extends JavaPlugin {
 
         // Stop schedulers
         BreweryPlugin.getScheduler().cancelTasks(this);
+
+        this.metrics.disable();
 
         // save Data to Disk
         if (dataManager != null) dataManager.exit(true, false);
