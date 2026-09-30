@@ -30,7 +30,7 @@ import com.dre.brewery.Wakeup;
 import com.dre.brewery.configuration.ConfigManager;
 import com.dre.brewery.configuration.files.Config;
 import com.dre.brewery.configuration.sector.capsule.ConfiguredDataManager;
-import com.dre.brewery.integration.bstats.BreweryStats;
+import com.dre.brewery.integration.metrics.bstats.BStatsBrewery;
 import com.dre.brewery.storage.impls.FlatFileStorage;
 import com.dre.brewery.storage.impls.MongoDBStorage;
 import com.dre.brewery.storage.impls.MySQLStorage;
@@ -262,23 +262,23 @@ public abstract class DataManager {
         Brew.loadPrevSeeds(miscData.prevSaveSeeds());
 
 
-        BreweryStats breweryStats = plugin.getBreweryStats();
+        BStatsBrewery bStatsBrewery = plugin.getMetrics().getBstatsBrewery();
         // Check the hash to prevent tampering with statistics - Note by original author
         if (miscData.brewsCreated().size() == 7 && miscData.brewsCreatedHash() == miscData.brewsCreated().hashCode()) {
-            breweryStats.brewsCreated = miscData.brewsCreated().get(0);
-            breweryStats.brewsCreatedCmd = miscData.brewsCreated().get(1);
-            breweryStats.exc = miscData.brewsCreated().get(2);
-            breweryStats.good = miscData.brewsCreated().get(3);
-            breweryStats.norm = miscData.brewsCreated().get(4);
-            breweryStats.bad = miscData.brewsCreated().get(5);
-            breweryStats.terr = miscData.brewsCreated().get(6);
+            bStatsBrewery.brewsCreated = miscData.brewsCreated().get(0);
+            bStatsBrewery.brewsCreatedCmd = miscData.brewsCreated().get(1);
+            bStatsBrewery.exc = miscData.brewsCreated().get(2);
+            bStatsBrewery.good = miscData.brewsCreated().get(3);
+            bStatsBrewery.norm = miscData.brewsCreated().get(4);
+            bStatsBrewery.bad = miscData.brewsCreated().get(5);
+            bStatsBrewery.terr = miscData.brewsCreated().get(6);
         }
     }
 
     public static BreweryMiscData getLoadedMiscData() {
         List<Integer> brewsCreated = new ArrayList<>(7);
-        BreweryStats breweryStats = plugin.getBreweryStats();
-        brewsCreated.addAll(List.of(breweryStats.brewsCreated, breweryStats.brewsCreatedCmd, breweryStats.exc, breweryStats.good, breweryStats.norm, breweryStats.bad, breweryStats.terr));
+        BStatsBrewery bStatsBrewery = plugin.getMetrics().getBstatsBrewery();
+        brewsCreated.addAll(List.of(bStatsBrewery.brewsCreated, bStatsBrewery.brewsCreatedCmd, bStatsBrewery.exc, bStatsBrewery.good, bStatsBrewery.norm, bStatsBrewery.bad, bStatsBrewery.terr));
 
 
         return new BreweryMiscData(
