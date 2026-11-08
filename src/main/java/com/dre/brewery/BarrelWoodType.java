@@ -59,6 +59,7 @@ public enum BarrelWoodType {
         Material.WAXED_OXIDIZED_CUT_COPPER, Material.WAXED_OXIDIZED_CUT_COPPER_STAIRS
     ),
     PALE_OAK("Pale Oak", 13),
+    POPLAR("Poplar", 14),
     // If you're adding more wood types, add them above 'NONE'
     // Remember to also add the wood type to the Group enum
     NONE("None", -1, true);
@@ -282,7 +283,7 @@ public enum BarrelWoodType {
 
           temperature x-axis, humidity y-axis, oak z-axis
         */
-        COLD(new Properties.Normal(Temperature.COLD, Humidity.MODERATE), SPRUCE),
+        COLD(new Properties.Normal(Temperature.COLD, Humidity.MODERATE), SPRUCE, POPLAR),
         TEMPERATE(new Properties.Normal(Temperature.WARM, Humidity.MODERATE), BIRCH, CHERRY),
         OAK(new Properties.Normal(Temperature.WARM, Humidity.MODERATE, true), BarrelWoodType.OAK, DARK_OAK, PALE_OAK),
         HOT_HUMID(new Properties.Normal(Temperature.HOT, Humidity.HUMID), JUNGLE, MANGROVE, BAMBOO),
