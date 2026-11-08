@@ -59,6 +59,7 @@ public enum BarrelWoodType {
         Material.WAXED_OXIDIZED_CUT_COPPER, Material.WAXED_OXIDIZED_CUT_COPPER_STAIRS
     ),
     PALE_OAK("Pale Oak", 13),
+    POPLAR("Poplar", 14),
     // If you're adding more wood types, add them above 'NONE'
     // Remember to also add the wood type to the Group enum
     NONE("None", -1, true);
