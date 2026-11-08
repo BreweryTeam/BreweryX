@@ -283,7 +283,7 @@ public enum BarrelWoodType {
 
           temperature x-axis, humidity y-axis, oak z-axis
         */
-        COLD(new Properties.Normal(Temperature.COLD, Humidity.MODERATE), SPRUCE),
+        COLD(new Properties.Normal(Temperature.COLD, Humidity.MODERATE), SPRUCE, POPLAR),
         TEMPERATE(new Properties.Normal(Temperature.WARM, Humidity.MODERATE), BIRCH, CHERRY),
         OAK(new Properties.Normal(Temperature.WARM, Humidity.MODERATE, true), BarrelWoodType.OAK, DARK_OAK, PALE_OAK),
         HOT_HUMID(new Properties.Normal(Temperature.HOT, Humidity.HUMID), JUNGLE, MANGROVE, BAMBOO),
